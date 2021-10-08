@@ -1,0 +1,41 @@
+{
+  "name": "hivekit-client-js",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "The browser/node client for the hivekit platform and server",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hivekit/hivekit-client-js.git"
+  },
+  "keywords": [
+    "hivekit",
+    "javascript",
+    "js",
+    "node",
+    "nodejs",
+    "client",
+    "websocket",
+    "connector"
+  ],
+  "author": "Hivekit Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hivekit/hivekit-client-js/issues"
+  },
+  "homepage": "https://github.com/hivekit/hivekit-client-js#readme",
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.2"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "ws": "^8.2.3"
+  }
+}
