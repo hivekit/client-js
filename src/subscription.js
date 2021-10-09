@@ -1,44 +1,77 @@
 import EventEmitter from "./event-emitter";
 import C from "./constants";
+import fieldnames from "./fieldnames";
+import { createMessage } from './message'
 
-export default class Subscription extends EventEmitter{
-    constructor( client, id ) {
+/**
+ * Subscription represents a single subscription to a given subject with
+ * a given set of options. It emits an `update` event whenever a subscription
+ * notification is received and can by unsubscribed by calling `cancel()`
+ * 
+ * @class Subscription
+ * @extends EventEmitter
+ */
+export default class Subscription extends EventEmitter {
+
+    /**
+     * Subscriptions are created by the {SubscriptionHandler}
+     * 
+     * @constructor
+     * @param {HivekitClient} client 
+     * @param {string} id 
+     * @param {string} realmId 
+     */
+    constructor(client, id, realmId) {
         super();
-        this._client = client;
         this.id = id;
+        this.realmId = realmId;
+        this._client = client;
         this._data = null;
     }
 
-    update() {}
+    /**
+     * Unsubscribes this subscription
+     * 
+     * @returns {void}
+     */
+    cancel() {
+        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, this.id, this.realmId);
+        return this._client._sendRequestAndHandleResponse(msg);
+    }
 
-    cancel() {}
-
-    _processIncomingMessage( msg ) {
+    _processIncomingMessage(msg) {
         var data;
 
-        if( msg[C.TYPE.OBJECT] ) {
-            data = this._client._extendFieldsMap( msg[C.TYPE.OBJECT] );
+        if (msg[C.TYPE.OBJECT]) {
+            data = this._client._extendFieldsMap(msg[C.TYPE.OBJECT]);
         }
-        else if( msg[C.TYPE.AREA] ) {
-            data = this._client._extendFieldsMap( msg[C.TYPE.AREA] );
+        else if (msg[C.TYPE.AREA]) {
+            data = this._client._extendFieldsMap(msg[C.TYPE.AREA]);
         }
-        else if( msg[C.TYPE.INSTRUCTION] ) {
-            data = this._client._extendFieldsMap( msg[C.TYPE.INSTRUCTION] );
+        else if (msg[C.TYPE.INSTRUCTION]) {
+            data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
         }
-        
+        else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
+            data = {
+                realmId: msg[C.FIELD.DATA][C.FIELD.ID],
+                action: fieldnames.ACTION[msg[C.FIELD.DATA][C.FIELD.ACTION]]
+            }
+        }
+
         switch (msg[C.FIELD.UPDATE_TYPE]) {
             case C.UPDATE_TYPE.FULL:
                 this._data = data;
-            break;
+                break;
             case C.UPDATE_TYPE.DELTA:
-                for( var id in data ) {
-                    this._data[ id ] = data[ id ];
+                for (var id in data) {
+                    this._data[id] = data[id];
                 }
-            break;
+                break;
             default:
-                this._client._onError( 'Received subscription message with unknown update type ' + msg[C.FIELD.UPDATE_TYPE])
+                this._client._onError('Received subscription message with unknown update type ' + msg[C.FIELD.UPDATE_TYPE])
                 return;
         }
-        this.emit( 'data', this._data );
+
+        this.emit('update', this._data);
     }
 }

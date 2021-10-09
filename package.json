@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/"
+    "test": "node ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/"
   },
   "repository": {
     "type": "git",

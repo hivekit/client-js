@@ -44,10 +44,12 @@ export default class HivekitClient extends EventEmitter {
             adminDashboardBasePath: '/admin/'
         });
 
-        // handlers
+        // public handlers
         this.system = new SystemHandler(this);
-        this.subscription = new SubscriptionHandler(this);
         this.realm = new RealmHandler(this);
+
+        // internal handlers
+        this._subscription = new SubscriptionHandler(this);
 
         // private properties
         this._wsConnection = null;
@@ -58,7 +60,7 @@ export default class HivekitClient extends EventEmitter {
         this._pendingMessages = null;
         this._typeHandler = {
             [C.TYPE.SYSTEM]: this.system,
-            [C.TYPE.SUBSCRIPTION]: this.subscription
+            [C.TYPE.SUBSCRIPTION]: this._subscription
         };
     }
 

@@ -11,7 +11,7 @@ export default class RealmHandler {
 
     subscribe() {
         // TODO swap ID for C.SUBSCRIPTION.REALM once subscription multiplexing is implemented
-        return this._client.subscription._getSubscription(this._client.getId('realm-subscription-'), C.TYPE.SYSTEM, {
+        return this._client._subscription._getSubscription(this._client.getId('realm-subscription-'), C.TYPE.SYSTEM, {
             [C.FIELD.TYPE]: C.TYPE.SYSTEM,
             [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
         });

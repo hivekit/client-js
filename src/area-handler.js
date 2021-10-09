@@ -10,7 +10,7 @@ export default class AreaHandler {
     }
 
     subscribe(options) {
-        return this._client.subscription._getSubscription(
+        return this._client._subscription._getSubscription(
             this._client.getId('area-subscription'),
             this._realm.id,
             extendMap({
