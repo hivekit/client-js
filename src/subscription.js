@@ -39,6 +39,16 @@ export default class Subscription extends EventEmitter {
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
+    /**
+     * Processes a message meant for this subscription. Extracts and formats
+     * the associated data for user consumption and conflates full and delta updates.
+     * 
+     * @TODO Check sequence numbering and reconsile if update is missing
+     * 
+     * @param {Object} msg
+     * @emits update 
+     * @returns {void}
+     */
     _processIncomingMessage(msg) {
         var data;
 

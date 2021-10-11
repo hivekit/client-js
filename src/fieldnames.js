@@ -21,7 +21,7 @@ export default {
         [C.FIELD.LOCATION]: 'location',
         [C.FIELD.ERROR]: 'error',
         [C.FIELD.LABEL]: 'label',
-        [C.FIELD.ATTRIBUTE]: 'attribute',
+        [C.FIELD.ATTRIBUTE]: ['attribute', 'where'],
         [C.FIELD.EXECUTE_IMMEDIATELY]: 'executeImmediately',
         [C.FIELD.SHAPE]: 'shape',
         [C.FIELD.SHAPE_DATA]: 'shapeData',

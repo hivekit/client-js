@@ -2,14 +2,44 @@ import C from './constants'
 import { createMessage } from './message'
 import fieldnames from './fieldnames';
 import { extendMap } from './tools';
+import Subscription from './subscription';
 
+/**
+ * This class exposes functionality to create, read, update, delete
+ * and subscribe to objects within the scope of a realm.
+ * 
+ * It is accessible from a realm object via e.g.
+ * 
+ * northLondon = await client.realm.get( 'north-london' );
+ * taxi143 = await northLondon.object.get( 'taxi-143' );
+ */
 export default class ObjectHandler {
+
+    /**
+     * This class is created whenver a Realm is instantiated
+     * 
+     * @param {HivekitClient} client 
+     * @param {Realm} realm 
+     */
     constructor(client, realm) {
         this._client = client;
         this._realm = realm;
         this._locationFields = this._getLocationFields();
     }
 
+    /**
+     * Subscribes to updates to objects within a realm. This will be invoked whenever
+     * any object within the realm is created, updated or deleted.
+     *  
+     * @param {Object} options A key/value map of subscription options including
+     * @example
+     * {
+     *   executeImmediatly: true, // if set to true, an initial list of all objects that match the subscription criteria is sent out
+     *   attributes: ["charge<0.5", "type=drone"] // filter criteria to limit the objects to receive updates for
+     * }
+     * 
+     * @returns {Promise<Subscription>}
+     */
     subscribe(options) {
         return this._client._subscription._getSubscription(
             this._client.getId('object-subscription'),
@@ -21,6 +51,12 @@ export default class ObjectHandler {
         );
     }
 
+    /**
+     * Returns data for a given object
+     * 
+     * @param {string} id 
+     * @returns {Promise<Object>}
+     */
     get(id) {
         if (!id) {
             throw new Error('no id provided for object.get');
@@ -31,14 +67,67 @@ export default class ObjectHandler {
         });
     }
 
+    /**
+     * Creates a new object and returns a confirmation. This method will fail 
+     * if an object with this ID already exists.
+     * 
+     * If you don't wish to specify a label, location or data, provide null instead
+     * 
+     * If you wish to quickly create or update objects without the need for a confirmation,
+     * use `set()` instead.
+     * 
+     * @param {string} id 
+     * @param {string} [label]
+     * @param {object} [location]
+     * @param {object} [data]
+     * 
+     * @returns {Promise<result>}
+     */
     create(id, label, location, data) {
         return this._setObjectState(id, label, location, data, C.ACTION.CREATE);
     }
 
+    /**
+     * Updates an existing object and returns a confirmation. This method will fail 
+     * if an object with this ID does not exist.
+     * 
+     * If you don't wish to specify a label, location or data, provide null instead
+     * 
+     * If you wish to quickly create or update objects without checking if they already exist or receiving confirmation,
+     * use `set()` instead.
+     * 
+     * @param {string} id 
+     * @param {string} [label]
+     * @param {object} [location]
+     * @param {object} [data]
+     * 
+     * @returns {Promise<result>}
+     */
     update(id, label, location, data) {
         return this._setObjectState(id, label, location, data, C.ACTION.UPDATE);
     }
 
+    /**
+     * Creates or updates objects without waiting for confirmation.
+     * 
+     * This is useful for data connectors or firehose scenarios where
+     * you quickly want to pump large amounts of data into Hivekit without
+     * the need to explicitly create objects first or to have strong consistency
+     *
+     * @param {string} id 
+     * @param {string} [label]
+     * @param {object} [location]
+     * @param {object} [data]
+     */
+    set(id, label, location, data) {
+        this._setObjectState(id, label, location, data, C.ACTION.SET);
+    }
+
+    /**
+     * 
+     * @param {Object} options 
+     * @returns 
+     */
     list(options) {
         const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
         if (options && Object.keys(options).length > 0) {
@@ -65,11 +154,15 @@ export default class ObjectHandler {
     _setObjectState(id, label, location, data, action) {
         const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;
-        if (data && Object.keys(location).length > 0) {
+        if (location && Object.keys(location).length > 0) {
             msg[C.FIELD.LOCATION] = this._parseLocation(location);
         }
         if (data && Object.keys(data).length > 0) msg[C.FIELD.DATA] = data;
-        return this._client._sendRequestAndHandleResponse(msg);
+        if (action === C.ACTION.SET) {
+            this._client._sendMessage(msg);
+        } else {
+            return this._client._sendRequestAndHandleResponse(msg);
+        }
     }
 
     _parseLocation(location) {
