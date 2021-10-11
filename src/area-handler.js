@@ -39,7 +39,17 @@ export default class AreaHandler {
         const msg = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
 
         return this._client._sendRequestAndHandleResponse(msg, result => {
-            return this._client._extendFieldsMap(result[C.FIELD.DATA]);
+            const areas = this._client._extendFieldsMap(result[C.FIELD.DATA]);
+
+            // the field SCOPE_TYPE and SUB_TYPE have the same field name and are
+            // thus ambigious. Likewise, the meaning of their value depends on the
+            // type of the entity they relate to. For new, we'll just translate it here,
+            // but in the long run we should do something about it.
+            for (var id in areas) {
+                areas[id].shape = fieldnames.SHAPE_TYPE[areas[id].scopeType]
+                delete areas[id].scopeType;
+            }
+            return areas;
         });
     }
 
@@ -66,6 +76,10 @@ export default class AreaHandler {
             case 'points':
                 msg[C.FIELD.SUB_TYPE] = C.SHAPE_TYPE.POLYGON;
                 break
+            default:
+                return new Promise((_, reject) => {
+                    reject('unknown shape data');
+                })
         }
 
         msg[C.FIELD.SHAPE] = shapeData;

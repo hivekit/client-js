@@ -1,3 +1,12 @@
+/**
+ * switches the keys and values in a map.
+ * 
+ * If the value is an array, the revered map will contain
+ * an entry for every value in the array.
+ * 
+ * @param {object} input map 
+ * @returns {object} reversed map
+ */
 export function reverseMap(input) {
     const reversed = {};
     for (var key in input) {
@@ -14,6 +23,14 @@ export function reverseMap(input) {
     return reversed;
 }
 
+/**
+ * Merges the properties from mapB into mapA
+ * 
+ * @param {object} mapA 
+ * @param {object} mapB
+ * 
+ * @returns {object} extended map
+ */
 export function extendMap(mapA, mapB) {
     for (var key in mapB) {
         mapA[key] = mapB[key];

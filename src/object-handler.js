@@ -125,7 +125,7 @@ export default class ObjectHandler {
 
     /**
      * 
-     * @param {Object} options 
+     * @param {object} options 
      * @returns 
      */
     list(options) {
@@ -138,11 +138,26 @@ export default class ObjectHandler {
         });
     }
 
+    /**
+     * Deletes an object. Will throw an error if the object can't be found.
+     * 
+     * @param {string} id 
+     * @returns {Promise<Success>}
+     */
     delete(id) {
         const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
+    /********************************************
+     * INTERNAL METHODS
+     *******************************************/
+
+    /**
+     * Maps location fields to fieldnames
+     * 
+     * @returns {object} locationFields
+     */
     _getLocationFields() {
         const locationFields = {};
         for (var fieldname in fieldnames.LOCATION) {
@@ -151,6 +166,17 @@ export default class ObjectHandler {
         return locationFields
     }
 
+    /**
+     * Composes a message object and passes it on to the client
+     * 
+     * @param {string} id 
+     * @param {string} label 
+     * @param {object} location 
+     * @param {object} data 
+     * @param {string} action one of C.ACTION.*
+     * 
+     * @returns {Promise<success> }
+     */
     _setObjectState(id, label, location, data, action) {
         const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;
@@ -165,6 +191,14 @@ export default class ObjectHandler {
         }
     }
 
+    /**
+     * Converts a user defined location object into something
+     * compatible with the servers idea of what a location
+     * should look like.
+     * 
+     * @param {object} location 
+     * @returns {object} parsed location
+     */
     _parseLocation(location) {
         const parsedLocation = {};
         for (var key in location) {

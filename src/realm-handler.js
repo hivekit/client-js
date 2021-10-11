@@ -3,20 +3,42 @@ import { getPromise } from './promise'
 import { createMessage } from './message'
 import Realm from './realm'
 
+/**
+ * The realm handler provides CRUD and subscription methods for realms.
+ * 
+ * @class RealmHandler
+ */
 export default class RealmHandler {
+
+    /**
+     * The RealmHandler is instantiated by the HivekitClient directly
+     * 
+     * @constructor
+     * @param {HivekitClient} client 
+     */
     constructor(client) {
         this._client = client;
         this._realms = {};
     }
 
+    /**
+     * Subscribes to the creation, updating and deletion of realms.
+     * 
+     * @returns {Promise<Subscription>}
+     */
     subscribe() {
-        // TODO swap ID for C.SUBSCRIPTION.REALM once subscription multiplexing is implemented
         return this._client._subscription._getSubscription(this._client.getId('realm-subscription-'), C.TYPE.SYSTEM, {
             [C.FIELD.TYPE]: C.TYPE.SYSTEM,
             [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
         });
     }
 
+    /**
+     * Resurns a realm object for an existing realm
+     * 
+     * @param {string} id 
+     * @returns {Promise<Realm>}
+     */
     get(id) {
         if (this._realms[id]) {
             const result = getPromise();
@@ -36,6 +58,15 @@ export default class RealmHandler {
         });
     }
 
+    /**
+     * Creates a new realm. Will throw an error if a realm with the given ID already exists.
+     * 
+     * @param {string} id 
+     * @param {string} label 
+     * @param {object} data Arbitrary key/valua data to be associated with the realm
+     * 
+     * @returns {Promise<success>}
+     */
     create(id, label, data) {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.CREATE, id);
         if (label) msg[C.FIELD.LABEL] = label;
@@ -43,6 +74,11 @@ export default class RealmHandler {
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
+    /**
+     * Lists all realms the currently authenticated tenant has access to.
+     * 
+     * @returns {Promise<list>}
+     */
     list() {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.LIST);
         return this._client._sendRequestAndHandleResponse(msg, result => {
@@ -50,6 +86,13 @@ export default class RealmHandler {
         });
     }
 
+    /**
+     * Deletes an existing realm. Will throw an error if the given realm
+     * does not exist.
+     * 
+     * @param {string} id 
+     * @returns {Promise<success>}
+     */
     delete(id) {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.DELETE, id);
         return this._client._sendRequestAndHandleResponse(msg);

@@ -11,7 +11,7 @@ import { reverseMap } from './tools'
 
 /**
  * HivekitClient is the main class and the only class the user
- * is meant to instantate directly. It provides access to realms
+ * is meant to instantiate directly. It provides access to realms
  * through its `.realm` namespace as well as constants and connection status.
  * 
  * This class also provides connectivity functionality to the other classes

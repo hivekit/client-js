@@ -5,7 +5,23 @@ import C from './constants';
 import fieldnames from "./fieldnames";
 import { createMessage } from "./message";
 
+/**
+ * Represents a single realm. This class is returned
+ * whenever `client.realm.get(id)` is called. It provides
+ * information (id, data, label) of the realm itself as well
+ * as accessor methods to interact with the objects, areas and
+ * instructions within it.
+ */
 export default class Realm {
+
+    /**
+     * Realms are instantiated by the {RealmHandler}
+     * 
+     * @param {string} id 
+     * @param {string} label 
+     * @param {object} data 
+     * @param {HivekitClient} client 
+     */
     constructor(id, label, data, client) {
         this._client = client;
         this.id = id;
@@ -16,6 +32,24 @@ export default class Realm {
         this.instruction = new InstructionHandler(client, this);
     }
 
+    /**
+     * Searches Objects and Areas within the given realm.
+     * 
+     * @param {string} searchString 
+     * @param {object} options
+     * {
+     *      // a list of properties to search in
+     *  	field: ['data', 'label', 'id' ]
+     * 
+     *      // max amount of object results to be returned
+            maxObjectResults
+
+            // max amount of area results to be returned
+            maxAreaResults
+     * }
+     * 
+     * @returns {Promise<search results>}
+     */
     search(searchString, options) {
         const data = this._client._compressFields(options, fieldnames.FIELD, true);
         data[C.STRING_VALUE] = searchString;
