@@ -73,7 +73,7 @@ subscription.cancel()
  * *******************************/
 realm.search( searchString, {
     // a list of properties to search in (default all)
-    field: ['data', 'label', 'id' ]
+    field: ['data', 'label', 'id' ],
     // max amount of object results to be returned
     maxObjectResults: 999,
 
@@ -89,7 +89,7 @@ realm.object.subscribe({
     // if set to true, an initial list of all objects that match the subscription criteria is sent out
     executeImmediatly: true, 
     // filter criteria to limit the objects to receive updates for
-    attributes: ["charge<0.5", "type=drone"] /
+    attributes: ["charge<0.5", "type=drone"]
 }) // returns {Promise<Subscription>}
 
 realm.object.get(id) // returns {Promise<ObjectData>}
@@ -105,7 +105,7 @@ realm.area.subscribe({
     // if set to true, an initial list of all areas that match the subscription criteria is sent out
     executeImmediatly: true, 
     // filter criteria to limit the areas to receive updates for
-    attributes: ["charge<0.5", "type=drone"] /
+    attributes: ["charge<0.5", "type=drone"] 
 }) // returns {Promise<Subscription>}
 
 realm.area.get(id) // returns {Promise<AreaData>}
