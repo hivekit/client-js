@@ -13,8 +13,11 @@ describe('Object Test', function () {
         objectIdD,
         objectIdE,
         objectIdF,
+        subscriptionB,
         subscriptionMessageCount = 0,
-        lastSubscriptionMessage;
+        lastSubscriptionMessage,
+        subscriptionBMessageCount = 0,
+        lastSubscriptionBMessage;
 
     it('creates and authenticates the client', async function () {
         client = new HivekitClient({ logErrors: false, logMessages: false });
@@ -35,7 +38,12 @@ describe('Object Test', function () {
         subscription.on('update', data => {
             lastSubscriptionMessage = data;
             subscriptionMessageCount++;
-        })
+        });
+        subscriptionB = await realmA.object.subscribe();
+        subscriptionB.on('update', data => {
+            lastSubscriptionBMessage = data;
+            subscriptionBMessageCount++;
+        });
     })
 
     it('creates object A and retrieves it', async function () {
@@ -99,7 +107,7 @@ describe('Object Test', function () {
     it('waits and receives subscription update', function (done) {
         setTimeout(() => {
 
-            const ids = Object.keys(lastSubscriptionMessage);
+            var ids = Object.keys(lastSubscriptionMessage);
             ids.sort((a, b) => {
                 return a > b ? 1 : -1;
             });
@@ -108,11 +116,28 @@ describe('Object Test', function () {
             ]);
             expect(subscriptionMessageCount).to.equal(1);
             expect(lastSubscriptionMessage[objectIdB].data.charge).to.equal(0.3);
+
+            ids = Object.keys(lastSubscriptionBMessage);
+            ids.sort((a, b) => {
+                return a > b ? 1 : -1;
+            });
+            expect(ids).to.deep.equal([
+                objectIdA, objectIdB, objectIdC
+            ]);
+            expect(subscriptionBMessageCount).to.equal(1);
+            expect(lastSubscriptionBMessage[objectIdB].data.charge).to.equal(0.3);
+
             done();
         }, 500);
+    });
+
+    it('cancels subscription b', async function () {
+        await subscriptionB.cancel();
     })
 
     it('updates object b data with delta', async function () {
+        expect(subscriptionMessageCount).to.equal(1);
+        expect(subscriptionBMessageCount).to.equal(1);
         await realmA.object.update(objectIdB, 'New Label', null, { charge: 0.5 });
         const objBData = await realmA.object.get(objectIdB);
         expect(objBData.data).to.deep.equal({ type: 'scooter', charge: 0.5 })
@@ -121,6 +146,8 @@ describe('Object Test', function () {
     it('waits and receives subscription update', function (done) {
         setTimeout(() => {
             expect(lastSubscriptionMessage[objectIdB].data.charge).to.equal(0.5);
+            expect(subscriptionMessageCount).to.equal(2);
+            expect(subscriptionBMessageCount).to.equal(1);
             done();
         }, 500);
     })

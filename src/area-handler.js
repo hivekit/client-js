@@ -58,6 +58,10 @@ export default class AreaHandler {
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
+    /********************************************
+     * INTERNAL METHODS
+     *******************************************/
+
     _setAreaState(id, label, shapeData, data, action) {
         const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;

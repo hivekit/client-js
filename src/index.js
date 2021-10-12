@@ -134,7 +134,9 @@ export default class HivekitClient extends EventEmitter {
         return this._wsConnection.url;
     }
 
-    /************* PRIVATE METHODS ******************/
+    /********************************************
+     * INTERNAL METHODS
+     *******************************************/
 
     _onOpen() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);

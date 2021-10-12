@@ -17,7 +17,32 @@ export default class SubscriptionHandler {
      */
     constructor(client) {
         this._client = client;
-        this._subscriptions = {};
+
+        /**
+         * The HivekitClient tries to optimize data usage by creating
+         * a single server side subscription for a given set of subscription criteria
+         * and distribute its updates onto multiple client side subscription objects.
+         * 
+         * To achieve this, it maintains an Array of subscription collections in the following
+         * format:
+         * 
+         * this._subscriptionCollections[ id ] = [
+         *      subscription,
+         *      subscription
+         * ].signature
+         * 
+         * where
+         * 
+         * - id is the ID with which the subscription is registered with the server
+         * - subscription is an instance of {Subscription}. Each instance can be cancelled individually
+         *   which will unbind its event handlers and remove it from the subscription collection.
+         *   Only if all subscription objects are removed from the collection will the server be notified
+         *   to cancel the subscription
+         * - signature is a hash based on the subscriptions realm and options. So even if the client subscribes
+         *   to the same criteria in multiple places across an app, it will be mapped to the same subscription.
+         *   
+         */
+        this._subscriptionCollections = {};
         this._pendingSubscriptionPromises = {};
     }
 
@@ -31,34 +56,30 @@ export default class SubscriptionHandler {
      */
     _getSubscription(id, realmId, options) {
         const resultPromise = getPromise();
-
-        // If a subscription with this ID already exists, return it.
-        if (this._subscriptions[id]) {
-            resultPromise.resolve(this._subscriptions[id]);
-            return resultPromise;
-        }
-
-        // If a subscription with the same parameters (realm and options) already
-        // exists, return it.
         const signature = this._client._getSignature(realmId, options);
-        for (var key in this._subscriptions) {
-            if (this._subscriptions[key].signature === signature) {
-                resultPromise.resolve(this._subscriptions[key]);
-                return resultPromise;
+        var subscription;
+
+        // Let's see if a subscription collection with a given id already exists
+        var subscriptionCollection = this._subscriptionCollections[id];
+
+        // If no subscriptionCollection exists for a given ID, maybe there is one
+        // with the same parameters (realm and options) as expressed by its signature
+        if (!subscriptionCollection) {
+            for (var _id in this._subscriptionCollections) {
+                if (this._subscriptionCollections[_id].signature === signature) {
+                    id = _id;
+                    subscriptionCollection = this._subscriptionCollections[id];
+                }
             }
         }
 
-        // If a subscription with the same signature has been requested already,
-        // but the request has not yet resolved, register this promise to be resolved
-        // once the subscription is loaded
-        if (this._pendingSubscriptionPromises[signature]) {
-            this._pendingSubscriptionPromises[signature].push(resultPromise);
+        // If we've found a collection, let's add our subscription to it and we're good
+        if (subscriptionCollection) {
+            subscription = new Subscription(this._client, id, realmId);
+            subscriptionCollection.push(subscription)
+            resultPromise.resolve(subscription)
             return resultPromise;
         }
-
-        // No subscription with the given id or signature exists. We need to create
-        // it. First, let's register it as a pending request.
-        this._pendingSubscriptionPromises[signature] = [resultPromise];
 
         // The id parameter is optional and usually will be null when the subscription
         // is created by the client. Let's create an id.
@@ -66,15 +87,29 @@ export default class SubscriptionHandler {
             id = this.getId(this.constants.TYPE.SUBSCRIPTION);
         }
 
-        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId)
-        msg[C.FIELD.DATA] = options;
+        // If we still haven't found a subscriptionCollection, create a new one
+        subscription = new Subscription(this._client, id, realmId);
+        this._subscriptionCollections[id] = [subscription];
+        this._subscriptionCollections[id].signature = signature;
 
+        // If a subscription with the same signature has been requested already,
+        // but the request has not yet resolved, register this promise to be resolved
+        // once the subscription is loaded
+        if (this._pendingSubscriptionPromises[signature]) {
+            this._pendingSubscriptionPromises[signature].push({ resultPromise, subscription })
+            return resultPromise;
+        }
+
+        // No subscription with the given id or signature exists. We need to create
+        // it. First, let's register it as a pending request.
+        this._pendingSubscriptionPromises[signature] = [{ resultPromise, subscription }];
+
+        // Let's send a message to the server to subscribe
+        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId, options)
         this._client._sendRequest(msg, res => {
             if (res[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
-                this._subscriptions[id] = new Subscription(this._client, id, realmId);
-                this._subscriptions[id].signature = signature;
-                this._pendingSubscriptionPromises[signature].forEach(promise => {
-                    promise.resolve(this._subscriptions[id]);
+                this._pendingSubscriptionPromises[signature].forEach(entry => {
+                    entry.resultPromise.resolve(entry.subscription);
                 });
 
                 // TODO if the subscription already exists and is called with execute immediatly
@@ -92,17 +127,51 @@ export default class SubscriptionHandler {
     }
 
     /**
+     * Invoked, when `subscription.cancel()` is called. This
+     * removes the subscription from its collection and - should the collection
+     * be empty afterwards - unsubscribes from the server and removes the collection itself.
+     * 
+     * @param {Subscription} subscription 
+     * @returns {Promise<success>}
+     */
+    _removeSubscription(subscription) {
+        if (!this._subscriptionCollections[subscription.id]) {
+            throw new Error('Can`t remove unknown subscription ' + subscription.id);
+        }
+
+        if (!this._subscriptionCollections[subscription.id].includes(subscription)) {
+            throw new Error('Subscription not found for id ' + subscription.id);
+        }
+
+        this._subscriptionCollections[subscription.id] = this._subscriptionCollections[subscription.id].filter(_subscription => {
+            return subscription !== _subscription;
+        })
+
+        // If there are still other subscriptions left, do nothing
+        if (this._subscriptionCollections[subscription.id].length > 0) {
+            return new Promise(resolve => {
+                resolve();
+            })
+        }
+
+        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, subscription.id, subscription.realmId);
+        delete this._subscriptionCollections[subscription.id];
+        return this._client._sendRequestAndHandleResponse(msg);
+    }
+
+    /**
      * Handles incoming messages with topic=subscription
      * 
      * @param {Object} msg 
      */
     _handleIncomingMessage(msg) {
         const id = msg[C.FIELD.ID];
-
-        if (!this._subscriptions[id]) {
+        if (!this._subscriptionCollections[id]) {
             this._client._onError('Received message for unknown subscription ' + msg);
         } else {
-            this._subscriptions[id]._processIncomingMessage(msg)
+            for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
+                this._subscriptionCollections[id][i]._processIncomingMessage(msg)
+            }
         }
     }
 }

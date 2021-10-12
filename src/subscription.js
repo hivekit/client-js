@@ -20,6 +20,7 @@ export default class Subscription extends EventEmitter {
      * @param {HivekitClient} client 
      * @param {string} id 
      * @param {string} realmId 
+     * @param {string} signature A signature derived from the subscription options
      */
     constructor(client, id, realmId) {
         super();
@@ -32,11 +33,10 @@ export default class Subscription extends EventEmitter {
     /**
      * Unsubscribes this subscription
      * 
-     * @returns {void}
+     * @returns {Promise<success>}
      */
     cancel() {
-        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, this.id, this.realmId);
-        return this._client._sendRequestAndHandleResponse(msg);
+        return this._client._subscription._removeSubscription(this);
     }
 
     /**

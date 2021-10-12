@@ -1,5 +1,11 @@
 import C from './constants'
 
+/**
+ * Fieldnames is the inverse to constants. It lists human
+ * readable names that will be passed from the client to the user and
+ * back. These values are translated back to the abbreviated constants
+ * before sending them to the server.
+ */
 export default {
     TYPE: {
         [C.TYPE.REALM]: 'realm',

@@ -10,7 +10,7 @@
  * invoked. This means there's no need for this.doStuff.bind( this ) type constructs
  * or for keeping references of a bound function for later deletion.
  */
- export default class EventEmitter{
+export default class EventEmitter {
 
     /**
      * @constructor
@@ -30,14 +30,14 @@
      * 
      * @returns {Number} listenerId
      */
-    on( eventName, fn, context, order ) {
+    on(eventName, fn, context, order) {
         this.listenerId++;
-        
-        if( !this.listener[ eventName ] ) {
-            this.listener[ eventName ] = [];
+
+        if (!this.listener[eventName]) {
+            this.listener[eventName] = [];
         }
 
-        this.listener[ eventName ].push({
+        this.listener[eventName].push({
             eventName: eventName,
             fn,
             context: context,
@@ -45,8 +45,8 @@
             id: this.listenerId
         });
 
-        this.listener[ eventName ].sort((a,b) => {
-            if( a.order == b.order ) return 0;
+        this.listener[eventName].sort((a, b) => {
+            if (a.order == b.order) return 0;
             return a.order > b.order ? 1 : -1;
         });
 
@@ -60,24 +60,24 @@
      * @param {Function} fn 
      * @param {Object} context 
      */
-    off( eventName, fn, context ) {
-        if( !this.listener[ eventName ] ) {
+    off(eventName, fn, context) {
+        if (!this.listener[eventName]) {
             return;
         }
 
-        var i = this.listener[ eventName ].length;
+        var i = this.listener[eventName].length;
 
-        while( i-- ) {
-            if( 
-                this.listener[ eventName ][ i ].fn === fn &&
-                this.listener[ eventName ][ i ].context === context
+        while (i--) {
+            if (
+                this.listener[eventName][i].fn === fn &&
+                this.listener[eventName][i].context === context
             ) {
-                this.listener[ eventName ].splice( i, 1 );
+                this.listener[eventName].splice(i, 1);
             }
         }
 
-        if( this.listener[ eventName ].length === 0 ) {
-            delete this.listener[ eventName ];
+        if (this.listener[eventName].length === 0) {
+            delete this.listener[eventName];
         }
     }
 
@@ -87,15 +87,15 @@
      * @param {String} eventName 
      * @param {Number} id 
      */
-    removeListenerById( eventName, id ) {
-        if( !this.listener[ eventName ] ) {
-            throw new Error( 'No listener registered for eventname ' + eventName );
+    removeListenerById(eventName, id) {
+        if (!this.listener[eventName]) {
+            throw new Error('No listener registered for eventname ' + eventName);
         }
 
         var foundListener = false;
 
-        this.listener[ eventName ] = this.listener[ eventName ].filter( listener => {
-            if( listener.id === id ) {
+        this.listener[eventName] = this.listener[eventName].filter(listener => {
+            if (listener.id === id) {
                 foundListener = true;
                 return false;
             } else {
@@ -103,8 +103,8 @@
             }
         });
 
-        if( !foundListener ) {
-            throw new Error( `Failed to find listener with id ${id} for event ${eventName}` );
+        if (!foundListener) {
+            throw new Error(`Failed to find listener with id ${id} for event ${eventName}`);
         }
     }
 
@@ -114,21 +114,21 @@
      * @param {String} eventName 
      * @param {Mixed} arguments
      */
-    emit( eventName ) {
-        if( !this.listener[ eventName ] ) {
+    emit(eventName) {
+        if (!this.listener[eventName]) {
             return;
         }
 
-        const args = Array.prototype.slice.call( arguments, 1 );
+        const args = Array.prototype.slice.call(arguments, 1);
 
         var last = null;
         var i = 0;
-        while( this.listener[ eventName ] && this.listener[ eventName ][ i ] ) {
-            last = this.listener[ eventName ][ i ];
-            if( this.listener[ eventName ][ i ].fn.apply( this.listener[ eventName ][ i ].context, args ) === false ) {
-                return;   
+        while (this.listener[eventName] && this.listener[eventName][i]) {
+            last = this.listener[eventName][i];
+            if (this.listener[eventName][i].fn.apply(this.listener[eventName][i].context, args) === false) {
+                return;
             }
-            if( this.listener[ eventName ] && this.listener[ eventName ][ i ] === last ) {
+            if (this.listener[eventName] && this.listener[eventName][i] === last) {
                 i++;
             }
         }
@@ -140,7 +140,7 @@
      * @param {String} eventName 
      * @returns {Boolean}
      */
-    hasListeners( eventName ) {
-        return this.listener[ eventName ] && this.listener[ eventName ].length > 0;
+    hasListeners(eventName) {
+        return !!(this.listener[eventName] && this.listener[eventName].length > 0);
     }
 }
