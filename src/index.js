@@ -35,13 +35,16 @@ export default class HivekitClient extends EventEmitter {
         // public properties
         this.constants = C;
         this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
+        this.ping = null;
 
         // default options
         this.options = this._extendOptions(options, {
             outgoingMessageBufferTime: 0,
             logMessages: false,
             logErrors: true,
-            adminDashboardBasePath: '/admin/'
+            adminDashboardBasePath: '/admin/',
+            heartbeatInterval: 5000,
+            reconnectInterval: 1000
         });
 
         // public handlers
@@ -50,14 +53,18 @@ export default class HivekitClient extends EventEmitter {
 
         // internal handlers
         this._subscription = new SubscriptionHandler(this);
+        this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
 
         // private properties
+        this._url = null;
         this._wsConnection = null;
+        this._reconnectInterval = null;
         this._onConnectPromise = null;
         this._onAuthenticatePromise = null;
         this._onDisconnectPromise = null;
         this._pendingRequests = {};
         this._pendingMessages = null;
+        this._pendingHeartbeats = {};
         this._typeHandler = {
             [C.TYPE.SYSTEM]: this.system,
             [C.TYPE.SUBSCRIPTION]: this._subscription
@@ -79,6 +86,7 @@ export default class HivekitClient extends EventEmitter {
      * @returns {Promise} <on connect>
      */
     connect(url) {
+        this._url = url;
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTING);
         this._wsConnection = typeof window !== 'undefined' && window.WebSocket ? new window.WebSocket(url) : new NodeWebSocket(url);
         this._wsConnection.onopen = this._onOpen.bind(this);
@@ -137,15 +145,31 @@ export default class HivekitClient extends EventEmitter {
     /********************************************
      * INTERNAL METHODS
      *******************************************/
-
     _onOpen() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);
+        clearInterval(this._reconnectInterval);
         this._onConnectPromise.resolve();
     }
 
     _onClose() {
-        this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
-        this._onDisconnectPromise.resolve();
+        // Intended Close
+        if (this.connectionStatus === C.CONNECTION_STATUS.DISCONNECTING) {
+            clearInterval(this._heartbeatInterval)
+            this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
+            this._onDisconnectPromise && this._onDisconnectPromise.resolve();
+        }
+
+        // Unintended Close - reconnect
+        else {
+            this._onError('Disconnected, attempting to reconnect');
+            this.connect(this._url).catch(() => {
+                clearInterval(this._reconnectInterval);
+                this._reconnectInterval = setInterval(() => {
+                    this._onError('Disconnected, attempting to reconnect');
+                    this.connect(this._url);
+                }, this.options.reconnectInterval)
+            })
+        }
     }
 
     _onError(error) {
@@ -153,7 +177,6 @@ export default class HivekitClient extends EventEmitter {
         if (this.options.logErrors) {
             console.warn(error);
         }
-
     }
 
     _onMessage(msg) {
@@ -196,12 +219,38 @@ export default class HivekitClient extends EventEmitter {
         this._pendingMessages = null;
     }
 
+    _sendHeartbeatMessage() {
+        if (this.connectionStatus !== C.CONNECTION_STATUS.AUTHENTICATED) {
+            return;
+        }
+        const id = this.getId('heartbeat');
+        this._pendingHeartbeats[id] = Date.now();
+        const heartbeatMessage = [{
+            [C.FIELD.TYPE]: C.TYPE.SYSTEM,
+            [C.FIELD.ACTION]: C.ACTION.HEARTBEAT,
+            [C.FIELD.CORRELATION_ID]: id
+        }];
+
+        this._wsConnection.send(JSON.stringify(heartbeatMessage));
+    }
+
+    _processHeartbeatResponse(msg) {
+        if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
+            this.ping = Date.now() - this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
+            this.emit('ping', this.ping);
+        }
+        delete this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
+    }
+
     _handleIncomingMessage(msg) {
         if (this.options.logMessages) {
             console.log('<', msg);
         }
         if (msg[C.FIELD.CORRELATION_ID]) {
-            if (this._pendingRequests[msg[C.FIELD.CORRELATION_ID]]) {
+            if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
+                this._processHeartbeatResponse(msg);
+            }
+            else if (this._pendingRequests[msg[C.FIELD.CORRELATION_ID]]) {
                 this._pendingRequests[msg[C.FIELD.CORRELATION_ID]].responseCallbacks.forEach(callback => {
                     callback(msg);
                 });

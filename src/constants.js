@@ -28,7 +28,7 @@ export default {
         SCOPE_TYPE: 'sty',
         SUB_TYPE: 'sty',
         SCOPE_ID: 'sid',
-        EXECUTE_IMMEDIATELY:'exe',
+        EXECUTE_IMMEDIATELY: 'exe',
         ACTION: 'act',
         RESULT: 'res',
         CORRELATION_ID: 'cid',
@@ -41,11 +41,11 @@ export default {
         ATTRIBUTE: 'atr',
         UPDATE_TYPE: 'uty',
         INSTRUCTION_STRING: 'ins',
-       // Here we cheat a bit to hide an implementation detail. Technically, shape is sent via the SUB_TYPE field.
-       // So the incoming message would look like
-       // { sty: 'rec' (SUB_TYPE: 'rectangle'), sha: {x1:12, y1:32...}
-       // but for the end user we translate it to
-       // {shape: 'rectangle', shapeData: {x1:12, y1:32...}}
+        // Here we cheat a bit to hide an implementation detail. Technically, shape is sent via the SUB_TYPE field.
+        // So the incoming message would look like
+        // { sty: 'rec' (SUB_TYPE: 'rectangle'), sha: {x1:12, y1:32...}
+        // but for the end user we translate it to
+        // {shape: 'rectangle', shapeData: {x1:12, y1:32...}}
         SHAPE: 'sha',
         SHAPE_DATA: 'shapeData',
         FIELD: 'fie',
@@ -62,7 +62,8 @@ export default {
         DELETE: 'del',
         AUTHENTICATE: 'aut',
         SET: 'set',
-        SEARCH: 'sea'
+        SEARCH: 'sea',
+        HEARTBEAT: 'hbt'
     },
 
     RESULT: {
