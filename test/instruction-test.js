@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import HivekitClient from '../src/index.js'
+import HivekitClient from '../src/index-node.js'
 import config from './config'
 import jwt from 'jsonwebtoken'
 

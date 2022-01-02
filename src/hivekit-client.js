@@ -2,7 +2,6 @@ import EventEmitter from './event-emitter'
 import C from './constants'
 import SystemHandler from './system-handler'
 import RealmHandler from './realm-handler'
-import { WebSocket as NodeWebSocket } from 'ws'
 import { getPromise } from './promise'
 import { nanoid } from 'nanoid'
 import SubscriptionHandler from './subscription-handler'
@@ -88,7 +87,7 @@ export default class HivekitClient extends EventEmitter {
     connect(url) {
         this._url = url;
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTING);
-        this._wsConnection = typeof window !== 'undefined' && window.WebSocket ? new window.WebSocket(url) : new NodeWebSocket(url);
+        this._wsConnection = new this.WsConstructor(url);
         this._wsConnection.onopen = this._onOpen.bind(this);
         this._wsConnection.onclose = this._onClose.bind(this);
         this._wsConnection.onerror = this._onError.bind(this);
