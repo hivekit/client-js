@@ -78,6 +78,9 @@ export default class SubscriptionHandler {
             subscription = new Subscription(this._client, id, realmId);
             subscriptionCollection.push(subscription)
             resultPromise.resolve(subscription)
+            if (options[C.FIELD.EXECUTE_IMMEDIATELY]) {
+                this._invokeImmediatly(subscription)
+            }
             return resultPromise;
         }
 
@@ -111,9 +114,6 @@ export default class SubscriptionHandler {
                 this._pendingSubscriptionPromises[signature].forEach(entry => {
                     entry.resultPromise.resolve(entry.subscription);
                 });
-
-                // TODO if the subscription already exists and is called with execute immediatly
-                // make it emit its current dataset
             } else {
                 this._pendingSubscriptionPromises[signature].forEach(promise => {
                     promise.reject(res[C.FIELD.ERROR]);
@@ -172,6 +172,34 @@ export default class SubscriptionHandler {
             for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
                 this._subscriptionCollections[id][i]._processIncomingMessage(msg)
             }
+        }
+    }
+
+    /**
+     * If the user registers a subscription that has the same signature as an
+     * existing subscription for which we already received an update, this method
+     * will find the similar subscription and invoke the new subscription with
+     * the existing subscription's data.
+     * 
+     * @param {Subscription} subscription 
+     * @returns {void}
+     */
+    _invokeImmediatly(subscription) {
+        if (!this._subscriptionCollections[subscription.id]) {
+            return;
+        }
+
+        var data = null, i;
+        for (i = 0; i < this._subscriptionCollections[subscription.id].length; i++) {
+            if (this._subscriptionCollections[subscription.id][i]._data) {
+                data = this._subscriptionCollections[subscription.id][i]._data;
+            }
+        }
+
+        if (data) {
+            setTimeout(() => {
+                subscription.emit('update', data);
+            }, 10);
         }
     }
 }
