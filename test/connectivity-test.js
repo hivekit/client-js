@@ -7,7 +7,7 @@ describe('Connectivity Test', function () {
     var client;
 
     it('creates the client without options', async function () {
-        client = new HivekitClient({ logMessages: false, logErrors: false });
+        client = new HivekitClient({ logMessages: false, logErrors: true });
         expect(client.connectionStatus).to.equal(client.constants.CONNECTION_STATUS.DISCONNECTED);
     });
 

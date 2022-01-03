@@ -3,13 +3,16 @@
   "type": "module",
   "version": "1.0.3",
   "description": "The browser/node client for the Hivekit platform and server",
-  "main": "dist/bundle-node.js",
+  "main": "src/index-node.js",
   "browser": "dist/bundle-browser.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": " node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/"
+    "test": " node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/",
+    "build-browser-bundle": "esbuild src/index-browser.js --bundle --format=esm --outfile=dist/bundle-browser.js",
+    "build": "npm run build-browser-bundle",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -34,11 +37,17 @@
   "devDependencies": {
     "c8": "^7.10.0",
     "chai": "^4.3.4",
-    "istanbul": "^0.4.5",
-    "mocha": "^9.1.2",
-    "nyc": "^15.1.0",
     "esbuild": "^0.14.10",
+    "istanbul": "^0.4.5",
     "jsonwebtoken": "^8.5.1",
+    "mocha": "^9.1.2",
+    "nyc": "^15.1.0"
+  },
+  "dependencies": {
+    "nanoid": "^3.1.30",
     "ws": "^8.2.3"
+  },
+  "engines": {
+    "node": ">=15.3.0"
   }
 }

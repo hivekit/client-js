@@ -2,7 +2,6 @@ import C from './constants'
 import { createMessage } from './message'
 import fieldnames from './fieldnames';
 import { extendMap } from './tools';
-import Subscription from './subscription';
 
 /**
  * This class exposes functionality to create, read, update, delete

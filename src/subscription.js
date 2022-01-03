@@ -1,7 +1,6 @@
 import EventEmitter from "./event-emitter";
 import C from "./constants";
 import fieldnames from "./fieldnames";
-import { createMessage } from './message'
 
 /**
  * Subscription represents a single subscription to a given subject with

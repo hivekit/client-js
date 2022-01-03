@@ -174,20 +174,21 @@ export default class HivekitClient extends EventEmitter {
     _onError(error) {
         this.emit('error', error);
         if (this.options.logErrors) {
-            console.warn(error);
+            console.warn(error.message || error);
         }
     }
 
     _onMessage(msg) {
-        var messages;
-
         try {
-            messages = JSON.parse(msg.data);
+            const messages = JSON.parse(msg.data);
+            if (Array.isArray(messages)) {
+                messages.forEach(this._handleIncomingMessage.bind(this));
+            } else {
+                this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
+            }
         } catch (e) {
-            this._onError('Failed to parse Websocket Message:', e);
+            this._onError(`Failed to parse Websocket Message: ${e}`);
         }
-
-        messages.forEach(this._handleIncomingMessage.bind(this));
     }
 
     _sendMessage(msg) {
@@ -210,7 +211,7 @@ export default class HivekitClient extends EventEmitter {
             return;
         }
         if (this.options.logMessages) {
-            for (var i = 0; i < this._pendingMessages.length; i++) {
+            for (let i = 0; i < this._pendingMessages.length; i++) {
                 console.log('>', this._pendingMessages[i]);
             }
         }
@@ -280,7 +281,7 @@ export default class HivekitClient extends EventEmitter {
     _sendRequest(msg, responseCallback) {
         const signature = this._getSignature(msg);
         // We combine identical requests into one
-        for (var id in this._pendingRequests) {
+        for (let id in this._pendingRequests) {
             if (this._pendingRequests[id].signature === signature) {
                 this._pendingRequests[id].responseCallbacks.push(responseCallback);
                 return;
@@ -311,7 +312,7 @@ export default class HivekitClient extends EventEmitter {
     }
 
     _getSignature() {
-        var val = JSON.stringify(Array.from(arguments)),
+        let val = JSON.stringify(Array.from(arguments)),
             i = 0,
             hash = 0;
 
@@ -342,7 +343,7 @@ export default class HivekitClient extends EventEmitter {
 
         const combinedOptions = {};
 
-        for (var key in defaults) {
+        for (let key in defaults) {
             if (typeof options[key] !== 'undefined') {
                 combinedOptions[key] = options[key];
             } else {
@@ -359,7 +360,7 @@ export default class HivekitClient extends EventEmitter {
         }
 
         const translated = {};
-        for (var key in data) {
+        for (let key in data) {
             if (fields[key]) {
                 if (key === C.FIELD.LOCATION) {
                     translated[fields[key]] = this._extendFields(data[key], fieldnames.LOCATION);
@@ -388,7 +389,7 @@ export default class HivekitClient extends EventEmitter {
 
     _extendFieldsMap(entries) {
         const result = {};
-        for (var id in entries) {
+        for (let id in entries) {
             result[id] = this._extendFields(entries[id]);
         }
         return result;
@@ -397,13 +398,13 @@ export default class HivekitClient extends EventEmitter {
     _compressFields(extendedFields, fieldnames, ignoreUnknown) {
         const reversedFieldNames = reverseMap(fieldnames);
         const compressedFields = {};
-        for (var key in extendedFields) {
+        for (let key in extendedFields) {
             if (reversedFieldNames[key]) {
                 compressedFields[reversedFieldNames[key]] = extendedFields[key]
             } else if (ignoreUnknown) {
                 compressedFields[key] = extendedFields[key]
             } else {
-                this._onError('Unknown field ' + key);
+                this._onError(`Unknown field ${key}`);
             }
         }
         return compressedFields;
