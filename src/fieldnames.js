@@ -1,4 +1,4 @@
-import C from './constants'
+import C from './constants.js'
 
 /**
  * Fieldnames is the inverse to constants. It lists human
@@ -13,7 +13,8 @@ export default {
         [C.TYPE.AREA]: 'area',
         [C.TYPE.SUBSCRIPTION]: 'subscription',
         [C.TYPE.SYSTEM]: 'system',
-        [C.TYPE.INSTRUCTION]: 'instruction'
+        [C.TYPE.INSTRUCTION]: 'instruction',
+        [C.TYPE.LOGEVENT]: 'logEvent'
     },
     FIELD: {
         [C.FIELD.TYPE]: 'type',

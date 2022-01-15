@@ -1,9 +1,10 @@
-import ObjectHandler from "./object-handler";
-import AreaHandler from "./area-handler";
-import InstructionHandler from './instruction-handler';
-import C from './constants';
-import fieldnames from "./fieldnames";
-import { createMessage } from "./message";
+import ObjectHandler from "./object-handler.js";
+import AreaHandler from "./area-handler.js";
+import InstructionHandler from './instruction-handler.js';
+import C from './constants.js';
+import fieldnames from "./fieldnames.js";
+import { createMessage } from "./message.js";
+import {extendMap} from "./tools.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -30,6 +31,22 @@ export default class Realm {
         this.object = new ObjectHandler(client, this);
         this.area = new AreaHandler(client, this);
         this.instruction = new InstructionHandler(client, this);
+    }
+
+    /**
+     * Subscribes to log events within a realm.
+     *
+     * @returns {Promise<Subscription>}
+     */
+    subscribe(options) {
+        return this._client._subscription._getSubscription(
+            this._client.getId('log-subs'),
+            this.id,
+            extendMap({
+                [C.FIELD.TYPE]: C.TYPE.LOGEVENT,
+                [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+            }, this._client._compressFields(options, fieldnames.FIELD))
+        )
     }
 
     /**

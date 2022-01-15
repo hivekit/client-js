@@ -1,6 +1,6 @@
-import EventEmitter from "./event-emitter";
-import C from "./constants";
-import fieldnames from "./fieldnames";
+import EventEmitter from "./event-emitter.js";
+import C from "./constants.js";
+import fieldnames from "./fieldnames.js";
 
 /**
  * Subscription represents a single subscription to a given subject with
@@ -19,7 +19,6 @@ export default class Subscription extends EventEmitter {
      * @param {HivekitClient} client 
      * @param {string} id 
      * @param {string} realmId 
-     * @param {string} signature A signature derived from the subscription options
      */
     constructor(client, id, realmId) {
         super();
@@ -49,7 +48,7 @@ export default class Subscription extends EventEmitter {
      * @returns {void}
      */
     _processIncomingMessage(msg) {
-        var data;
+        let data;
 
         if (msg[C.TYPE.OBJECT]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.OBJECT]);
@@ -59,8 +58,9 @@ export default class Subscription extends EventEmitter {
         }
         else if (msg[C.TYPE.INSTRUCTION]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
-        }
-        else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
+        } else if (msg[C.TYPE.LOGEVENT]) {
+            data = msg[C.TYPE.LOGEVENT]
+        } else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
             data = {
                 realmId: msg[C.FIELD.DATA][C.FIELD.ID],
                 action: fieldnames.ACTION[msg[C.FIELD.DATA][C.FIELD.ACTION]]

@@ -1,12 +1,12 @@
-import EventEmitter from './event-emitter'
-import C from './constants'
-import SystemHandler from './system-handler'
-import RealmHandler from './realm-handler'
-import { getPromise } from './promise'
+import EventEmitter from './event-emitter.js'
+import C from './constants.js'
+import SystemHandler from './system-handler.js'
+import RealmHandler from './realm-handler.js'
+import { getPromise } from './promise.js'
 import { nanoid } from 'nanoid'
-import SubscriptionHandler from './subscription-handler'
-import fieldnames from './fieldnames'
-import { reverseMap } from './tools'
+import SubscriptionHandler from './subscription-handler.js'
+import fieldnames from './fieldnames.js'
+import { reverseMap } from './tools.js'
 
 /**
  * HivekitClient is the main class and the only class the user

@@ -1,4 +1,4 @@
-import C from './constants'
+import C from './constants.js'
 
 /**
  * Creates a message object based on provided parameters

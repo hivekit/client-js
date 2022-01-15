@@ -13,7 +13,8 @@ export default {
         AREA: 'are',
         SUBSCRIPTION: 'sub',
         SYSTEM: 'sys',
-        INSTRUCTION: 'ins'
+        INSTRUCTION: 'ins',
+        LOGEVENT: "log"
     },
 
     UPDATE_TYPE: {

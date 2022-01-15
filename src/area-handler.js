@@ -1,7 +1,7 @@
-import C from './constants'
-import { createMessage } from './message'
-import fieldnames from './fieldnames';
-import { extendMap } from './tools';
+import C from './constants.js'
+import { createMessage } from './message.js'
+import fieldnames from './fieldnames.js';
+import { extendMap } from './tools.js';
 
 export default class AreaHandler {
     constructor(client, realm) {

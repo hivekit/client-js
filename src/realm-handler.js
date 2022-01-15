@@ -1,7 +1,7 @@
-import C from './constants'
-import { getPromise } from './promise'
-import { createMessage } from './message'
-import Realm from './realm'
+import C from './constants.js'
+import { getPromise } from './promise.js'
+import { createMessage } from './message.js'
+import Realm from './realm.js'
 
 /**
  * The realm handler provides CRUD and subscription methods for realms.

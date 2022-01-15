@@ -1,7 +1,7 @@
-import { getPromise } from './promise'
-import { createMessage } from './message'
-import C from './constants'
-import Subscription from './subscription'
+import { getPromise } from './promise.js'
+import { createMessage } from './message.js'
+import C from './constants.js'
+import Subscription from './subscription.js'
 
 /**
  * The SubscriptionHandler is not directly exposed to the user, but used
@@ -50,7 +50,7 @@ export default class SubscriptionHandler {
      * Returns and - if necessary - creates a subscription.
      * 
      * @param {String} [id] 
-     * @param {String} realm 
+     * @param {String} realmId
      * @param {Map} options
      * @returns {Promise<Subscription>}
      */

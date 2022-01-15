@@ -1,4 +1,4 @@
-import C from './constants'
+import C from './constants.js'
 
 /**
  * The system handler is responsible for all aspects that are not
