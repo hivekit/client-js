@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import HivekitClient from '../src/index-node.js'
-import config from './config'
+import config from './config.js'
 import jwt from 'jsonwebtoken'
 
 describe('Search Test', function () {

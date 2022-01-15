@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import EventEmitter from '../src/event-emitter';
+import EventEmitter from '../src/event-emitter.js';
 
 function spy() {
     var spyFn = function () {
