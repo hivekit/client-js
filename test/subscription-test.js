@@ -26,7 +26,7 @@ describe('Subscription Test', function () {
     it('subscribes and receives an empty response immediatly', function (done) {
         realmA.object.subscribe({ executeImmediately: true }).then(subscription => {
             subscription.on('update', data => {
-                expect(data).to.deep.equal([]);
+                expect(data).to.deep.equal({});
                 subscription.cancel().then(() => {
                     done();
                 });

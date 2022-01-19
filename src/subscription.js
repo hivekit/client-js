@@ -48,7 +48,7 @@ export default class Subscription extends EventEmitter {
      * @returns {void}
      */
     _processIncomingMessage(msg) {
-        let data;
+        let data = {};
 
         if (msg[C.TYPE.OBJECT]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.OBJECT]);
@@ -65,10 +65,6 @@ export default class Subscription extends EventEmitter {
                 realmId: msg[C.FIELD.DATA][C.FIELD.ID],
                 action: fieldnames.ACTION[msg[C.FIELD.DATA][C.FIELD.ACTION]]
             }
-        }
-
-        if (!data) {
-            data = [];
         }
 
         switch (msg[C.FIELD.UPDATE_TYPE]) {
