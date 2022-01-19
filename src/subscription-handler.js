@@ -171,6 +171,9 @@ export default class SubscriptionHandler {
         } else {
             for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
                 this._subscriptionCollections[id][i]._processIncomingMessage(msg)
+                if (!this._subscriptionCollections[id]) {
+                    break;
+                }
             }
         }
     }

@@ -187,6 +187,7 @@ export default class HivekitClient extends EventEmitter {
                 this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
             }
         } catch (e) {
+            console.log(e.stack);
             this._onError(`Failed to parse Websocket Message: ${e}`);
         }
     }

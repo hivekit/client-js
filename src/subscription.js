@@ -67,6 +67,10 @@ export default class Subscription extends EventEmitter {
             }
         }
 
+        if (!data) {
+            data = [];
+        }
+
         switch (msg[C.FIELD.UPDATE_TYPE]) {
             case C.UPDATE_TYPE.FULL:
                 this._data = data;
