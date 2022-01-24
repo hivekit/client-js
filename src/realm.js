@@ -4,7 +4,7 @@ import InstructionHandler from './instruction-handler.js';
 import C from './constants.js';
 import fieldnames from "./fieldnames.js";
 import { createMessage } from "./message.js";
-import {extendMap} from "./tools.js";
+import { extendMap } from "./tools.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -47,6 +47,21 @@ export default class Realm {
                 [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
             }, this._client._compressFields(options, fieldnames.FIELD))
         )
+    }
+
+    /**
+     * Updates a value in the realm's metadata
+     * 
+     * @param {string} key 
+     * @param {mixed} value
+     * 
+     * @returns {Promise<success>}
+     */
+    setData(key, value) {
+        const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
+        this.data[key] = value;
+        msg[C.FIELD.DATA] = this.data;
+        return this._client._sendRequestAndHandleResponse(msg);
     }
 
     /**

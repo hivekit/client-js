@@ -1,7 +1,7 @@
 {
   "name": "@hivekit/client-js",
   "type": "module",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "The browser/node client for the Hivekit platform and server",
   "main": "src/index-node.js",
   "browser": "dist/bundle-browser.js",
@@ -11,8 +11,7 @@
   "scripts": {
     "test": " node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/",
     "build-browser-bundle": "esbuild src/index-browser.js --bundle --format=esm --outfile=dist/bundle-browser.js",
-    "build": "npm run build-browser-bundle",
-    "postinstall": "npm run build"
+    "build": "npm run build-browser-bundle"
   },
   "repository": {
     "type": "git",
