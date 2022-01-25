@@ -1,10 +1,11 @@
 import ObjectHandler from "./object-handler.js";
 import AreaHandler from "./area-handler.js";
 import InstructionHandler from './instruction-handler.js';
+import EventEmitter from './event-emitter'
 import C from './constants.js';
 import fieldnames from "./fieldnames.js";
 import { createMessage } from "./message.js";
-import { extendMap } from "./tools.js";
+import { extendMap, deepClone } from "./tools.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -13,7 +14,7 @@ import { extendMap } from "./tools.js";
  * as accessor methods to interact with the objects, areas and
  * instructions within it.
  */
-export default class Realm {
+export default class Realm extends EventEmitter {
 
     /**
      * Realms are instantiated by the {RealmHandler}
@@ -24,10 +25,12 @@ export default class Realm {
      * @param {HivekitClient} client 
      */
     constructor(id, label, data, client) {
+        super();
         this._client = client;
+        this._data = data;
         this.id = id;
         this.label = label;
-        this.data = data;
+
         this.object = new ObjectHandler(client, this);
         this.area = new AreaHandler(client, this);
         this.instruction = new InstructionHandler(client, this);
@@ -35,6 +38,10 @@ export default class Realm {
 
     /**
      * Subscribes to log events within a realm.
+     * 
+     * @todo - we will need the ability to subscribe to changes in realm meta data as well
+     * so might want to make this method more explicit (e.g. subscribeToLogs, subscribeToData)
+     * or support an option argument defining what should be listened to
      *
      * @returns {Promise<Subscription>}
      */
@@ -57,10 +64,27 @@ export default class Realm {
      * 
      * @returns {Promise<success>}
      */
+    getData(key) {
+        if (typeof this._data[key] === 'object') {
+            return deepClone(this._data[key]);
+        } else {
+            return this._data[key]
+        }
+    }
+
+    /**
+     * Updates a value in the realm's metadata
+     * 
+     * @param {string} key 
+     * @param {mixed} value
+     * 
+     * @returns {Promise<success>}
+     */
     setData(key, value) {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
-        this.data[key] = value;
-        msg[C.FIELD.DATA] = this.data;
+        this._data[key] = value;
+        msg[C.FIELD.DATA] = this._data;
+        this.emit('update'); // @todo - react to remote data changes
         return this._client._sendRequestAndHandleResponse(msg);
     }
 

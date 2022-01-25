@@ -37,3 +37,14 @@ export function extendMap(mapA, mapB) {
     }
     return mapA;
 }
+
+/**
+ * Creates a copy of an object or array
+ * 
+ * @param {object} obj
+ * 
+ * @returns {object}
+ */
+export function deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
