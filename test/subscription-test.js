@@ -23,7 +23,7 @@ describe('Subscription Test', function () {
         expect(realmA.id).to.equal(realmIdA);
     });
 
-    it('subscribes and receives an empty response immediatly', function (done) {
+    it('subscribes and receives an empty response immediately', function (done) {
         realmA.object.subscribe({ executeImmediately: true }).then(subscription => {
             subscription.on('update', data => {
                 expect(data).to.deep.equal({});

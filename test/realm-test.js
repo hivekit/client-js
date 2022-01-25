@@ -43,7 +43,7 @@ describe('Realm Test', function () {
         const realmData = await client.realm.get(realmIdA);
         expect(realmData.id).to.equal(realmIdA);
         expect(realmData.label).to.equal('label for realm a');
-        expect(realmData.data).to.deep.equal({ some: 'value' })
+        expect(realmData.getData("some")).to.equal('value')
     });
 
     it('creates a second realm and retrieves it', async function () {
@@ -55,7 +55,7 @@ describe('Realm Test', function () {
         const realmData = await client.realm.get(realmIdB);
         expect(realmData.id).to.equal(realmIdB);
         expect(realmData.label).to.equal('label for realm b');
-        expect(realmData.data).to.deep.equal({ amount: 42 })
+        expect(realmData.getData("amount")).to.equal(42)
     });
 
     it('lists both realms', async function () {
