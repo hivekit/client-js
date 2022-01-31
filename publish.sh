@@ -1,10 +1,20 @@
 #!/bin/sh
+
+# Make sure everything stops if command fails
+set -e 
+set -o pipefail
+
+# Show current version
+echo "Current version:" `npm view @hivekit/client-js version`
+
+# Get version number
 read -p "Enter the new version number: " version
 
 # Run tests?
+npm run test-only
 
 # Replace version in package.json
-# sed -i '/version/s/[^\"]*$/'"${version}\"/" package.json
+npm version ${version}
 
 # Build browser bundle
 npm run build-browser-bundle
