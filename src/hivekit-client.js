@@ -355,11 +355,7 @@ export default class HivekitClient extends EventEmitter {
         return combinedOptions;
     }
 
-    _extendFields(data, fields) {
-        if (!fields) {
-            fields = fieldnames.FIELD;
-        }
-
+    _extendFields(data, fields = fieldnames.FIELD) {
         const translated = {};
         for (let key in data) {
             if (fields[key]) {
@@ -392,6 +388,14 @@ export default class HivekitClient extends EventEmitter {
         const result = {};
         for (let id in entries) {
             result[id] = this._extendFields(entries[id]);
+        }
+        return result;
+    }
+
+    _extendFieldsArray(entries) {
+        const result = [];
+        for (let entry of entries) {
+            result.push(this._extendFields(entry));
         }
         return result;
     }

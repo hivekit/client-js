@@ -46,6 +46,25 @@ export default class InstructionHandler {
     }
 
     /**
+     * Subscribes to log events.
+     *
+     * @todo Are there actually viable subscription options for log events?
+     * If so - document them.
+     *
+     * @returns {Promise<Subscription>}
+     */
+    subscribeToLogs(options) {
+        return this._client._subscription._getSubscription(
+            this._client.getId('instruction-log-subscription'),
+            this._realm.id,
+            extendMap({
+                [C.FIELD.TYPE]: C.TYPE.LOGEVENT,
+                [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM,
+            }, this._client._compressFields(options, fieldnames.FIELD))
+        );
+    }
+
+    /**
      * Retrieves the data associated with an instruction from the server
      * 
      * @param {string} id 

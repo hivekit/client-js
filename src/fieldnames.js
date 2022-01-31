@@ -36,7 +36,8 @@ export default {
         [C.FIELD.FIELD]: 'field',
         [C.FIELD.VALUE]: 'value',
         [C.FIELD.START]: 'start',
-        [C.FIELD.END]: 'end'
+        [C.FIELD.END]: 'end',
+        [C.FIELD.LEVEL]: 'level',
     },
     ACTION: {
         [C.ACTION.CREATE]: 'create',

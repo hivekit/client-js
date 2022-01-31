@@ -11,7 +11,8 @@
   "scripts": {
     "test": " node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/",
     "build-browser-bundle": "esbuild src/index-browser.js --bundle --format=esm --outfile=dist/bundle-browser.js",
-    "build": "npm run build-browser-bundle"
+    "build": "npm run build-browser-bundle",
+    "watch": "esbuild src/index-browser.js --bundle --format=esm --outfile=dist/bundle-browser.js --watch"
   },
   "repository": {
     "type": "git",

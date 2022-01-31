@@ -41,7 +41,7 @@ export default class Subscription extends EventEmitter {
      * Processes a message meant for this subscription. Extracts and formats
      * the associated data for user consumption and conflates full and delta updates.
      * 
-     * @TODO Check sequence numbering and reconsile if update is missing
+     * @TODO Check sequence numbering and reconcile if update is missing
      * 
      * @param {Object} msg
      * @emits update 
@@ -59,7 +59,7 @@ export default class Subscription extends EventEmitter {
         else if (msg[C.TYPE.INSTRUCTION]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
         } else if (msg[C.TYPE.LOGEVENT]) {
-            data = msg[C.TYPE.LOGEVENT]
+            data = this._client._extendFieldsArray(msg[C.TYPE.LOGEVENT]);
         } else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
             data = {
                 realmId: msg[C.FIELD.DATA][C.FIELD.ID],

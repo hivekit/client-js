@@ -52,7 +52,8 @@ export default {
         FIELD: 'fie',
         VALUE: 'val',
         START: 'sta',
-        END: 'end'
+        END: 'end',
+        LEVEL: 'lvl'
     },
 
     ACTION: {

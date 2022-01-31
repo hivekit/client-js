@@ -1,7 +1,7 @@
 import ObjectHandler from "./object-handler.js";
 import AreaHandler from "./area-handler.js";
 import InstructionHandler from './instruction-handler.js';
-import EventEmitter from './event-emitter'
+import EventEmitter from './event-emitter.js'
 import C from './constants.js';
 import fieldnames from "./fieldnames.js";
 import { createMessage } from "./message.js";
@@ -34,26 +34,6 @@ export default class Realm extends EventEmitter {
         this.object = new ObjectHandler(client, this);
         this.area = new AreaHandler(client, this);
         this.instruction = new InstructionHandler(client, this);
-    }
-
-    /**
-     * Subscribes to log events within a realm.
-     * 
-     * @todo - we will need the ability to subscribe to changes in realm meta data as well
-     * so might want to make this method more explicit (e.g. subscribeToLogs, subscribeToData)
-     * or support an option argument defining what should be listened to
-     *
-     * @returns {Promise<Subscription>}
-     */
-    subscribe(options) {
-        return this._client._subscription._getSubscription(
-            this._client.getId('log-subs'),
-            this.id,
-            extendMap({
-                [C.FIELD.TYPE]: C.TYPE.LOGEVENT,
-                [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
-            }, this._client._compressFields(options, fieldnames.FIELD))
-        )
     }
 
     /**
