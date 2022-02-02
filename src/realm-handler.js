@@ -51,7 +51,7 @@ export default class RealmHandler {
         return this._client._sendRequestAndHandleResponse(msg, response => {
             this._realms[id] = new Realm(id,
                 response[C.FIELD.DATA][C.FIELD.LABEL],
-                response[C.FIELD.DATA][C.FIELD.DATA],
+                response[C.FIELD.DATA][C.FIELD.DATA] || {},
                 this._client
             );
             return this._realms[id];
