@@ -312,8 +312,8 @@ export default class HivekitClient extends EventEmitter {
         return result;
     }
 
-    _getSignature() {
-        let val = JSON.stringify(Array.from(arguments)),
+    _getSignature(...args) {
+        let val = JSON.stringify(args),
             i = 0,
             hash = 0;
 

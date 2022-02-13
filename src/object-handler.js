@@ -40,6 +40,23 @@ export default class ObjectHandler {
      * @returns {Promise<Subscription>}
      */
     subscribe(options) {
+        if (options && options.shape) {
+            const shapeDataSignature = Object.keys(options.shape).sort().join("");
+            switch (shapeDataSignature) {
+                case "x1x2y1y2":
+                    options.scopeType = C.SHAPE_TYPE.RECTANGLE;
+                    break;
+                case "cxcyr":
+                    options.scopeType = C.SHAPE_TYPE.CIRCLE;
+                    break;
+                case "points":
+                    options.scopeType = C.SHAPE_TYPE.POLYGON;
+                    break;
+                default:
+                    throw new Error("Unknown shape data")
+            }
+        }
+
         return this._client._subscription._getSubscription(
             this._client.getId('object-subscription'),
             this._realm.id,

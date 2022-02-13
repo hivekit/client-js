@@ -14,10 +14,13 @@ describe('Object Test', function () {
         objectIdE,
         objectIdF,
         subscriptionB,
+        subscriptionC,
         subscriptionMessageCount = 0,
         lastSubscriptionMessage,
         subscriptionBMessageCount = 0,
-        lastSubscriptionBMessage;
+        lastSubscriptionBMessage,
+        subscriptionCMessageCount = 0,
+        lastSubscriptionCMessage;
 
     it('creates and authenticates the client', async function () {
         client = new HivekitClient({ logErrors: true, logMessages: false });
@@ -44,6 +47,13 @@ describe('Object Test', function () {
             lastSubscriptionBMessage = data;
             subscriptionBMessageCount++;
         });
+        subscriptionC = await realmA.object.subscribe({
+            shape: { x1: 12.5, y1: 50.5, x2: 13.5, y2: 51.5 }
+        })
+        subscriptionC.on('update', data => {
+            lastSubscriptionCMessage = data
+            subscriptionCMessageCount++
+        })
     })
 
     it('creates object A and retrieves it', async function () {
@@ -70,8 +80,8 @@ describe('Object Test', function () {
         objectIdB = client.getId('object-b');
         objectIdC = client.getId('object-c');
         const location = {
-            longitude: 13.404954,
-            latitude: 52.520008
+            longitude: 13,
+            latitude: 51
         }
 
         await realmA.object.create(objectIdB, 'Object B Label', location, { type: 'scooter', charge: 0.3 });
@@ -126,6 +136,16 @@ describe('Object Test', function () {
             ]);
             expect(subscriptionBMessageCount).to.equal(1);
             expect(lastSubscriptionBMessage[objectIdB].data.charge).to.equal(0.3);
+
+            // Object A update was out of the shape of subscription C
+            ids = Object.keys(lastSubscriptionCMessage);
+            ids.sort((a, b) => {
+                return a > b ? 1 : -1;
+            });
+            expect(ids).to.deep.equal([
+                objectIdB, objectIdC
+            ]);
+            expect(subscriptionCMessageCount).to.equal(1);
 
             done();
         }, 500);

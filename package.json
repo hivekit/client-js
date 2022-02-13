@@ -1,7 +1,7 @@
 {
   "name": "@hivekit/client-js",
   "type": "module",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "The browser/node client for the Hivekit platform and server",
   "main": "src/index-node.js",
   "browser": "dist/bundle-browser.js",
@@ -47,8 +47,5 @@
   "dependencies": {
     "nanoid": "^3.1.30",
     "ws": "^8.2.3"
-  },
-  "engines": {
-    "node": ">=15.3.0"
   }
 }

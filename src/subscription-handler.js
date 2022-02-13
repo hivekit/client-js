@@ -116,7 +116,7 @@ export default class SubscriptionHandler {
                 });
             } else {
                 this._pendingSubscriptionPromises[signature].forEach(promise => {
-                    promise.reject(res[C.FIELD.ERROR]);
+                    promise.resultPromise.reject(res[C.FIELD.ERROR]);
                 });
             }
 
