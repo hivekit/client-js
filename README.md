@@ -97,6 +97,11 @@ realm.object.create(id, [label], [location], [data]) // returns {Promise}
 realm.object.update(id, [label], [location], [data]) // returns {Promise}
 realm.object.set(id, [label], [location], [data])
 realm.object.delete(id) // returns {Promise}
+realm.object.list(options) // returns {Promise<id:objectData>} options can be any of 
+{
+    fields: ['customValue'] // fieldnames from data to be included in result
+    where: ['key>value'] // key -> operator -> value filters
+}
 
 /**********************************
  * AREA
@@ -112,7 +117,7 @@ realm.area.get(id) // returns {Promise<AreaData>}
 realm.area.create(id, [label], shapeData, [data]) // returns {Promise}
 realm.area.update(id, [label], shapeData, [data]) // returns {Promise}
 realm.area.delete(id) // returns {Promise}
-
+realm.area.list(options) // returns {Promise<areas>}
 /**********************************
  * INSTRUCTION
  * *******************************/
@@ -122,5 +127,6 @@ realm.instruction.get(id) // returns {Promise<AreaData>}
 realm.instruction.create(id, [label], instructionString, [data]) // returns {Promise}
 realm.instruction.update(id, [label], instructionString, [data]) // returns {Promise}
 realm.instruction.delete(id) // returns {Promise}
+realm.instruction.list(options) // returns {Promise<instructions>}
 ```
 
