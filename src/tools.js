@@ -39,7 +39,7 @@ export function extendMap(mapA, mapB) {
 }
 
 /**
- * Creates a copy of an object or array
+ * Creates a deep copy of an object or array
  * 
  * @param {object} obj
  * 
@@ -47,4 +47,20 @@ export function extendMap(mapA, mapB) {
  */
 export function deepClone(obj) {
     return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Creates a shallow copy of an object
+ * 
+ * @param {object} obj 
+ * @returns {object}
+ */
+export function shallowClone(obj) {
+    const clonedObj = {};
+
+    for (let key in obj) {
+        clonedObj[key] = obj[key];
+    }
+
+    return clonedObj;
 }

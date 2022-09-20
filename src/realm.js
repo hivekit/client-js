@@ -45,6 +45,9 @@ export default class Realm extends EventEmitter {
      * @returns {Promise<success>}
      */
     getData(key) {
+        if (!key) {
+            return deepClone(this._data);
+        }
         if (typeof this._data[key] === 'object') {
             return deepClone(this._data[key]);
         } else {
@@ -64,6 +67,21 @@ export default class Realm extends EventEmitter {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this._data[key] = value;
         msg[C.FIELD.DATA] = this._data;
+        this.emit('update'); // @todo - react to remote data changes
+        return this._client._sendRequestAndHandleResponse(msg);
+    }
+
+    /**
+     * Changes a realm's label
+     * 
+     * @param {string} label 
+     * 
+     * @returns {Promise<success>}
+     */
+    setLabel(label) {
+        const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
+        this.label = label;
+        msg[C.FIELD.LABEL] = label;
         this.emit('update'); // @todo - react to remote data changes
         return this._client._sendRequestAndHandleResponse(msg);
     }
