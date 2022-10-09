@@ -99,7 +99,7 @@ realm.object.set(id, [label], [location], [data])
 realm.object.delete(id) // returns {Promise}
 realm.object.list(options) // returns {Promise<id:objectData>} options can be any of 
 {
-    fields: ['customValue'] // fieldnames from data to be included in result
+    field: ['customValue'] // fieldnames from data to be included in result
     where: ['key>value'] // key -> operator -> value filters
 }
 
