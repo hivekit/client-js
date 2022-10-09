@@ -211,11 +211,11 @@ describe('Object Test', function () {
 
     it('waits and receives subscription update', function (done) {
         setTimeout(() => {
-
             const ids = Object.keys(lastSubscriptionMessage);
             ids.sort((a, b) => {
                 return a > b ? 1 : -1;
             });
+            console.log(ids)
             expect(ids).to.deep.equal([
                 objectIdA, objectIdC, objectIdD, objectIdE, objectIdF
             ]);
@@ -223,7 +223,8 @@ describe('Object Test', function () {
             done();
         }, 500);
     })
-    it('closes the client', async function () {
+    it('cleans up the realm and closes the client', async function () {
+        await client.realm.delete(realmIdA);
         await client.disconnect();
     });
 });

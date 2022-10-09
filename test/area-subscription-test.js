@@ -78,7 +78,8 @@ describe('Area Subscription Test', function () {
         expect(Object.keys(messagesB[0])).to.deep.equal([areaIdA]);
     })
 
-    it('closes the client', async function () {
+    it('deletes the realm and closes the client', async function () {
+        await client.realm.delete(realmIdA);
         await client.disconnect();
     });
 });

@@ -1,5 +1,6 @@
 import ObjectHandler from "./object-handler.js";
 import AreaHandler from "./area-handler.js";
+import TaskHandler from "./task-handler.js";
 import InstructionHandler from './instruction-handler.js';
 import EventEmitter from './event-emitter.js'
 import C from './constants.js';
@@ -33,6 +34,7 @@ export default class Realm extends EventEmitter {
 
         this.object = new ObjectHandler(client, this);
         this.area = new AreaHandler(client, this);
+        this.task = new TaskHandler(client, this);
         this.instruction = new InstructionHandler(client, this);
     }
 

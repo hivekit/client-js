@@ -3,11 +3,12 @@ import HivekitClient from '../src/index-node.js'
 import config from './config.js'
 import jwt from 'jsonwebtoken'
 
-describe('Subscription Test', function () {
+describe('Task Test', function () {
     var client,
         realmIdA,
-        realmA,
-        objectIdA;
+        lastSubscriptionMessage,
+        taskIdA,
+        realmA;
 
     it('creates and authenticates the client', async function () {
         client = new HivekitClient({ logErrors: true, logMessages: false });
@@ -23,39 +24,33 @@ describe('Subscription Test', function () {
         expect(realmA.id).to.equal(realmIdA);
     });
 
-    it('subscribes and receives an empty response immediately', function (done) {
-        realmA.object.subscribe({ executeImmediately: true }).then(subscription => {
-            subscription.on('update', data => {
-                expect(data).to.deep.equal({});
-                subscription.cancel().then(() => {
-                    done();
-                });
-            });
+    it('subscribes to all tasks', async function () {
+        const subscription = await realmA.task.subscribe();
+        subscription.on('update', data => {
+            lastSubscriptionMessage = data;
         })
-    });
+    })
 
-    it('creates object A ', async function () {
-        objectIdA = client.getId('object-a');
+    it('creates a task and retrieves it', async function () {
+        taskIdA = client.getId('task-a-');
         const location = {
             longitude: 13.404954,
             latitude: 52.520008
         }
 
         const data = {
-            type: 'scooter',
-            charge: 0.5
+            strength: 5,
+            intellience: 0.5,
+            charisma: 4
         }
 
-        await realmA.object.create(objectIdA, 'Object A Label', location, data);
-    });
+        await realmA.task.create(taskIdA, 'Task A Label', location, data, "sort out the rowdy folks", [], "NOT DONE", 4);
 
-    it('subscribes and receives a message', function (done) {
-        realmA.object.subscribe({ executeImmediately: true }).then(subscription => {
-            subscription.on('update', data => {
-                expect(Object.keys(data)).to.deep.equal([objectIdA]);
-                done();
-            });
-        })
+        const taskA = await realmA.task.get(taskIdA);
+        expect(taskA.location.latitude).to.equal(location.latitude);
+        expect(taskA.location.altitude).to.equal(0);
+        expect(taskA.label).to.equal('Task A Label');
+        expect(taskA.data).to.deep.equal(data);
     });
 
     it('cleans up the realm and closes the client', async function () {

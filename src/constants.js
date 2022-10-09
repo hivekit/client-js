@@ -11,6 +11,7 @@ export default {
         REALM: 'rea',
         OBJECT: 'obj',
         AREA: 'are',
+        TASK: 'tsk',
         SUBSCRIPTION: 'sub',
         SYSTEM: 'sys',
         INSTRUCTION: 'ins',
@@ -41,6 +42,10 @@ export default {
         LABEL: 'lab',
         ATTRIBUTE: 'atr',
         UPDATE_TYPE: 'uty',
+        DESCRIPTION: 'dsc',
+        OBJECT_IDS: 'obs',
+        STATUS: 'sts',
+        PRIORITY: 'pri',
         INSTRUCTION_STRING: 'ins',
         // Here we cheat a bit to hide an implementation detail. Technically, shape is sent via the SUB_TYPE field.
         // So the incoming message would look like

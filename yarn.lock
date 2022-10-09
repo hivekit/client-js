@@ -590,9 +590,9 @@
   "resolved" "https://registry.npmjs.org/es6-error/-/es6-error-4.1.1.tgz"
   "version" "4.1.1"
 
-"esbuild-windows-64@0.14.10":
-  "integrity" "sha512-LE5Mm62y0Bilu7RDryBhHIX8rK3at5VwJ6IGM3BsASidCfOBTzqcs7Yy0/Vkq39VKeTmy9/66BAfVoZRNznoDw=="
-  "resolved" "https://registry.npmjs.org/esbuild-windows-64/-/esbuild-windows-64-0.14.10.tgz"
+"esbuild-linux-64@0.14.10":
+  "integrity" "sha512-K+gCQz2oLIIBI8ZM77e9sYD5/DwEpeYCrOQ2SYXx+R4OU2CT9QjJDi4/OpE7ko4AcYMlMW7qrOCuLSgAlEj4Wg=="
+  "resolved" "https://registry.npmjs.org/esbuild-linux-64/-/esbuild-linux-64-0.14.10.tgz"
   "version" "0.14.10"
 
 "esbuild@^0.14.10":

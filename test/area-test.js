@@ -190,7 +190,8 @@ describe('Area Test', function () {
         }, 500);
     });
 
-    it('closes the client', async function () {
+    it('cleans up the realm and closes the client', async function () {
+        await client.realm.delete(realmIdA);
         await client.disconnect();
     });
 });

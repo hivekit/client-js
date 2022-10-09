@@ -104,6 +104,27 @@ realm.object.list(options) // returns {Promise<id:objectData>} options can be an
 }
 
 /**********************************
+ * TASK
+ * *******************************/
+realm.task.subscribe({
+    // if set to true, an initial list of all objects that match the subscription criteria is sent out
+    executeImmediatly: true,
+    // filter criteria to limit the objects to receive updates for
+    attributes: ["charge<0.5", "type=drone"]
+}) // returns {Promise<Subscription>}
+
+realm.task.get(id) // returns {Promise<ObjectData>}
+realm.task.create(id, [label], [location], [data]) // returns {Promise}
+realm.task.update(id, [label], [location], [data]) // returns {Promise}
+realm.task.set(id, [label], [location], [data])
+realm.task.delete(id) // returns {Promise}
+realm.task.list(options) // returns {Promise<id:objectData>} options can be any of 
+{
+    fields: ['customValue'] // fieldnames from data to be included in result
+    where: ['key>value'] // key -> operator -> value filters
+}
+
+/**********************************
  * AREA
  * *******************************/
 realm.area.subscribe({

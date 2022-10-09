@@ -9,10 +9,14 @@ import C from './constants.js'
  * @param {string} realm the id of realm
  * @param {object} data data object
  * @param {object} location location object
+ * @param {string} description the description of a task
+ * @param {string} objectIds objects that a task relates to
+ * @param {object} status the status of a task
+ * @param {object} priority the priority of a task
  * 
  * @returns {object} message
  */
-export function createMessage(type, action, id, realm, data, location) {
+export function createMessage(type, action, id, realm, data, location, description, objectIds, status, priority) {
     const message = {
         [C.FIELD.TYPE]: type,
         [C.FIELD.ACTION]: action,
@@ -22,6 +26,10 @@ export function createMessage(type, action, id, realm, data, location) {
     if (realm) message[C.FIELD.REALM] = realm;
     if (data) message[C.FIELD.DATA] = data;
     if (location) message[C.FIELD.LOCATION] = location;
+    if (description !== undefined) message[C.FIELD.DESCRIPTION] = description;
+    if (objectIds !== undefined) message[C.FIELD.OBJECT_IDS] = objectIds;
+    if (status !== undefined) message[C.FIELD.STATUS] = status;
+    if (priority !== undefined) message[C.FIELD.PRIORITY] = priority;
 
     return message;
 }

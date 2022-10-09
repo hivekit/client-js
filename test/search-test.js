@@ -152,7 +152,8 @@ describe('Search Test', function () {
         expect(result.length).to.equal(0);
     });
 
-    it('closes the client', async function () {
+    it('cleans up the realm an dcloses the client', async function () {
+        await client.realm.delete(realmIdA);
         await client.disconnect();
     });
 });
