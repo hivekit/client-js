@@ -89,7 +89,6 @@ var constants_default = {
     REALM: "rea",
     OBJECT: "obj",
     AREA: "are",
-    TASK: "tsk",
     SUBSCRIPTION: "sub",
     SYSTEM: "sys",
     INSTRUCTION: "ins",
@@ -117,10 +116,6 @@ var constants_default = {
     LABEL: "lab",
     ATTRIBUTE: "atr",
     UPDATE_TYPE: "uty",
-    DESCRIPTION: "dsc",
-    OBJECT_IDS: "obs",
-    STATUS: "sts",
-    PRIORITY: "pri",
     INSTRUCTION_STRING: "ins",
     SHAPE: "sha",
     SHAPE_DATA: "shapeData",
@@ -241,7 +236,7 @@ function getPromise() {
 }
 
 // src/message.js
-function createMessage(type, action, id, realm, data, location, description, objectIds, status, priority) {
+function createMessage(type, action, id, realm, data, location) {
   const message = {
     [constants_default.FIELD.TYPE]: type,
     [constants_default.FIELD.ACTION]: action
@@ -254,14 +249,6 @@ function createMessage(type, action, id, realm, data, location, description, obj
     message[constants_default.FIELD.DATA] = data;
   if (location)
     message[constants_default.FIELD.LOCATION] = location;
-  if (description !== void 0)
-    message[constants_default.FIELD.DESCRIPTION] = description;
-  if (objectIds !== void 0)
-    message[constants_default.FIELD.OBJECT_IDS] = objectIds;
-  if (status !== void 0)
-    message[constants_default.FIELD.STATUS] = status;
-  if (priority !== void 0)
-    message[constants_default.FIELD.PRIORITY] = priority;
   return message;
 }
 
@@ -271,7 +258,6 @@ var fieldnames_default = {
     [constants_default.TYPE.REALM]: "realm",
     [constants_default.TYPE.OBJECT]: "object",
     [constants_default.TYPE.AREA]: "area",
-    [constants_default.TYPE.TASK]: "task",
     [constants_default.TYPE.SUBSCRIPTION]: "subscription",
     [constants_default.TYPE.SYSTEM]: "system",
     [constants_default.TYPE.INSTRUCTION]: "instruction",
@@ -294,9 +280,6 @@ var fieldnames_default = {
     [constants_default.FIELD.SHAPE]: "shape",
     [constants_default.FIELD.SHAPE_DATA]: "shapeData",
     [constants_default.FIELD.INSTRUCTION_STRING]: "instructionString",
-    [constants_default.FIELD.DESCRIPTION]: "description",
-    [constants_default.FIELD.OBJECT_IDS]: "objects",
-    [constants_default.FIELD.PRIORITY]: "priority",
     [constants_default.FIELD.FIELD]: "field",
     [constants_default.FIELD.VALUE]: "value",
     [constants_default.FIELD.START]: "start",
@@ -533,99 +516,6 @@ var AreaHandler = class {
   }
 };
 
-// src/task-handler.js
-var TaskHandler = class {
-  constructor(client, realm) {
-    this._client = client;
-    this._realm = realm;
-    this._locationFields = this._getLocationFields();
-  }
-  subscribe(options) {
-    return this._client._subscription._getSubscription(this._client.getId("task-subscription"), this._realm.id, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.TASK,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
-  }
-  get(id) {
-    if (!id) {
-      throw new Error("no id provided for task.get");
-    }
-    const msg = createMessage(constants_default.TYPE.TASK, constants_default.ACTION.READ, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[constants_default.FIELD.DATA]);
-    });
-  }
-  create(id, label, location, data, description, objectIds, status, priority) {
-    const arg = arguments.length === 1 ? arguments[0] : {};
-    return this._setTaskState(arg.id || id, arg.label || label, arg.location || location, arg.data || data, constants_default.ACTION.CREATE, arg.description || description || "", arg.objectIds || objectIds || [], arg.status || status || "open", arg.priority || priority || 0);
-  }
-  update(id, label, location, data, description, objectIds, status, priority) {
-    return this._setTaskState(id, label, location, data, constants_default.ACTION.UPDATE, description, objectIds, status, priority);
-  }
-  set(id, label, location, data, description, objectIds, status, priority) {
-    this._setTaskState(id, label, location, data, constants_default.ACTION.SET, description, objectIds, status, priority);
-  }
-  list(options) {
-    const msg = createMessage(constants_default.TYPE.TASK, constants_default.ACTION.LIST, null, this._realm.id);
-    if (options && Object.keys(options).length > 0) {
-      msg[constants_default.FIELD.DATA] = this._client._compressFields(options, fieldnames_default.FIELD);
-    }
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
-      return this._client._extendFieldsMap(result[constants_default.FIELD.DATA]);
-    });
-  }
-  delete(id) {
-    const msg = createMessage(constants_default.TYPE.TASK, constants_default.ACTION.DELETE, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg);
-  }
-  _getLocationFields() {
-    const locationFields = {};
-    for (var fieldname in fieldnames_default.LOCATION) {
-      locationFields[fieldnames_default.LOCATION[fieldname]] = fieldname;
-    }
-    return locationFields;
-  }
-  _setTaskState(id, label, location, data, action, description, objectIds, status, priority) {
-    const msg = createMessage(constants_default.TYPE.TASK, action, id, this._realm.id, void 0, void 0, description, objectIds, status, priority);
-    if (label)
-      msg[constants_default.FIELD.LABEL] = label;
-    if (location && Object.keys(location).length > 0) {
-      msg[constants_default.FIELD.LOCATION] = this._parseLocation(location);
-    }
-    if (data && Object.keys(data).length > 0)
-      msg[constants_default.FIELD.DATA] = data;
-    if (action === constants_default.ACTION.SET) {
-      this._client._sendMessage(msg);
-    } else {
-      return this._client._sendRequestAndHandleResponse(msg);
-    }
-  }
-  _parseLocation(location) {
-    const parsedLocation = {};
-    for (var key in location) {
-      if (key.length === 0) {
-        continue;
-      }
-      if (typeof location[key] !== "string") {
-        parsedLocation[this._locationFields[key]] = location[key];
-        continue;
-      }
-      if (location[key].length > 0) {
-        if (key === fieldnames_default.LOCATION[constants_default.LOCATION.TIME]) {
-          try {
-            parsedLocation[key] = new Date(location[key]).toISOString();
-          } catch (e) {
-            throw new Error(`Can't convert ${location[key]} into a valid date:${e}`);
-          }
-        } else {
-          parsedLocation[this._locationFields[key]] = parseFloat(location[key]);
-        }
-      }
-    }
-    return parsedLocation;
-  }
-};
-
 // src/instruction-handler.js
 var InstructionHandler = class {
   constructor(client, realm) {
@@ -687,7 +577,6 @@ var Realm = class extends EventEmitter {
     this.label = label;
     this.object = new ObjectHandler(client, this);
     this.area = new AreaHandler(client, this);
-    this.task = new TaskHandler(client, this);
     this.instruction = new InstructionHandler(client, this);
   }
   getData(key) {
