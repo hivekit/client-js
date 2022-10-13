@@ -18,7 +18,7 @@ fi
 npm version ${version}
 
 # Build browser bundle
-npm run build-browser-bundle
+npm run build
 
 # Commit and Push to git
 git add -A
