@@ -66,7 +66,8 @@ export default class HivekitClient extends EventEmitter {
         this._pendingHeartbeats = {};
         this._typeHandler = {
             [C.TYPE.SYSTEM]: this.system,
-            [C.TYPE.SUBSCRIPTION]: this._subscription
+            [C.TYPE.SUBSCRIPTION]: this._subscription,
+            [C.TYPE.REALM]: this.realm
         };
     }
 
@@ -360,6 +361,9 @@ export default class HivekitClient extends EventEmitter {
             if (fields[key]) {
                 if (key === C.FIELD.LOCATION) {
                     translated[fields[key]] = this._extendFields(data[key], fieldnames.LOCATION);
+                }
+                else if (key === C.FIELD.PRESENCE_CONNECTION_STATUS) {
+                    translated[fields[C.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames.PRESENCE_CONNECTION_STATUS[data[key]];
                 }
                 else if (key === C.FIELD.SUB_TYPE && data[C.FIELD.SHAPE]) {
                     translated[fields[C.FIELD.SHAPE]] = fieldnames.SHAPE_TYPE[data[key]];

@@ -91,9 +91,9 @@ describe('Object Test', function () {
     it('lists all objects', async function () {
         const list = await realmA.object.list()
         expect(list).to.deep.equal({
-            [objectIdA]: { id: objectIdA, label: 'Object A Label' },
-            [objectIdB]: { id: objectIdB, label: 'Object B Label' },
-            [objectIdC]: { id: objectIdC, label: 'Object C Label' },
+            [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected' },
+            [objectIdB]: { id: objectIdB, label: 'Object B Label', connectionStatus: 'disconnected' },
+            [objectIdC]: { id: objectIdC, label: 'Object C Label', connectionStatus: 'disconnected' },
         });
     });
 
@@ -102,15 +102,15 @@ describe('Object Test', function () {
             where: ['type=scooter']
         })
         expect(list).to.deep.equal({
-            [objectIdA]: { id: objectIdA, label: 'Object A Label' },
-            [objectIdB]: { id: objectIdB, label: 'Object B Label' },
+            [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected' },
+            [objectIdB]: { id: objectIdB, label: 'Object B Label', connectionStatus: 'disconnected' },
         });
 
         list = await realmA.object.list({
             where: ['type=maintenance-vehicle']
         })
         expect(list).to.deep.equal({
-            [objectIdC]: { id: objectIdC, label: 'Object C Label' },
+            [objectIdC]: { id: objectIdC, label: 'Object C Label', connectionStatus: 'disconnected' },
         });
     });
 

@@ -5,7 +5,8 @@ import EventEmitter from './event-emitter.js'
 import C from './constants.js';
 import fieldnames from "./fieldnames.js";
 import { createMessage } from "./message.js";
-import { extendMap, deepClone } from "./tools.js";
+import { deepClone } from "./tools.js";
+import PubSubHandler from "./pubsub-handler.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -28,12 +29,14 @@ export default class Realm extends EventEmitter {
         super();
         this._client = client;
         this._data = data;
+        this._subscriptionCallbacks = {};
         this.id = id;
         this.label = label;
 
         this.object = new ObjectHandler(client, this);
         this.area = new AreaHandler(client, this);
         this.instruction = new InstructionHandler(client, this);
+        this.pubsub = new PubSubHandler(client, this);
     }
 
     /**

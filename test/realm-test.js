@@ -65,10 +65,21 @@ describe('Realm Test', function () {
         expect(realmList[realmIdB].label).to.equal('label for realm b')
     });
 
+    it('gets and sets realm data', async function () {
+        const realm = await client.realm.get(realmIdB);
+        await realm.setData('firstname', 'Joe')
+        await realm.setData('address', { street: 'spooner street', number: 12 })
+        expect(await realm.getData()).to.deep.equal({
+            amount: 42,
+            firstname: 'Joe',
+            address: { street: 'spooner street', number: 12 }
+        })
+    });
+
     it('deletes realm b', async function () {
-        expect(subscriptionUpdateCount).to.equal(2);
+        expect(subscriptionUpdateCount).to.equal(4);
         await client.realm.delete(realmIdB);
-        expect(subscriptionUpdateCount).to.equal(3);
+        expect(subscriptionUpdateCount).to.equal(5);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdB, action: 'delete' });
         const realmList = await client.realm.list()
         expect(realmList[realmIdA].label).to.equal('label for realm a')
@@ -76,12 +87,12 @@ describe('Realm Test', function () {
     });
 
     it('unsubscribes before deleting realm a and receives no updates', async function () {
-        expect(subscriptionUpdateCount).to.equal(3);
+        expect(subscriptionUpdateCount).to.equal(5);
         lastSubscriptionMessage = null;
         await subscription.cancel();
         expect(lastSubscriptionMessage).to.equal(null);
         await client.realm.delete(realmIdA);
-        expect(subscriptionUpdateCount).to.equal(3);
+        expect(subscriptionUpdateCount).to.equal(5);
     });
 
     it('closes the client', async function () {

@@ -99,6 +99,9 @@ var constants_default = {
     DELTA: "dta"
   },
   STRING_VALUE: "val",
+  INTERNAL_EVENTS: [
+    "connectionStatusChanged"
+  ],
   FIELD: {
     TYPE: "typ",
     SCOPE_TYPE: "sty",
@@ -117,13 +120,16 @@ var constants_default = {
     ATTRIBUTE: "atr",
     UPDATE_TYPE: "uty",
     INSTRUCTION_STRING: "ins",
+    PRESENCE_CONNECTION_STATUS: "cst",
     SHAPE: "sha",
     SHAPE_DATA: "shapeData",
     FIELD: "fie",
     VALUE: "val",
     START: "sta",
     END: "end",
-    LEVEL: "lvl"
+    LEVEL: "lvl",
+    EVENT_NAME: "eve",
+    ID_PATTERN: "idp"
   },
   ACTION: {
     CREATE: "cre",
@@ -134,7 +140,10 @@ var constants_default = {
     AUTHENTICATE: "aut",
     SET: "set",
     SEARCH: "sea",
-    HEARTBEAT: "hbt"
+    HEARTBEAT: "hbt",
+    SUBSCRIBE: "sub",
+    UNSUBSCRIBE: "uns",
+    PUBLISH: "pub"
   },
   RESULT: {
     SUCCESS: "suc",
@@ -159,6 +168,10 @@ var constants_default = {
     RECTANGLE: "rec",
     CIRCLE: "cir",
     POLYGON: "pol"
+  },
+  PRESENCE_CONNECTION_STATUS: {
+    CONNECTED: "con",
+    DISCONNECTED: "dis"
   }
 };
 
@@ -284,7 +297,12 @@ var fieldnames_default = {
     [constants_default.FIELD.VALUE]: "value",
     [constants_default.FIELD.START]: "start",
     [constants_default.FIELD.END]: "end",
-    [constants_default.FIELD.LEVEL]: "level"
+    [constants_default.FIELD.LEVEL]: "level",
+    [constants_default.FIELD.PRESENCE_CONNECTION_STATUS]: "connectionStatus"
+  },
+  PRESENCE_CONNECTION_STATUS: {
+    [constants_default.PRESENCE_CONNECTION_STATUS.CONNECTED]: "connected",
+    [constants_default.PRESENCE_CONNECTION_STATUS.DISCONNECTED]: "disconnected"
   },
   ACTION: {
     [constants_default.ACTION.CREATE]: "create",
@@ -567,17 +585,70 @@ var InstructionHandler = class {
   }
 };
 
+// src/pubsub-handler.js
+var PubSubHandler = class {
+  constructor(client, realm) {
+    this._client = client;
+    this._realm = realm;
+    this._subscriptionCallbacks = [];
+  }
+  subscribe(eventName, idPatternOrCallback, callback) {
+    var idPattern = null;
+    if (arguments.length == 2) {
+      callback = idPatternOrCallback;
+    } else {
+      idPattern = idPatternOrCallback;
+    }
+    this._subscriptionCallbacks[eventName] = callback;
+    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(constants_default.ACTION.SUBSCRIBE, eventName, idPattern));
+  }
+  unsubscribe(eventName, idPattern) {
+    delete this._subscriptionCallbacks[eventName];
+    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(constants_default.ACTION.UNSUBSCRIBE, eventName, idPattern));
+  }
+  publish(eventName, idPatternOrData, data) {
+    var idPattern;
+    if (arguments.length == 2) {
+      idPattern = "*";
+      data = idPatternOrData;
+    } else {
+      idPattern = idPatternOrData;
+    }
+    const msg = this._getPubSubMessage(constants_default.ACTION.PUBLISH, eventName, idPattern);
+    msg[constants_default.FIELD.DATA][constants_default.FIELD.DATA] = data;
+    return this._client._sendRequestAndHandleResponse(msg);
+  }
+  _emitSubscriptionEvent(eventName, data, idPattern) {
+    if (this._subscriptionCallbacks[eventName]) {
+      if (constants_default.INTERNAL_EVENTS.includes(eventName)) {
+        data = this._client._extendFields(data);
+      }
+      this._subscriptionCallbacks[eventName](data, idPattern);
+    }
+  }
+  _getPubSubMessage(action, eventName, idPattern) {
+    const msg = createMessage(constants_default.TYPE.REALM, action, this._realm.id);
+    msg[constants_default.FIELD.DATA] = {
+      [constants_default.FIELD.EVENT_NAME]: eventName,
+      [constants_default.FIELD.ID_PATTERN]: idPattern || "*"
+    };
+    return msg;
+  }
+};
+
 // src/realm.js
 var Realm = class extends EventEmitter {
   constructor(id, label, data, client) {
     super();
     this._client = client;
     this._data = data;
+    this._subscriptionCallbacks = {};
     this.id = id;
     this.label = label;
     this.object = new ObjectHandler(client, this);
     this.area = new AreaHandler(client, this);
     this.instruction = new InstructionHandler(client, this);
+    this.pubsub = new PubSubHandler(client, this);
   }
   getData(key) {
     if (!key) {
@@ -662,6 +733,11 @@ var RealmHandler = class {
   delete(id) {
     const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.DELETE, id);
     return this._client._sendRequestAndHandleResponse(msg);
+  }
+  _handleIncomingMessage(msg) {
+    if (msg[constants_default.FIELD.ACTION] == constants_default.ACTION.PUBLISH && this._realms[msg[constants_default.FIELD.REALM]]) {
+      this._realms[msg[constants_default.FIELD.REALM]].pubsub._emitSubscriptionEvent(msg[constants_default.FIELD.DATA][constants_default.FIELD.EVENT_NAME], msg[constants_default.FIELD.DATA][constants_default.FIELD.DATA], msg[constants_default.FIELD.DATA][constants_default.FIELD.ID_PATTERN]);
+    }
   }
 };
 
@@ -875,7 +951,8 @@ var HivekitClient = class extends EventEmitter {
     this._pendingHeartbeats = {};
     this._typeHandler = {
       [constants_default.TYPE.SYSTEM]: this.system,
-      [constants_default.TYPE.SUBSCRIPTION]: this._subscription
+      [constants_default.TYPE.SUBSCRIPTION]: this._subscription,
+      [constants_default.TYPE.REALM]: this.realm
     };
   }
   connect(url) {
@@ -1080,6 +1157,8 @@ var HivekitClient = class extends EventEmitter {
       if (fields[key]) {
         if (key === constants_default.FIELD.LOCATION) {
           translated[fields[key]] = this._extendFields(data[key], fieldnames_default.LOCATION);
+        } else if (key === constants_default.FIELD.PRESENCE_CONNECTION_STATUS) {
+          translated[fields[constants_default.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames_default.PRESENCE_CONNECTION_STATUS[data[key]];
         } else if (key === constants_default.FIELD.SUB_TYPE && data[constants_default.FIELD.SHAPE]) {
           translated[fields[constants_default.FIELD.SHAPE]] = fieldnames_default.SHAPE_TYPE[data[key]];
         } else if (key === constants_default.FIELD.SHAPE) {

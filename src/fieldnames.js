@@ -38,6 +38,11 @@ export default {
         [C.FIELD.START]: 'start',
         [C.FIELD.END]: 'end',
         [C.FIELD.LEVEL]: 'level',
+        [C.FIELD.PRESENCE_CONNECTION_STATUS]: 'connectionStatus'
+    },
+    PRESENCE_CONNECTION_STATUS: {
+        [C.PRESENCE_CONNECTION_STATUS.CONNECTED]: 'connected',
+        [C.PRESENCE_CONNECTION_STATUS.DISCONNECTED]: 'disconnected'
     },
     ACTION: {
         [C.ACTION.CREATE]: 'create',

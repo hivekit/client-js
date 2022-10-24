@@ -23,6 +23,9 @@ export default {
     },
 
     STRING_VALUE: 'val',
+    INTERNAL_EVENTS: [
+        'connectionStatusChanged'
+    ],
 
     FIELD: {
         TYPE: 'typ',
@@ -42,6 +45,7 @@ export default {
         ATTRIBUTE: 'atr',
         UPDATE_TYPE: 'uty',
         INSTRUCTION_STRING: 'ins',
+        PRESENCE_CONNECTION_STATUS: 'cst',
         // Here we cheat a bit to hide an implementation detail. Technically, shape is sent via the SUB_TYPE field.
         // So the incoming message would look like
         // { sty: 'rec' (SUB_TYPE: 'rectangle'), sha: {x1:12, y1:32...}
@@ -53,7 +57,9 @@ export default {
         VALUE: 'val',
         START: 'sta',
         END: 'end',
-        LEVEL: 'lvl'
+        LEVEL: 'lvl',
+        EVENT_NAME: 'eve',
+        ID_PATTERN: 'idp'
     },
 
     ACTION: {
@@ -65,7 +71,10 @@ export default {
         AUTHENTICATE: 'aut',
         SET: 'set',
         SEARCH: 'sea',
-        HEARTBEAT: 'hbt'
+        HEARTBEAT: 'hbt',
+        SUBSCRIBE: 'sub',
+        UNSUBSCRIBE: 'uns',
+        PUBLISH: 'pub'
     },
 
     RESULT: {
@@ -94,5 +103,10 @@ export default {
         RECTANGLE: 'rec',
         CIRCLE: 'cir',
         POLYGON: 'pol'
+    },
+
+    PRESENCE_CONNECTION_STATUS: {
+        CONNECTED: 'con',
+        DISCONNECTED: 'dis'
     }
 }
