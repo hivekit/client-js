@@ -56,7 +56,6 @@ export default class ObjectHandler {
                     throw new Error("Unknown shape data")
             }
         }
-
         return this._client._subscription._getSubscription(
             this._client.getId('object-subscription'),
             this._realm.id,
@@ -93,14 +92,15 @@ export default class ObjectHandler {
      * use `set()` instead.
      * 
      * @param {string} id 
-     * @param {string} [label]
-     * @param {object} [location]
-     * @param {object} [data]
+     * @param {object} options {}
+     * @param {string} [options.label]
+     * @param {object} [options.location]
+     * @param {object} [options.data]
      * 
      * @returns {Promise<result>}
      */
-    create(id, label, location, data) {
-        return this._setObjectState(id, label, location, data, C.ACTION.CREATE);
+    create(id, options) {
+        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.CREATE);
     }
 
     /**
@@ -113,16 +113,16 @@ export default class ObjectHandler {
      * use `set()` instead.
      * 
      * @param {string} id 
-     * @param {string} [label]
-     * @param {object} [location]
-     * @param {object} [data]
+     * @param {object} options {}
+     * @param {string} [options.label]
+     * @param {object} [options.location]
+     * @param {object} [options.data]
      * 
      * @returns {Promise<result>}
      */
-    update(id, label, location, data) {
-        return this._setObjectState(id, label, location, data, C.ACTION.UPDATE);
+    update(id, options) {
+        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.UPDATE);
     }
-
     /**
      * Creates or updates objects without waiting for confirmation.
      * 
@@ -131,12 +131,15 @@ export default class ObjectHandler {
      * the need to explicitly create objects first or to have strong consistency
      *
      * @param {string} id 
-     * @param {string} [label]
-     * @param {object} [location]
-     * @param {object} [data]
+     * @param {object} options {}
+     * @param {string} [options.label]
+     * @param {object} [options.location]
+     * @param {object} [options.data]
+     * 
+     * @returns {Promise<result>}
      */
-    set(id, label, location, data) {
-        this._setObjectState(id, label, location, data, C.ACTION.SET);
+    set(id, options) {
+        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.SET);
     }
 
     /**

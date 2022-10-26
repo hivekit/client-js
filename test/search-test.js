@@ -54,12 +54,12 @@ describe('Search Test', function () {
             charge: 0.5
         }
 
-        await realmA.object.create(objectIdA, 'Object A Label', location, { type: 'scooter', charge: 0.1 });
-        await realmA.object.create(objectIdB, 'Object B Label', location, { type: 'scooter', charge: 0.2 });
-        await realmA.object.create(objectIdC, 'Object C Label', location, { type: 'car', charge: 0.3 });
-        await realmA.object.create(objectIdD, 'Object D Label', location, { type: 'truck', charge: 0.4 });
-        await realmA.object.create(objectIdE, 'Object E Label', location, { type: 'truck', charge: 0.5 });
-        await realmA.object.create(objectIdF, 'Object F Label', location, { type: 'truck', charge: 0.6 });
+        await realmA.object.create(objectIdA, { label: 'Object A Label', location, data: { type: 'scooter', charge: 0.1 } });
+        await realmA.object.create(objectIdB, { label: 'Object B Label', location, data: { type: 'scooter', charge: 0.2 } });
+        await realmA.object.create(objectIdC, { label: 'Object C Label', location, data: { type: 'car', charge: 0.3 } });
+        await realmA.object.create(objectIdD, { label: 'Object D Label', location, data: { type: 'truck', charge: 0.4 } });
+        await realmA.object.create(objectIdE, { label: 'Object E Label', location, data: { type: 'truck', charge: 0.5 } });
+        await realmA.object.create(objectIdF, { label: 'Object F Label', location, data: { type: 'truck', charge: 0.6 } });
         const list = await realmA.object.list()
         expect(Object.keys(list)).to.include(
             objectIdA,

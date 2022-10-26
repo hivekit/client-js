@@ -46,7 +46,7 @@ describe('Subscription Test', function () {
             charge: 0.5
         }
 
-        await realmA.object.create(objectIdA, 'Object A Label', location, data);
+        await realmA.object.create(objectIdA, { label: 'Object A Label', location, data });
     });
 
     it('subscribes and receives a message', function (done) {

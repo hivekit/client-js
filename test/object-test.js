@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import HivekitClient from '../src/index-node.js'
 import config from './config.js'
 import jwt from 'jsonwebtoken'
+import { sleep } from './tools.js'
 
 describe('Object Test', function () {
     var client,
@@ -68,7 +69,7 @@ describe('Object Test', function () {
             charge: 0.5
         }
 
-        await realmA.object.create(objectIdA, 'Object A Label', location, data);
+        await realmA.object.create(objectIdA, { label: 'Object A Label', location, data });
         const objectA = await realmA.object.get(objectIdA);
         expect(objectA.data).to.deep.equal(data);
         expect(objectA.location.latitude).to.equal(location.latitude);
@@ -84,8 +85,8 @@ describe('Object Test', function () {
             latitude: 51
         }
 
-        await realmA.object.create(objectIdB, 'Object B Label', location, { type: 'scooter', charge: 0.3 });
-        await realmA.object.create(objectIdC, 'Object C Label', location, { type: 'maintenance-vehicle' });
+        await realmA.object.create(objectIdB, { label: 'Object B Label', location, data: { type: 'scooter', charge: 0.3 } });
+        await realmA.object.create(objectIdC, { label: 'Object C Label', location, data: { type: 'maintenance-vehicle' } });
     });
 
     it('lists all objects', async function () {
@@ -114,38 +115,39 @@ describe('Object Test', function () {
         });
     });
 
-    it('waits and receives subscription update', function (done) {
-        setTimeout(() => {
-            var ids = Object.keys(lastSubscriptionMessage);
-            ids.sort((a, b) => {
-                return a > b ? 1 : -1;
-            });
-            expect(ids).to.deep.equal([
-                objectIdA, objectIdB, objectIdC
-            ]);
-            expect(lastSubscriptionMessage[objectIdB].data.charge).to.equal(0.3);
+    it('waits and receives subscription update A for Message A', async function () {
+        await sleep(500);
+        var ids = Object.keys(lastSubscriptionMessage);
+        ids.sort((a, b) => {
+            return a > b ? 1 : -1;
+        });
+        expect(ids).to.deep.equal([
+            objectIdA, objectIdB, objectIdC
+        ]);
+        expect(lastSubscriptionMessage[objectIdB].data.charge).to.equal(0.3);
+    });
 
-            ids = Object.keys(lastSubscriptionBMessage);
-            ids.sort((a, b) => {
-                return a > b ? 1 : -1;
-            });
-            expect(ids).to.deep.equal([
-                objectIdA, objectIdB, objectIdC
-            ]);
+    it('waits and receives subscription update A for Message B', async function () {
+        var ids = Object.keys(lastSubscriptionBMessage);
+        ids.sort((a, b) => {
+            return a > b ? 1 : -1;
+        });
+        expect(ids).to.deep.equal([
+            objectIdA, objectIdB, objectIdC
+        ]);
 
-            expect(lastSubscriptionBMessage[objectIdB].data.charge).to.equal(0.3);
+        expect(lastSubscriptionBMessage[objectIdB].data.charge).to.equal(0.3);
+    });
 
-            // Object A update was out of the shape of subscription C
-            ids = Object.keys(lastSubscriptionCMessage);
-            ids.sort((a, b) => {
-                return a > b ? 1 : -1;
-            });
-            expect(ids).to.deep.equal([
-                objectIdB, objectIdC
-            ]);
-
-            done();
-        }, 1000);
+    it('waits and receives subscription update A for Message C', async function () {
+        // Object A update was out of the shape of subscription C
+        var ids = Object.keys(lastSubscriptionCMessage);
+        ids.sort((a, b) => {
+            return a > b ? 1 : -1;
+        });
+        expect(ids).to.deep.equal([
+            objectIdB, objectIdC
+        ]);
     });
 
     it('cancels subscription b', async function () {
@@ -153,12 +155,12 @@ describe('Object Test', function () {
     })
 
     it('updates object b data with delta', async function () {
-        await realmA.object.update(objectIdB, 'New Label', null, { charge: 0.5 });
+        await realmA.object.update(objectIdB, { label: 'New Label', data: { charge: 0.5 } });
         const objBData = await realmA.object.get(objectIdB);
         expect(objBData.data).to.deep.equal({ type: 'scooter', charge: 0.5 })
     });
 
-    it('waits and receives subscription update', function (done) {
+    it('waits and receives subscription update B', function (done) {
         setTimeout(() => {
             expect(lastSubscriptionMessage[objectIdB].data.charge).to.equal(0.5);
             done();
@@ -173,7 +175,7 @@ describe('Object Test', function () {
     });
 
 
-    it('waits and receives subscription update', function (done) {
+    it('waits and receives subscription update C', function (done) {
         setTimeout(() => {
 
             const ids = Object.keys(lastSubscriptionMessage);
@@ -196,12 +198,12 @@ describe('Object Test', function () {
             latitude: 52.520008
         }
 
-        realmA.object.set(objectIdD, 'Object D Label', location, null);
-        realmA.object.set(objectIdE, 'Object E Label', location, null);
-        realmA.object.set(objectIdF, 'Object F Label', location, null);
+        realmA.object.set(objectIdD, { label: 'Object D Label', location });
+        realmA.object.set(objectIdE, { label: 'Object E Label', location });
+        realmA.object.set(objectIdF, { label: 'Object F Label', location });
     });
 
-    it('waits and receives subscription update', function (done) {
+    it('waits and receives subscription update D', function (done) {
         setTimeout(() => {
 
             const ids = Object.keys(lastSubscriptionMessage);

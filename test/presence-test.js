@@ -34,7 +34,7 @@ describe('Presence Test', function () {
 
     it('creates an object with objectReaderClient and retrieves it', async function () {
         objectAId = objectReaderClient.getId('car/');
-        await realmInstanceA.object.create(objectAId, 'object a')
+        await realmInstanceA.object.create(objectAId, { label: 'object a' })
         objectA = await realmInstanceA.object.get(objectAId);
         expect(objectA.connectionStatus).to.equal('disconnected');
         expect(connectionStatusUpdateMsg).to.equal(null)
