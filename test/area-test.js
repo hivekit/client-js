@@ -46,7 +46,7 @@ describe('Area Test', function () {
             some: 'Value'
         }
 
-        await realmA.area.create(areaIdA, 'area A Label', shape, data);
+        await realmA.area.create(areaIdA, { label: 'area A Label', shape, data });
         const areaA = await realmA.area.get(areaIdA);
         expect(areaA.shape).to.equal('rectangle');
         expect(areaA.shapeData).to.deep.equal(shape);
@@ -65,7 +65,7 @@ describe('Area Test', function () {
         const data = {
             some: 'Value'
         }
-        realmA.area.create(areaIdA, 'area A Label', shape, data)
+        realmA.area.create(areaIdA, { label: 'area A Label', shape, data })
             .then(() => {
                 expect('it').to.equal('should not get here');
             })
@@ -84,7 +84,7 @@ describe('Area Test', function () {
         const data = {
             some: 'Value'
         }
-        realmA.area.create(areaIdB, 'area B Label', shape, data)
+        realmA.area.create(areaIdB, { label: 'area B Label', shape, data })
             .then(() => {
                 expect('it').to.equal('should not get here');
             })
@@ -101,7 +101,7 @@ describe('Area Test', function () {
             cy: 13.397644336372132,
             r: 20000
         }
-        await realmA.area.create(areaIdB, 'Berlin', shape, { isCapital: true, country: 'Germany' });
+        await realmA.area.create(areaIdB, { label: 'Berlin', shape, data: { isCapital: true, country: 'Germany' } });
 
         const areaB = await realmA.area.get(areaIdB);
         expect(areaB.shape).to.equal('circle');
@@ -122,7 +122,7 @@ describe('Area Test', function () {
         };
 
 
-        await realmA.area.create(areaIdC, 'Berlin Part', shape, { isCapital: true, country: 'Germany' });
+        await realmA.area.create(areaIdC, { label: 'Berlin Part', shape, data: { isCapital: true, country: 'Germany' } });
 
         const areaC = await realmA.area.get(areaIdC);
         expect(areaC.shape).to.equal('polygon');
@@ -155,7 +155,7 @@ describe('Area Test', function () {
     })
 
     it('updates area b data with delta', async function () {
-        await realmA.area.update(areaIdB, 'New Label', { cx: 1, cy: 2, r: 3 }, { charge: 0.5 });
+        await realmA.area.update(areaIdB, { label: 'New Label', shape: { cx: 1, cy: 2, r: 3 }, data: { charge: 0.5 } });
         const objBData = await realmA.area.get(areaIdB);
         expect(objBData.shapeData).to.deep.equal({ cx: 1, cy: 2, r: 3 })
         expect(objBData.data).to.deep.equal({ isCapital: true, country: 'Germany', charge: 0.5 })

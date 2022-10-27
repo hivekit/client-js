@@ -37,7 +37,7 @@ describe('Area Subscription Test', function () {
         areaIdA = client.getId('area-a');
         const shape = { x1: 5, y1: 5, x2: 10, y2: 10 }
         const data = { some: 'Value' };
-        await realmA.area.create(areaIdA, 'area A Label', shape, data);
+        await realmA.area.create(areaIdA, { label: 'area A Label', shape, data });
         const areaA = await realmA.area.get(areaIdA);
         expect(areaA.shape).to.equal('rectangle');
     });

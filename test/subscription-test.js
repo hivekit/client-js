@@ -62,3 +62,5 @@ describe('Subscription Test', function () {
         await client.disconnect();
     });
 });
+
+

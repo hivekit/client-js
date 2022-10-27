@@ -115,6 +115,18 @@ describe('Object Test', function () {
         });
     });
 
+    it('includes additional data in the list result', async function () {
+        var list = await realmA.object.list({
+            where: ['type=scooter'],
+            field: ['charge']
+        });
+
+        expect(list).to.deep.equal({
+            [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected', data: { charge: 0.5 } },
+            [objectIdB]: { id: objectIdB, label: 'Object B Label', connectionStatus: 'disconnected', data: { charge: 0.3 } },
+        });
+    })
+
     it('waits and receives subscription update A for Message A', async function () {
         await sleep(500);
         var ids = Object.keys(lastSubscriptionMessage);

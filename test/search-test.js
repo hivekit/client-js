@@ -86,12 +86,12 @@ describe('Search Test', function () {
             y2: 10
         }
 
-        await realmA.area.create(areaIdA, 'Area A Label', shapeData, { type: 'city scooter', charge: 0.1 });
-        await realmA.area.create(areaIdB, 'Area B Label', shapeData, { type: 'city', charge: 0.2 });
-        await realmA.area.create(areaIdC, 'Area C Label', shapeData, { type: 'city', charge: 0.3 });
-        await realmA.area.create(areaIdD, 'Area D Label', shapeData, { type: 'country', charge: 0.4 });
-        await realmA.area.create(areaIdE, 'Area E Label', shapeData, { type: 'country', charge: 0.5 });
-        await realmA.area.create(areaIdF, 'Area F Label', shapeData, { type: 'country', charge: 0.6 });
+        await realmA.area.create(areaIdA, { label: 'Area A Label', shape: shapeData, data: { type: 'city scooter', charge: 0.1 } });
+        await realmA.area.create(areaIdB, { label: 'Area B Label', shape: shapeData, data: { type: 'city', charge: 0.2 } });
+        await realmA.area.create(areaIdC, { label: 'Area C Label', shape: shapeData, data: { type: 'city', charge: 0.3 } });
+        await realmA.area.create(areaIdD, { label: 'Area D Label', shape: shapeData, data: { type: 'country', charge: 0.4 } });
+        await realmA.area.create(areaIdE, { label: 'Area E Label', shape: shapeData, data: { type: 'country', charge: 0.5 } });
+        await realmA.area.create(areaIdF, { label: 'Area F Label', shape: shapeData, data: { type: 'country', charge: 0.6 } });
         const list = await realmA.area.list()
 
         expect(Object.keys(list)).to.include(areaIdA);

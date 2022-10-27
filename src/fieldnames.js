@@ -19,6 +19,7 @@ export default {
     FIELD: {
         [C.FIELD.TYPE]: 'type',
         [C.FIELD.SCOPE_TYPE]: 'scopeType',
+        [C.FIELD.SCOPE_ID]: 'scopeId',
         [C.FIELD.ACTION]: 'action',
         [C.FIELD.RESULT]: 'result',
         [C.FIELD.CORRELATION_ID]: 'correlationId',
