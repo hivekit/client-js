@@ -34,6 +34,7 @@ export default class Subscription extends EventEmitter {
      * @returns {Promise<success>}
      */
     cancel() {
+        this.listener = {};
         return this._client._subscription._removeSubscription(this);
     }
 

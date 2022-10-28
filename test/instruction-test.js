@@ -48,7 +48,7 @@ describe('Instruction Test', function () {
             some: 'Value'
         }
 
-        await realmA.instruction.create(instructionIdA, 'instruction A Label', instructionString, data);
+        await realmA.instruction.create(instructionIdA, { label: 'instruction A Label', instructionString, data });
         const instructionA = await realmA.instruction.get(instructionIdA);
         expect(instructionA.instructionString.trim()).to.equal(instructionString.trim());
         expect(instructionA.data).to.deep.equal(data);
@@ -69,7 +69,7 @@ describe('Instruction Test', function () {
             some: 'Value'
         }
 
-        realmA.instruction.create(instructionIdA, 'instruction A Label', instructionString, data)
+        realmA.instruction.create(instructionIdA, { label: 'instruction A Label', instructionString, data })
             .then(() => {
                 expect('it').to.equal('should not get here');
             })
@@ -118,8 +118,8 @@ describe('Instruction Test', function () {
                 set(needsCharging, false)
         `
 
-        await realmA.instruction.create(instructionIdB, 'instruction B Label', instructionString, { letter: 'B' })
-        await realmA.instruction.create(instructionIdC, 'instruction C Label', instructionString, { letter: 'C' })
+        await realmA.instruction.create(instructionIdB, { label: 'instruction B Label', instructionString, data: { letter: 'B' } })
+        await realmA.instruction.create(instructionIdC, { label: 'instruction C Label', instructionString, data: { letter: 'C' } })
     });
 
     it('lists all instructions', async function () {
@@ -152,7 +152,7 @@ describe('Instruction Test', function () {
                 set(needsCharging, true)
             until
                 set(needsCharging, false)`;
-        await realmA.instruction.update(instructionIdB, 'New Label', instructionString, { charge: 0.5 });
+        await realmA.instruction.update(instructionIdB, { label: 'New Label', instructionString, data: { charge: 0.5 } });
         const intructionData = await realmA.instruction.get(instructionIdB);
         expect(intructionData.instructionString.trim()).to.deep.equal(instructionString.trim())
         expect(intructionData.data).to.deep.equal({ letter: 'B', charge: 0.5 })

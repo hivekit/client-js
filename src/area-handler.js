@@ -3,6 +3,14 @@ import { createMessage } from './message.js'
 import fieldnames from './fieldnames.js';
 import { extendMap } from './tools.js';
 
+/**
+ * This handler manages CRUD and subscriptions for areas.
+ * It can be accessed within the client from realm.area, e.g.
+ * 
+ * realm.area.create(...)
+ * 
+ * @class AreaHandler
+ */
 export default class AreaHandler {
     constructor(client, realm) {
         this._client = client;

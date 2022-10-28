@@ -82,14 +82,15 @@ export default class InstructionHandler {
      * an error if an instruction with the given ID already exists.
      * 
      * @param {string} id 
-     * @param {string} label 
-     * @param {string} instructionString 
-     * @param {object} data 
+     * @param {object} options 
+     * @param {string} options.label 
+     * @param {string} options.instructionString 
+     * @param {object} options.data 
      * 
      * @returns {Promise<success>}
      */
-    create(id, label, instructionString, data) {
-        return this._setInstructionState(id, label, instructionString, data, C.ACTION.CREATE);
+    create(id, options) {
+        return this._setInstructionState(id, options.label, options.instructionString, options.data, C.ACTION.CREATE);
     }
 
     /**
@@ -97,14 +98,15 @@ export default class InstructionHandler {
      * the given ID exists.
      * 
      * @param {string} id 
-     * @param {string} label 
-     * @param {string} instructionString 
-     * @param {object} data 
+     * @param {object} options 
+     * @param {string} options.label 
+     * @param {string} options.instructionString 
+     * @param {object} options.data 
      * 
      * @returns {Promise<success>}
      */
-    update(id, label, instructionString, data) {
-        return this._setInstructionState(id, label, instructionString, data, C.ACTION.UPDATE);
+    update(id, options) {
+        return this._setInstructionState(id, options.label, options.instructionString, options.data, C.ACTION.UPDATE);
     }
 
     /**
