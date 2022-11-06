@@ -279,6 +279,7 @@ var fieldnames_default = {
   FIELD: {
     [constants_default.FIELD.TYPE]: "type",
     [constants_default.FIELD.SCOPE_TYPE]: "scopeType",
+    [constants_default.FIELD.SCOPE_ID]: "scopeId",
     [constants_default.FIELD.ACTION]: "action",
     [constants_default.FIELD.RESULT]: "result",
     [constants_default.FIELD.CORRELATION_ID]: "correlationId",
@@ -398,14 +399,14 @@ var ObjectHandler = class {
       return this._client._extendFields(response[constants_default.FIELD.DATA]);
     });
   }
-  create(id, label, location, data) {
-    return this._setObjectState(id, label, location, data, constants_default.ACTION.CREATE);
+  create(id, options) {
+    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.CREATE);
   }
-  update(id, label, location, data) {
-    return this._setObjectState(id, label, location, data, constants_default.ACTION.UPDATE);
+  update(id, options) {
+    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.UPDATE);
   }
-  set(id, label, location, data) {
-    this._setObjectState(id, label, location, data, constants_default.ACTION.SET);
+  set(id, options) {
+    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.SET);
   }
   list(options) {
     const msg = createMessage(constants_default.TYPE.OBJECT, constants_default.ACTION.LIST, null, this._realm.id);
@@ -486,11 +487,11 @@ var AreaHandler = class {
       return this._client._extendFields(response[constants_default.FIELD.DATA]);
     });
   }
-  create(id, label, shapeData, data) {
-    return this._setAreaState(id, label, shapeData, data, constants_default.ACTION.CREATE);
+  create(id, options) {
+    return this._setAreaState(id, options.label, options.shape, options.data, constants_default.ACTION.CREATE);
   }
-  update(id, label, shapeData, data) {
-    return this._setAreaState(id, label, shapeData, data, constants_default.ACTION.UPDATE);
+  update(id, options) {
+    return this._setAreaState(id, options.label, options.shape, options.data, constants_default.ACTION.UPDATE);
   }
   list() {
     const msg = createMessage(constants_default.TYPE.AREA, constants_default.ACTION.LIST, null, this._realm.id);
@@ -558,11 +559,11 @@ var InstructionHandler = class {
       return this._client._extendFields(response[constants_default.FIELD.DATA]);
     });
   }
-  create(id, label, instructionString, data) {
-    return this._setInstructionState(id, label, instructionString, data, constants_default.ACTION.CREATE);
+  create(id, options) {
+    return this._setInstructionState(id, options.label, options.instructionString, options.data, constants_default.ACTION.CREATE);
   }
-  update(id, label, instructionString, data) {
-    return this._setInstructionState(id, label, instructionString, data, constants_default.ACTION.UPDATE);
+  update(id, options) {
+    return this._setInstructionState(id, options.label, options.instructionString, options.data, constants_default.ACTION.UPDATE);
   }
   list() {
     const msg = createMessage(constants_default.TYPE.INSTRUCTION, constants_default.ACTION.LIST, null, this._realm.id);
@@ -781,6 +782,7 @@ var Subscription = class extends EventEmitter {
     this._data = null;
   }
   cancel() {
+    this.listener = {};
     return this._client._subscription._removeSubscription(this);
   }
   _processIncomingMessage(msg) {
