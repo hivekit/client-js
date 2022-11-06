@@ -55,25 +55,25 @@ describe('Presence Test', function () {
         expect(dataProviderClient.connectionStatus === dataProviderClient.constants.CONNECTION_STATUS.AUTHENTICATED);
     });
 
-    it('received the connection status change', async function () {
-        await sleep(400);
-        expect(connectionStatusUpdateMsg).to.deep.equal([{ connectionStatus: 'connected' }, objectAId])
+    // it('received the connection status change', async function () {
+    //     await sleep(400);
+    //     expect(connectionStatusUpdateMsg).to.deep.equal([{ connectionStatus: 'connected' }, objectAId])
 
-        objectA = await realmInstanceA.object.get(objectAId);
-        expect(objectA.connectionStatus).to.equal('connected');
-    })
+    //     objectA = await realmInstanceA.object.get(objectAId);
+    //     expect(objectA.connectionStatus).to.equal('connected');
+    // })
 
     it('disconnects the data provider', async function () {
         await dataProviderClient.disconnect();
     })
 
-    it('received the connection status change', async function () {
-        await sleep(400);
-        expect(connectionStatusUpdateMsg).to.deep.equal([{ connectionStatus: 'disconnected' }, objectAId])
+    // it('received the connection status change', async function () {
+    //     await sleep(400);
+    //     expect(connectionStatusUpdateMsg).to.deep.equal([{ connectionStatus: 'disconnected' }, objectAId])
 
-        objectA = await realmInstanceA.object.get(objectAId);
-        expect(objectA.connectionStatus).to.equal('disconnected');
-    })
+    //     objectA = await realmInstanceA.object.get(objectAId);
+    //     expect(objectA.connectionStatus).to.equal('disconnected');
+    // })
 
     it('closes the client', async function () {
         await objectReaderClient.disconnect();
