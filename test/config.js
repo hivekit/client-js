@@ -1,4 +1,4 @@
 export default {
-    wsUrl: 'ws://localhost:8090/ws',
-    authTokenSecret: 'IXTPDEZpEdjZZ6QIjICUXivUq1bOeC7C'
+    wsUrl: 'ws://127.0.0.1:8090/ws',
+    authTokenSecret: 'CHANGE_ME'
 }
