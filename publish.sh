@@ -17,22 +17,19 @@ fi
 # replace version in hivekit client file so that it can be read from the client side
 sed -i -E "s/this.version = '.+';/this.version = '${version}';/" src/hivekit-client.js
 
-exit
 
-# # Replace version in package.json
-# npm version ${version}
+# Replace version in package.json
+npm version ${version}
 
+# Build browser bundle
+npm run build
 
+# Commit and Push to git
+git add -A
+git commit -m "publishing version ${version}"
+git push
+git tag ${version}
+git push --tags
 
-# # Build browser bundle
-# npm run build
-
-# # Commit and Push to git
-# git add -A
-# git commit -m "publishing version ${version}"
-# git push
-# git tag ${version}
-# git push --tags
-
-# # Publish to npm
-# npm publish
+# Publish to npm
+npm publish

@@ -930,6 +930,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
+    this.version = "1.3.1";
     this.options = this._extendOptions(options, {
       outgoingMessageBufferTime: 0,
       logMessages: false,
