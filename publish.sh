@@ -17,7 +17,6 @@ fi
 # replace version in hivekit client file so that it can be read from the client side
 sed -i -E "s/this.version = '.+';/this.version = '${version}';/" src/hivekit-client.js
 
-
 # Replace version in package.json
 npm version ${version}
 
