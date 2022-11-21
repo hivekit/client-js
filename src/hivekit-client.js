@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid'
 import SubscriptionHandler from './subscription-handler.js'
 import fieldnames from './fieldnames.js'
 import { reverseMap } from './tools.js'
+import HTTPConnection from './http-connection.js'
 
 /**
  * HivekitClient is the main class and the only class the user
@@ -38,6 +39,7 @@ export default class HivekitClient extends EventEmitter {
         this.version = '1.3.1'; // will be replaced by the build script
         this.serverVersion = null; // will be replaced by data in auth message
         this.serverBuildDate = null; // will be replaced by data in auth message
+        this.mode = null; // either HTTP or WS
 
         // default options
         this.options = this._extendOptions(options, {
@@ -59,7 +61,7 @@ export default class HivekitClient extends EventEmitter {
 
         // private properties
         this._url = null;
-        this._wsConnection = null;
+        this._connection = null;
         this._reconnectInterval = null;
         this._onConnectPromise = null;
         this._onAuthenticatePromise = null;
@@ -72,6 +74,16 @@ export default class HivekitClient extends EventEmitter {
             [C.TYPE.SUBSCRIPTION]: this._subscription,
             [C.TYPE.REALM]: this.realm
         };
+    }
+
+    useHTTP(url) {
+        if (this.mode == C.MODE.WS) {
+            throw new Error('Can\'t use HTTP. This client is already connected via Websocket.');
+        }
+        clearInterval(this._heartbeatInterval);
+        this.mode = C.MODE.HTTP;
+        this._url = url;
+        this._connection = new HTTPConnection(url, this._onMessage.bind(this));
     }
 
     /**
@@ -89,13 +101,20 @@ export default class HivekitClient extends EventEmitter {
      * @returns {Promise} <on connect>
      */
     connect(url) {
+        if (this.mode === C.MODE.HTTP) {
+            throw new Error('Can\'t connect via Websocket. This client is already using HTTP');
+        }
+        if (this.mode !== null) {
+            throw new Error('This client is already connected');
+        }
+        this.mode = C.MODE.WS;
         this._url = url;
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTING);
-        this._wsConnection = new this.WsConstructor(url);
-        this._wsConnection.onopen = this._onOpen.bind(this);
-        this._wsConnection.onclose = this._onClose.bind(this);
-        this._wsConnection.onerror = this._onError.bind(this);
-        this._wsConnection.onmessage = this._onMessage.bind(this);
+        this._connection = new this.WsConstructor(url);
+        this._connection.onopen = this._onOpen.bind(this);
+        this._connection.onclose = this._onClose.bind(this);
+        this._connection.onerror = this._onError.bind(this);
+        this._connection.onmessage = this._onMessage.bind(this);
         this._onConnectPromise = getPromise();
         return this._onConnectPromise;
     }
@@ -108,6 +127,11 @@ export default class HivekitClient extends EventEmitter {
      * @returns {Promise} <on authenticated>
      */
     authenticate(token) {
+        if (this.mode === C.MODE.HTTP) {
+            this._connection.token = token;
+            this.connectionStatus = C.CONNECTION_STATUS.AUTHENTICATED;
+            return Promise.resolve();
+        }
         this.system._sendAuthMessage(token);
         this._onAuthenticatePromise = getPromise();
         return this._onAuthenticatePromise;
@@ -120,7 +144,7 @@ export default class HivekitClient extends EventEmitter {
      */
     disconnect() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTING);
-        this._wsConnection.close();
+        this._connection.close();
         this._onDisconnectPromise = getPromise();
         return this._onDisconnectPromise;
     }
@@ -142,7 +166,7 @@ export default class HivekitClient extends EventEmitter {
      * @returns string URL
      */
     getURL() {
-        return this._wsConnection.url;
+        return this._connection.url;
     }
 
     /********************************************
@@ -183,15 +207,18 @@ export default class HivekitClient extends EventEmitter {
     }
 
     _onMessage(msg) {
+        var messages;
+
         try {
-            const messages = JSON.parse(msg.data);
-            if (Array.isArray(messages)) {
-                messages.forEach(this._handleIncomingMessage.bind(this));
-            } else {
-                this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
-            }
+            messages = typeof msg.data === 'string' ? JSON.parse(msg.data) : msg.data;
         } catch (e) {
-            this._onError(`Failed to parse Websocket Message: ${e} - ${msg.data}`);
+            this._onError(`Failed to parse message: ${e} - ${msg.data}`);
+        }
+
+        if (Array.isArray(messages)) {
+            messages.forEach(this._handleIncomingMessage.bind(this));
+        } else {
+            this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
         }
     }
 
@@ -219,7 +246,7 @@ export default class HivekitClient extends EventEmitter {
                 console.log('>', this._pendingMessages[i]);
             }
         }
-        this._wsConnection.send(JSON.stringify(this._pendingMessages));
+        this._connection.send(JSON.stringify(this._pendingMessages));
         this._pendingMessages = null;
     }
 
@@ -235,7 +262,7 @@ export default class HivekitClient extends EventEmitter {
             [C.FIELD.CORRELATION_ID]: id
         }];
 
-        this._wsConnection.send(JSON.stringify(heartbeatMessage));
+        this._connection.send(JSON.stringify(heartbeatMessage));
     }
 
     _processHeartbeatResponse(msg) {

@@ -29,6 +29,13 @@ client.connectionStatus // 'connected','disconnected','connecting','disconnectin
 client.ping // heartbeat roundtrip time in milliseconds
 client.constants // access to system level constants
 client.options // a map of user provided and default options
+client.version // the version of the client SDK
+
+// the version and build date of the server the client is connected to.
+// populated once connectionStatus == 'authenticated'
+client.serverVersion
+client.serverBuildDate
+
 
 // Events
 'error' // emitted when an error occurs
@@ -43,7 +50,9 @@ client.options // a map of user provided and default options
 .hasListener(eventName)
 
 // Methods
-client.connect(url) // returns {Promise}
+client.connect(url) // connect via Websocket. returns {Promise} OR
+client.useHTTP(url) // prepare to make HTTP requests
+
 client.authenticate(token) // returns {Promise}, only needs to be called explicitly if no token is set
 client.disconnect() // returns {Promise}
 client.getId(prefix) // returns randomly generated id
@@ -55,8 +64,8 @@ client.getURL() // returns the current WS URL - which might be different from th
  * *******************************/
 client.realm.subscribe() //returns {Promise<Subscription>} subscribe to create/update/delete for realms
 client.realm.get(id) //returns {Promise<Realm>}
-client.realm.create(id, [label],[data]) //returns {Promise}
-client.realm.update(id, [label],[data]) //returns {Promise}
+client.realm.create(id, {label: '...', data: {}}) //returns {Promise}
+client.realm.update(id, {label: '...', data: {}}) //returns {Promise}
 client.realm.delete(id)//returns {Promise}
 client.realm.list()
 
@@ -93,9 +102,9 @@ realm.object.subscribe({
 }) // returns {Promise<Subscription>}
 
 realm.object.get(id) // returns {Promise<ObjectData>}
-realm.object.create(id, [label], [location], [data]) // returns {Promise}
-realm.object.update(id, [label], [location], [data]) // returns {Promise}
-realm.object.set(id, [label], [location], [data])
+realm.object.create(id, {label: '...', location: {}, data: {}}) // returns {Promise}
+realm.object.update(id, {label: '...', location: {}, data: {}}) // returns {Promise}
+realm.object.set(id, {label: '...', location: {}, data: {}})
 realm.object.delete(id) // returns {Promise}
 realm.object.list(options) // returns {Promise<id:objectData>} options can be any of 
 {
@@ -114,8 +123,8 @@ realm.area.subscribe({
 }) // returns {Promise<Subscription>}
 
 realm.area.get(id) // returns {Promise<AreaData>}
-realm.area.create(id, [label], shapeData, [data]) // returns {Promise}
-realm.area.update(id, [label], shapeData, [data]) // returns {Promise}
+realm.area.create(id, {label: '...', shapeData: {}, data: {}}) // returns {Promise}
+realm.area.update(id, {label: '...', shapeData: {}, data: {}}) // returns {Promise}
 realm.area.delete(id) // returns {Promise}
 realm.area.list(options) // returns {Promise<areas>}
 /**********************************
@@ -124,9 +133,8 @@ realm.area.list(options) // returns {Promise<areas>}
 realm.instruction.subscribe() // returns {Promise<Subscription>}
 
 realm.instruction.get(id) // returns {Promise<AreaData>}
-realm.instruction.create(id, [label], instructionString, [data]) // returns {Promise}
-realm.instruction.update(id, [label], instructionString, [data]) // returns {Promise}
+realm.instruction.create(id,{label: '...', instructionString: '...', data: {}}) // returns {Promise}
+realm.instruction.update(id, {label: '...', instructionString: '...', data: {}}) // returns {Promise}
 realm.instruction.delete(id) // returns {Promise}
 realm.instruction.list(options) // returns {Promise<instructions>}
 ```
-

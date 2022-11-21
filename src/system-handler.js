@@ -36,7 +36,7 @@ export default class SystemHandler {
      * @returns {string} httpUrl
      */
     getHttpUrl() {
-        return document.location.protocol + '//' + new URL(this._client._wsConnection.url).host;
+        return document.location.protocol + '//' + new URL(this._client._connection.url).host;
     }
 
     /**
@@ -88,11 +88,11 @@ export default class SystemHandler {
      * @param {string} token JWT token string
      */
     _sendAuthMessage(token) {
-        if (this._client._wsConnection.readyState === this._client._wsConnection.constructor.OPEN) {
-            this._client._wsConnection.send('Bearer ' + token);
+        if (this._client._connection.readyState === this._client._connection.constructor.OPEN) {
+            this._client._connection.send('Bearer ' + token);
         } else {
-            this._client._wsConnection.addEventListener('open', () => {
-                this._client._wsConnection.send('Bearer ' + token);
+            this._client._connection.addEventListener('open', () => {
+                this._client._connection.send('Bearer ' + token);
             });
         }
     }

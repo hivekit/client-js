@@ -6,7 +6,10 @@ export default {
         DISCONNECTING: 'disconnecting',
         AUTHENTICATED: 'authenticated'
     },
-
+    MODE: {
+        HTTP: 'http',
+        WS: 'ws'
+    },
     TYPE: {
         REALM: 'rea',
         OBJECT: 'obj',

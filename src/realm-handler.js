@@ -46,6 +46,11 @@ export default class RealmHandler {
             return result;
         }
 
+        if (this._client.mode === C.MODE.HTTP) {
+            this._realms[id] = new Realm(id, null, {}, this._client);
+            return Promise.resolve(this._realms[id]);
+        }
+
         const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
 
         return this._client._sendRequestAndHandleResponse(msg, response => {
