@@ -2,6 +2,10 @@
 
 The javascript/node client for Hivekit
 
+:::tip
+[find the full documentation here](https://hivekit.io/docs/category/jsnode-client-sdk)
+:::
+
 ## Installation
 Install via yarn or npm
 ```sh
