@@ -106,6 +106,10 @@ export default class SystemHandler {
         switch (message[C.FIELD.ACTION]) {
             case C.ACTION.AUTHENTICATE:
                 if (message[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
+                    if (message[C.FIELD.DATA]) {
+                        this._client.serverVersion = message[C.FIELD.DATA].version;
+                        this._client.serverBuildDate = message[C.FIELD.DATA].buildDate;
+                    }
                     this._client._changeConnectionStatus(C.CONNECTION_STATUS.AUTHENTICATED);
                     this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.resolve();
                 }

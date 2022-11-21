@@ -16,6 +16,9 @@ describe('Realm Test', function () {
         await client.connect(config.wsUrl);
         await client.authenticate(jwt.sign({ sub: 'userName' }, config.authTokenSecret));
         expect(client.connectionStatus === client.constants.CONNECTION_STATUS.AUTHENTICATED);
+        expect(typeof client.serverVersion).to.equal('string')
+        expect(client.serverVersion.length).to.be.greaterThan(0);
+        expect(client.serverBuildDate.length).to.be.greaterThan(0);
     });
 
     it('subscribes to realm events', async function () {
