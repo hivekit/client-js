@@ -1,4 +1,5 @@
 import axios from "axios";
+import C from "./constants.js"
 
 export default class HTTPConnection {
     constructor(url, messageCallback) {
@@ -24,8 +25,14 @@ export default class HTTPConnection {
             data: msg
         }).then(response => {
             this.messageCallback(response);
-        }).catch(result => {
-            console.warn(`Failed to make request to ${this.url}: ${result.response.status} - ${result.response.data}`);
+        }).catch(response => {
+            this.messageCallback({
+                data: [{
+                    [C.FIELD.RESULT]: C.RESULT.ERROR,
+                    [C.FIELD.ERROR]: response.response.data,
+                    [C.FIELD.CORRELATION_ID]: JSON.parse(msg)[0][C.FIELD.CORRELATION_ID]
+                }]
+            });
         });
     }
 

@@ -218,7 +218,7 @@ export default class HivekitClient extends EventEmitter {
         if (Array.isArray(messages)) {
             messages.forEach(this._handleIncomingMessage.bind(this));
         } else {
-            this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
+            this._onError(`message was not in expected form: ${JSON.stringify(messages)}`);
         }
     }
 
@@ -332,8 +332,8 @@ export default class HivekitClient extends EventEmitter {
 
         this._sendRequest(msg, response => {
             if (response[C.FIELD.RESULT] === C.RESULT.ERROR) {
-                this._onError(`${response[C.FIELD.ERROR]}`);
-                result.reject(`${response[C.FIELD.ERROR]}`);
+                this._onError(response[C.FIELD.ERROR]);
+                result.reject(response[C.FIELD.ERROR]);
             } else {
                 result.resolve(successDataTransform ? successDataTransform(response) : response);
             }

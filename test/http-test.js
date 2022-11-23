@@ -13,16 +13,19 @@ describe('HTTP Test', function () {
         objectIdC,
         objectIdD,
         objectIdE,
-        objectIdF,
-        subscriptionB,
-        subscriptionC,
-        subscriptionMessageCount = 0,
-        lastSubscriptionMessage,
-        subscriptionBMessageCount = 0,
-        lastSubscriptionBMessage,
-        subscriptionCMessageCount = 0,
-        lastSubscriptionCMessage;
+        objectIdF;
 
+    it('receives an error message for a faulty token', function (done) {
+        const client = new HivekitClient({ logErrors: true, logMessages: false });
+        client.useHTTP(config.httpUrl);
+        client.authenticate(jwt.sign({ sub: 'userName' }, 'INVALID_SECRET'));
+        const realmIdA = client.getId('realm-a');
+
+        client.realm.create(realmIdA, 'label for realm a', { some: 'value' }).catch(e => {
+            expect(e).to.equal('signature is invalid')
+            done();
+        });
+    })
     it('creates and authenticates the client', async function () {
         client = new HivekitClient({ logErrors: true, logMessages: false });
         client.useHTTP(config.httpUrl);
@@ -36,8 +39,6 @@ describe('HTTP Test', function () {
         realmA = await client.realm.get(realmIdA);
         expect(realmA.id).to.equal(realmIdA);
     });
-
-
 
     it('creates object A and retrieves it', async function () {
         objectIdA = client.getId('object-a');
@@ -102,8 +103,6 @@ describe('HTTP Test', function () {
         const objBData = await realmA.object.get(objectIdB);
         expect(objBData.data).to.deep.equal({ type: 'scooter', charge: 0.5 })
     });
-
-
 
     it('deletes object b', async function () {
         await realmA.object.delete(objectIdB);
