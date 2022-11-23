@@ -2754,8 +2754,14 @@ var HTTPConnection = class {
       data: msg
     }).then((response) => {
       this.messageCallback(response);
-    }).catch((result) => {
-      console.warn(`Failed to make request to ${this.url}: ${result.response.status} - ${result.response.data}`);
+    }).catch((response) => {
+      this.messageCallback({
+        data: [{
+          [constants_default.FIELD.RESULT]: constants_default.RESULT.ERROR,
+          [constants_default.FIELD.ERROR]: response.response.data,
+          [constants_default.FIELD.CORRELATION_ID]: JSON.parse(msg)[0][constants_default.FIELD.CORRELATION_ID]
+        }]
+      });
     });
   }
   close() {
@@ -2769,7 +2775,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.4.0";
+    this.version = "1.4.1";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
@@ -2886,7 +2892,7 @@ var HivekitClient = class extends EventEmitter {
     if (Array.isArray(messages)) {
       messages.forEach(this._handleIncomingMessage.bind(this));
     } else {
-      this._onError(`Websocket Message was not expected form: ${JSON.stringify(messages)}`);
+      this._onError(`message was not in expected form: ${JSON.stringify(messages)}`);
     }
   }
   _sendMessage(msg) {
@@ -2985,8 +2991,8 @@ var HivekitClient = class extends EventEmitter {
     const result = getPromise();
     this._sendRequest(msg, (response) => {
       if (response[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
-        this._onError(`${response[constants_default.FIELD.ERROR]}`);
-        result.reject(`${response[constants_default.FIELD.ERROR]}`);
+        this._onError(response[constants_default.FIELD.ERROR]);
+        result.reject(response[constants_default.FIELD.ERROR]);
       } else {
         result.resolve(successDataTransform ? successDataTransform(response) : response);
       }
