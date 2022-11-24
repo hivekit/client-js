@@ -474,7 +474,7 @@ var ObjectHandler = class {
     }
     if (data && Object.keys(data).length > 0)
       msg[constants_default.FIELD.DATA] = data;
-    if (action === constants_default.ACTION.SET) {
+    if (action === constants_default.ACTION.SET && this._client.mode !== constants_default.MODE.HTTP) {
       this._client._sendMessage(msg);
     } else {
       return this._client._sendRequestAndHandleResponse(msg);
@@ -2738,6 +2738,20 @@ var HTTPConnection = class {
     this.token = null;
     this.messageCallback = messageCallback;
   }
+  getCorrelationId(msg) {
+    if (typeof msg !== "string") {
+      return null;
+    }
+    var parsedMsg;
+    try {
+      parsedMsg = msg && JSON.parse(msg);
+    } catch (e) {
+      return null;
+    }
+    if (parsedMsg && parsedMsg[0] && parsedMsg[0][constants_default.FIELD.CORRELATION_ID]) {
+      return parsedMsg[0][constants_default.FIELD.CORRELATION_ID];
+    }
+  }
   send(msg) {
     if (this.token === null) {
       throw new Error("HTTP Connection not yet authenticated. Call authenticate() first.");
@@ -2753,14 +2767,33 @@ var HTTPConnection = class {
       },
       data: msg
     }).then((response) => {
+      if (msg.includes(constants_default.ACTION.SET)) {
+        const messages = JSON.parse(msg);
+        messages.forEach((msg2) => {
+          if (msg2[constants_default.FIELD.ACTION] === constants_default.ACTION.SET) {
+            response.data.push({
+              [constants_default.FIELD.CORRELATION_ID]: msg2[constants_default.FIELD.CORRELATION_ID],
+              [constants_default.FIELD.RESULT]: constants_default.RESULT.SUCCESS
+            });
+          }
+        });
+      }
       this.messageCallback(response);
     }).catch((response) => {
+      const responseMessage = {
+        [constants_default.FIELD.RESULT]: constants_default.RESULT.ERROR
+      };
+      const correlationId = this.getCorrelationId(msg);
+      if (correlationId) {
+        responseMessage[constants_default.FIELD.CORRELATION_ID] = correlationId;
+      }
+      if (response.response && response.response.data) {
+        responseMessage[constants_default.FIELD.ERROR] = response.response.data;
+      } else {
+        responseMessage[constants_default.FIELD.ERROR] = response.message || response.body || response.toString();
+      }
       this.messageCallback({
-        data: [{
-          [constants_default.FIELD.RESULT]: constants_default.RESULT.ERROR,
-          [constants_default.FIELD.ERROR]: response.response.data,
-          [constants_default.FIELD.CORRELATION_ID]: JSON.parse(msg)[0][constants_default.FIELD.CORRELATION_ID]
-        }]
+        data: [responseMessage]
       });
     });
   }
@@ -2775,7 +2808,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.4.1";
+    this.version = "1.4.2";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;

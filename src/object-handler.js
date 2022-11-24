@@ -203,7 +203,7 @@ export default class ObjectHandler {
             msg[C.FIELD.LOCATION] = this._parseLocation(location);
         }
         if (data && Object.keys(data).length > 0) msg[C.FIELD.DATA] = data;
-        if (action === C.ACTION.SET) {
+        if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
             this._client._sendMessage(msg);
         } else {
             return this._client._sendRequestAndHandleResponse(msg);

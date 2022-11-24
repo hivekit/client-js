@@ -36,7 +36,7 @@ export default class HivekitClient extends EventEmitter {
         this.constants = C;
         this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
         this.ping = null;
-        this.version = '1.4.1'; // will be replaced by the build script
+        this.version = '1.4.2'; // will be replaced by the build script
         this.serverVersion = null; // will be replaced by data in auth message
         this.serverBuildDate = null; // will be replaced by data in auth message
         this.mode = null; // either HTTP or WS
