@@ -1,7 +1,7 @@
 import C from './constants.js'
 import { createMessage } from './message.js'
 import fieldnames from './fieldnames.js';
-import { extendMap } from './tools.js';
+import { extendMap, getShapeTypeFromSignature } from './tools.js';
 
 /**
  * This handler manages CRUD and subscriptions for areas.
@@ -74,24 +74,9 @@ export default class AreaHandler {
         const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;
         if (data) msg[C.FIELD.DATA] = data;
-
-        // we infer the shapeType from the shapeData provided. Is that a good idea?
-        const shapeDataSignature = Object.keys(shapeData).sort().join('');
-
-        switch (shapeDataSignature) {
-            case 'x1x2y1y2':
-                msg[C.FIELD.SUB_TYPE] = C.SHAPE_TYPE.RECTANGLE;
-                break;
-            case 'cxcyr':
-                msg[C.FIELD.SUB_TYPE] = C.SHAPE_TYPE.CIRCLE;
-                break;
-            case 'points':
-                msg[C.FIELD.SUB_TYPE] = C.SHAPE_TYPE.POLYGON;
-                break
-            default:
-                return new Promise((_, reject) => {
-                    reject('unknown shape data');
-                })
+        msg[C.FIELD.SUB_TYPE] = getShapeTypeFromSignature(shapeData);
+        if (!msg[C.FIELD.SUB_TYPE]) {
+            return Promise.reject('unknown shape data')
         }
 
         msg[C.FIELD.SHAPE] = shapeData;

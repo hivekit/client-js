@@ -1,3 +1,5 @@
+import C from './constants.js'
+
 /**
  * switches the keys and values in a map.
  * 
@@ -63,4 +65,14 @@ export function shallowClone(obj) {
     }
 
     return clonedObj;
+}
+
+const SHAPE_SIGNATURES = {
+    'x1x2y1y2': C.SHAPE_TYPE.RECTANGLE,
+    'cxcyr': C.SHAPE_TYPE.CIRCLE,
+    'points': C.SHAPE_TYPE.POLYGON
+};
+
+export function getShapeTypeFromSignature(shapeData) {
+    return SHAPE_SIGNATURES[Object.keys(shapeData).sort().join('')] || null;
 }

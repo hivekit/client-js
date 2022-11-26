@@ -1,7 +1,7 @@
 import C from './constants.js'
 import { createMessage } from './message.js'
 import fieldnames from './fieldnames.js';
-import { extendMap } from './tools.js';
+import { extendMap, getShapeTypeFromSignature } from './tools.js';
 
 /**
  * This class exposes functionality to create, read, update, delete
@@ -41,19 +41,9 @@ export default class ObjectHandler {
      */
     subscribe(options) {
         if (options && options.shape) {
-            const shapeDataSignature = Object.keys(options.shape).sort().join("");
-            switch (shapeDataSignature) {
-                case "x1x2y1y2":
-                    options.scopeType = C.SHAPE_TYPE.RECTANGLE;
-                    break;
-                case "cxcyr":
-                    options.scopeType = C.SHAPE_TYPE.CIRCLE;
-                    break;
-                case "points":
-                    options.scopeType = C.SHAPE_TYPE.POLYGON;
-                    break;
-                default:
-                    throw new Error("Unknown shape data")
+            options.scopeType = getShapeTypeFromSignature(options.shape);
+            if (options.scopeType === null) {
+                return Promise.reject('unknown shape data');
             }
         }
         return this._client._subscription._getSubscription(

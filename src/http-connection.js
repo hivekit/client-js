@@ -41,7 +41,6 @@ export default class HTTPConnection {
             },
             data: msg
         }).then(response => {
-
             if (msg.includes(C.ACTION.SET)) {
                 const messages = JSON.parse(msg);
                 messages.forEach(msg => {

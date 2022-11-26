@@ -127,6 +127,39 @@ describe('Object Test', function () {
         });
     })
 
+    it('finds objects within a shape', async function () {
+        var list = await realmA.object.list({
+            where: ['type=scooter'],
+            field: ['charge'],
+            shape: {
+                x1: 13,
+                x2: 14,
+                y1: 52,
+                y2: 53
+            }
+        });
+
+        expect(list).to.deep.equal({
+            [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected', data: { charge: 0.5 } },
+        });
+    })
+
+    it('does not find objects outside of a shape', async function () {
+        var list = await realmA.object.list({
+            where: ['type=scooter'],
+            field: ['charge'],
+            shape: {
+                x1: 14,
+                x2: 15,
+                y1: 52,
+                y2: 53
+            }
+        });
+
+        expect(list).to.deep.equal({});
+    })
+
+
     it('waits and receives subscription update A for Message A', async function () {
         await sleep(500);
         var ids = Object.keys(lastSubscriptionMessage);
