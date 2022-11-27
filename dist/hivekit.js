@@ -162,7 +162,8 @@ var constants_default = {
     END: "end",
     LEVEL: "lvl",
     EVENT_NAME: "eve",
-    ID_PATTERN: "idp"
+    ID_PATTERN: "idp",
+    ERROR_CODE: "erc"
   },
   ACTION: {
     CREATE: "cre",
@@ -397,6 +398,14 @@ function extendMap(mapA, mapB) {
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
+var SHAPE_SIGNATURES = {
+  "x1x2y1y2": constants_default.SHAPE_TYPE.RECTANGLE,
+  "cxcyr": constants_default.SHAPE_TYPE.CIRCLE,
+  "points": constants_default.SHAPE_TYPE.POLYGON
+};
+function getShapeTypeFromSignature(shapeData) {
+  return SHAPE_SIGNATURES[Object.keys(shapeData).sort().join("")] || null;
+}
 
 // src/object-handler.js
 var ObjectHandler = class {
@@ -407,19 +416,9 @@ var ObjectHandler = class {
   }
   subscribe(options) {
     if (options && options.shape) {
-      const shapeDataSignature = Object.keys(options.shape).sort().join("");
-      switch (shapeDataSignature) {
-        case "x1x2y1y2":
-          options.scopeType = constants_default.SHAPE_TYPE.RECTANGLE;
-          break;
-        case "cxcyr":
-          options.scopeType = constants_default.SHAPE_TYPE.CIRCLE;
-          break;
-        case "points":
-          options.scopeType = constants_default.SHAPE_TYPE.POLYGON;
-          break;
-        default:
-          throw new Error("Unknown shape data");
+      options.scopeType = getShapeTypeFromSignature(options.shape);
+      if (options.scopeType === null) {
+        return Promise.reject("unknown shape data");
       }
     }
     return this._client._subscription._getSubscription(this._client.getId("object-subscription"), this._realm.id, extendMap({
@@ -551,21 +550,9 @@ var AreaHandler = class {
       msg[constants_default.FIELD.LABEL] = label;
     if (data)
       msg[constants_default.FIELD.DATA] = data;
-    const shapeDataSignature = Object.keys(shapeData).sort().join("");
-    switch (shapeDataSignature) {
-      case "x1x2y1y2":
-        msg[constants_default.FIELD.SUB_TYPE] = constants_default.SHAPE_TYPE.RECTANGLE;
-        break;
-      case "cxcyr":
-        msg[constants_default.FIELD.SUB_TYPE] = constants_default.SHAPE_TYPE.CIRCLE;
-        break;
-      case "points":
-        msg[constants_default.FIELD.SUB_TYPE] = constants_default.SHAPE_TYPE.POLYGON;
-        break;
-      default:
-        return new Promise((_, reject) => {
-          reject("unknown shape data");
-        });
+    msg[constants_default.FIELD.SUB_TYPE] = getShapeTypeFromSignature(shapeData);
+    if (!msg[constants_default.FIELD.SUB_TYPE]) {
+      return Promise.reject("unknown shape data");
     }
     msg[constants_default.FIELD.SHAPE] = shapeData;
     return this._client._sendRequestAndHandleResponse(msg);
@@ -2788,7 +2775,12 @@ var HTTPConnection = class {
         responseMessage[constants_default.FIELD.CORRELATION_ID] = correlationId;
       }
       if (response.response && response.response.data) {
-        responseMessage[constants_default.FIELD.ERROR] = response.response.data;
+        if (typeof response.response.data === "object") {
+          responseMessage[constants_default.FIELD.ERROR] = response.response.data[constants_default.FIELD.ERROR];
+          responseMessage[constants_default.FIELD.ERROR_CODE] = response.response.data[constants_default.FIELD.ERROR_CODE];
+        } else {
+          responseMessage[constants_default.FIELD.ERROR] = response.response.data;
+        }
       } else {
         responseMessage[constants_default.FIELD.ERROR] = response.message || response.body || response.toString();
       }
@@ -2808,7 +2800,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.4.2";
+    this.version = "1.4.3";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
@@ -3025,7 +3017,10 @@ var HivekitClient = class extends EventEmitter {
     this._sendRequest(msg, (response) => {
       if (response[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
         this._onError(response[constants_default.FIELD.ERROR]);
-        result.reject(response[constants_default.FIELD.ERROR]);
+        result.reject({
+          message: response[constants_default.FIELD.ERROR],
+          code: response[constants_default.FIELD.ERROR_CODE]
+        });
       } else {
         result.resolve(successDataTransform ? successDataTransform(response) : response);
       }
