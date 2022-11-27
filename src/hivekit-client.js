@@ -333,7 +333,10 @@ export default class HivekitClient extends EventEmitter {
         this._sendRequest(msg, response => {
             if (response[C.FIELD.RESULT] === C.RESULT.ERROR) {
                 this._onError(response[C.FIELD.ERROR]);
-                result.reject(response[C.FIELD.ERROR]);
+                result.reject({
+                    message: response[C.FIELD.ERROR],
+                    code: response[C.FIELD.ERROR_CODE]
+                });
             } else {
                 result.resolve(successDataTransform ? successDataTransform(response) : response);
             }

@@ -70,7 +70,10 @@ describe('Area Test', function () {
                 expect('it').to.equal('should not get here');
             })
             .catch(e => {
-                expect(e).to.equal(`area with id ${areaIdA} already exists`)
+                expect(e).to.deep.equal({
+                    message: `area with id ${areaIdA} already exists`,
+                    code: 409
+                })
                 done();
             })
     });

@@ -74,7 +74,10 @@ describe('Instruction Test', function () {
                 expect('it').to.equal('should not get here');
             })
             .catch(e => {
-                expect(e).to.equal(`instruction with id ${instructionIdA} already exists`)
+                expect(e).to.deep.equal({
+                    message: `instruction with id ${instructionIdA} already exists`,
+                    code: 409
+                })
                 done();
             })
     });
@@ -100,7 +103,7 @@ describe('Instruction Test', function () {
                 expect('it').to.equal('should not get here');
             })
             .catch(e => {
-                expect(e.startsWith('Error: Incorrect Syntax.')).to.equal(true)
+                expect(e.message.startsWith('Error: Incorrect Syntax.')).to.equal(true)
                 done();
             })
     });

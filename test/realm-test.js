@@ -32,7 +32,10 @@ describe('Realm Test', function () {
     it('attempts to read a non existing realm', function (done) {
         const realmId = client.getId('realm');
         client.realm.get(realmId).catch(err => {
-            expect(err).to.equal('unknown realm ' + realmId);
+            expect(err).to.deep.equal({
+                message: 'unknown realm ' + realmId,
+                code: 404
+            });
             done();
         })
     });

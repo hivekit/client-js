@@ -62,7 +62,8 @@ export default {
         END: 'end',
         LEVEL: 'lvl',
         EVENT_NAME: 'eve',
-        ID_PATTERN: 'idp'
+        ID_PATTERN: 'idp',
+        ERROR_CODE: 'erc'
     },
 
     ACTION: {

@@ -64,7 +64,13 @@ export default class HTTPConnection {
             }
 
             if (response.response && response.response.data) {
-                responseMessage[C.FIELD.ERROR] = response.response.data
+                if (typeof response.response.data === 'object') {
+                    responseMessage[C.FIELD.ERROR] = response.response.data[C.FIELD.ERROR];
+                    responseMessage[C.FIELD.ERROR_CODE] = response.response.data[C.FIELD.ERROR_CODE];
+                } else {
+                    responseMessage[C.FIELD.ERROR] = response.response.data;
+                }
+
             } else {
                 responseMessage[C.FIELD.ERROR] = response.message || response.body || response.toString();
             }

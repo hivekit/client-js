@@ -22,10 +22,14 @@ describe('HTTP Test', function () {
         const realmIdA = client.getId('realm-a');
 
         client.realm.create(realmIdA, 'label for realm a', { some: 'value' }).catch(e => {
-            expect(e).to.equal('signature is invalid')
+            expect(e).to.deep.equal({
+                message: 'signature is invalid',
+                code: 401
+            })
             done();
         });
     })
+
     it('creates and authenticates the client', async function () {
         client = new HivekitClient({ logErrors: true, logMessages: false });
         client.useHTTP(config.httpUrl);
