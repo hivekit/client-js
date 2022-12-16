@@ -65,6 +65,7 @@ describe('Realm Test', function () {
     });
 
     it('lists both realms', async function () {
+        this.timeout(10000);
         const realmList = await client.realm.list()
         expect(Object.keys(realmList).length).to.be.greaterThan(1);
         expect(realmList[realmIdA].label).to.equal('label for realm a')

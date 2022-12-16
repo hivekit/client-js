@@ -1,7 +1,8 @@
 import EventEmitter from "./event-emitter.js";
 import C from "./constants.js";
 import fieldnames from "./fieldnames.js";
-
+import { createMessage } from "./message.js";
+import { extendMap, getShapeTypeFromSignature } from './tools.js';
 /**
  * Subscription represents a single subscription to a given subject with
  * a given set of options. It emits an `update` event whenever a subscription
@@ -36,6 +37,35 @@ export default class Subscription extends EventEmitter {
     cancel() {
         this.listener = {};
         return this._client._subscription._removeSubscription(this);
+    }
+
+    /**
+     * Updates an existing subscription. This is useful to subscribe e.g. to objects
+     * within a moving radius or to limit updates to the area currently visible on the screen.
+     *  
+     * @param {Object} options A key/value map of subscription options including
+     * @example
+     * {
+     *   shape: {cx: -0.14059031608, cy: 51.50183460, r: 500}
+     *   attributes: ["charge<0.5", "type=drone"] // optional filter criteria to limit the objects to receive updates for
+     * }
+     * 
+     * @returns {Promise<Subscription>}
+     */
+    update(options) {
+        if (options && options.shape) {
+            options.scopeType = getShapeTypeFromSignature(options.shape);
+            if (options.scopeType === null) {
+                return Promise.reject('unknown shape data');
+            }
+        }
+
+        const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.UPDATE, this.id, this.realmId, extendMap({
+            [C.FIELD.TYPE]: C.TYPE.OBJECT,
+            [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+        }, this._client._compressFields(options, fieldnames.FIELD)));
+
+        return this._client._sendRequestAndHandleResponse(msg);
     }
 
     /**
