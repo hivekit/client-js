@@ -45,7 +45,7 @@ describe('Subscription Update', function () {
         })
     })
 
-    it('creates ten objects', async function () {
+    it('creates ten objects and receives an intial update', async function () {
         const updates = [];
         for (var i = 0; i < 10; i++) {
             updates.push(realmA.object.create('obj-id-' + i, {
@@ -58,9 +58,7 @@ describe('Subscription Update', function () {
                 }
             }))
         }
-    })
 
-    it('has received an initial update', async function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-0',
@@ -68,7 +66,8 @@ describe('Subscription Update', function () {
         ])
     })
 
-    it('updates the subscription circle location', async function () {
+
+    it('updates the subscription circle location and receives an update', async function () {
         await subscriptionA.update({
             shape: {
                 cx: -0.14061314560500038 + 2 * 0.001,
@@ -76,9 +75,6 @@ describe('Subscription Update', function () {
                 r: 110
             }
         })
-    })
-
-    it('has received an update for the updated subscription', async function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-1',
@@ -86,7 +82,6 @@ describe('Subscription Update', function () {
             'obj-id-3',
         ])
     })
-
 
 
     // it('moves object 2 out of radius', async function () {
@@ -108,16 +103,14 @@ describe('Subscription Update', function () {
     //     ])
     // })
 
-    it('moves object 4 into the radius', async function () {
+    it('moves object 4 into the radius and receives an update', async function () {
         realmA.object.update('obj-id-4', {
             location: {
                 longitude: -0.14061314560500038 + 2 * 0.001,
                 latitude: 51.50186617865612,
             }
         })
-    })
 
-    it('has received an update for object 4', async function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-1',
@@ -127,7 +120,7 @@ describe('Subscription Update', function () {
         ])
     })
 
-    it('updates the subscription circle radius and adds an attribute filter', async function () {
+    it('updates the subscription circle radius and adds an attribute filter and receives an update', async function () {
         await subscriptionA.update({
             shape: {
                 cx: -0.14061314560500038 + 2 * 0.001,
@@ -136,9 +129,7 @@ describe('Subscription Update', function () {
             },
             where: ['testValue>5']
         })
-    })
 
-    it('has received an update for the updated radius', async function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-6',
@@ -148,15 +139,14 @@ describe('Subscription Update', function () {
         ])
     })
 
-    it('updates the test value for object 1', async function () {
+
+    it('updates the test value for object 1 and receives an update', async function () {
         realmA.object.update('obj-id-1', {
             data: {
                 testValue: 10
             }
         })
-    })
 
-    it('has received an update for the object 1', async function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-1',
@@ -167,44 +157,39 @@ describe('Subscription Update', function () {
         ])
     })
 
-    // @todo this requires a nil check for filter criteria
-    // it('removes the filter criteria', async function () {
-    //     await subscriptionA.update({
-    //         where: []
-    //     })
-    // })
 
-    // it('has received an update without filter criteria', async function () {
-    //     await sleep(200);
-    //     expect(objectKeys).to.deep.equal([
-    //         'obj-id-1',
-    //         'obj-id-2',
-    //         'obj-id-3',
-    //         'obj-id-4',
-    //         'obj-id-5',
-    //         'obj-id-6',
-    //         'obj-id-7',
-    //         'obj-id-8',
-    //         'obj-id-9',
-    //     ])
-    // })
-
-    it('cancels the subscription', async function () {
-        expect(updateCount).to.equal(5);
-        await subscriptionA.cancel();
+    it('removes the filter criteria', async function () {
+        await subscriptionA.update({
+            where: []
+        })
     })
 
-    it('updates the test value for object 1', async function () {
-        realmA.object.update('obj-id-2', {
+    it('has received an update without filter criteria', async function () {
+        await sleep(200);
+        expect(objectKeys).to.deep.equal([
+            'obj-id-0',
+            'obj-id-1',
+            'obj-id-2',
+            'obj-id-3',
+            'obj-id-4',
+            'obj-id-5',
+            'obj-id-6',
+            'obj-id-7',
+            'obj-id-8',
+            'obj-id-9',
+        ])
+    })
+
+    it('cancels the subscription, updates an object and does not receive an update', async function () {
+        updateCount = 0;
+        await subscriptionA.cancel();
+        await realmA.object.update('obj-id-2', {
             data: {
                 testValue: 10
             }
         })
-    })
-
-    it('has not received an update for object 5', async function () {
         await sleep(200);
-        expect(updateCount).to.equal(5);
+        expect(updateCount).to.equal(0);
     })
 
     it('disconnects the client', async function () {

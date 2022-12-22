@@ -84,6 +84,7 @@ describe('Realm Test', function () {
     });
 
     it('deletes realm b', async function () {
+        this.timeout(10000);
         expect(subscriptionUpdateCount).to.equal(4);
         await client.realm.delete(realmIdB);
         expect(subscriptionUpdateCount).to.equal(5);
