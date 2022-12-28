@@ -84,24 +84,23 @@ describe('Subscription Update', function () {
     })
 
 
-    // it('moves object 2 out of radius', async function () {
-    //     await realmA.object.update('obj-id-2', {
-    //      
-    //location: {
-    //             latitude: 50.50186617865612,
-    //             longitude: -0.14061314560500038
-    //         }
-    //     })
-    // })
+    it('moves object 2 out of radius and receives an update', async function () {
+        updateCount = 0;
+        await realmA.object.update('obj-id-2', {
+            location: {
+                latitude: 50.50186617865612,
+                longitude: -0.14061314560500038
+            }
+        })
 
-    // @todo this requires stateful subscriptions
-    // it('has received an update for the moved object', async function () {
-    //     await sleep(200);
-    //     expect(Object.keys(subscriptionUpdates[2])).to.deep.equal([
-    //         'obj-id-1',
-    //         'obj-id-3',
-    //     ])
-    // })
+        //  @todo this requires stateful subscriptions
+        await sleep(200);
+        expect(updateCount).to.equal(1);
+        expect(objectKeys).to.deep.equal([
+            'obj-id-1',
+            'obj-id-3',
+        ]);
+    })
 
     it('moves object 4 into the radius and receives an update', async function () {
         realmA.object.update('obj-id-4', {
@@ -114,7 +113,6 @@ describe('Subscription Update', function () {
         await sleep(200);
         expect(objectKeys).to.deep.equal([
             'obj-id-1',
-            'obj-id-2',
             'obj-id-3',
             'obj-id-4',
         ])
@@ -169,7 +167,7 @@ describe('Subscription Update', function () {
         expect(objectKeys).to.deep.equal([
             'obj-id-0',
             'obj-id-1',
-            'obj-id-2',
+            // 'obj-id-2', object two was moved out of the radius earlier
             'obj-id-3',
             'obj-id-4',
             'obj-id-5',
