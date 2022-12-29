@@ -1,7 +1,7 @@
 import C from './constants.js'
 import { createMessage } from './message.js'
 import fieldnames from './fieldnames.js';
-import { extendMap, getShapeTypeFromSignature } from './tools.js';
+import { extendMap, toShape } from './tools.js';
 
 /**
  * This class exposes functionality to create, read, update, delete
@@ -41,11 +41,14 @@ export default class ObjectHandler {
      */
     subscribe(options) {
         if (options && options.shape) {
-            options.scopeType = getShapeTypeFromSignature(options.shape);
-            if (options.scopeType === null) {
-                return Promise.reject('unknown shape data');
+            const shape = toShape(options.shape);
+            if (shape.err) {
+                return Promise.reject(shape.err);
             }
+            options.scopeType = shape.type;
+            options.shape = shape.data;
         }
+
         return this._client._subscription._getSubscription(
             this._client.getId('object-subscription'),
             this._realm.id,

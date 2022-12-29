@@ -193,6 +193,33 @@ describe('Area Test', function () {
         }, 500);
     });
 
+    it('creates area D as a rectangle from north, east, west south and retrieves it', async function () {
+        const areaIdD = client.getId('area-d');
+        const shape = {
+            west: 5,
+            north: 10,
+            east: 10,
+            south: -10
+        }
+
+        const data = {
+            some: 'Value'
+        }
+
+        await realmA.area.create(areaIdD, { label: 'area A Label', shape, data });
+        const areaA = await realmA.area.get(areaIdD);
+        expect(areaA.shape).to.equal('rectangle');
+
+        expect(areaA.shapeData).to.deep.equal({
+            x1: 5,
+            y1: -10,
+            x2: 10,
+            y2: 10
+        });
+        expect(areaA.data).to.deep.equal(data);
+        expect(areaA.label).to.equal('area A Label');
+    });
+
     it('closes the client', async function () {
         await client.disconnect();
     });

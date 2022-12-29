@@ -114,7 +114,7 @@ export default class SystemHandler {
                     this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.resolve();
                 }
                 if (message[C.FIELD.RESULT] === C.RESULT.ERROR) {
-                    this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[C.FIELD.DATA]);
+                    this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[C.FIELD.ERROR]);
                 }
                 break;
             default:

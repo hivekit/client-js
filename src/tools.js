@@ -73,6 +73,30 @@ const SHAPE_SIGNATURES = {
     'points': C.SHAPE_TYPE.POLYGON
 };
 
-export function getShapeTypeFromSignature(shapeData) {
-    return SHAPE_SIGNATURES[Object.keys(shapeData).sort().join('')] || null;
+export function toShape(shapeData) {
+    var shapeSignature = Object.keys(shapeData).sort().join('');
+
+    if (shapeSignature === 'eastnorthsouthwest') {
+        shapeData = {
+            x1: shapeData.west,
+            y1: shapeData.south,
+            x2: shapeData.east,
+            y2: shapeData.north
+        }
+
+        shapeSignature = 'x1x2y1y2';
+    }
+
+    if (!SHAPE_SIGNATURES[shapeSignature]) {
+        return {
+            err: 'unknown shape data'
+        }
+    }
+
+    // @todo shape type specific validation
+    return {
+        type: SHAPE_SIGNATURES[shapeSignature],
+        data: shapeData,
+        err: null
+    }
 }

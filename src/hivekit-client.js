@@ -127,6 +127,9 @@ export default class HivekitClient extends EventEmitter {
      * @returns {Promise} <on authenticated>
      */
     authenticate(token) {
+        if (!this._connection) {
+            return Promise.reject('can\'t authenticate: client not connected. Did you call .connect() before calling .authenticate()?')
+        }
         if (this.mode === C.MODE.HTTP) {
             this._connection.token = token;
             this.connectionStatus = C.CONNECTION_STATUS.AUTHENTICATED;
@@ -143,6 +146,9 @@ export default class HivekitClient extends EventEmitter {
      * @returns {Promise} <on disconnect>
      */
     disconnect() {
+        if (!this._connection) {
+            return Promise.reject('client not connected');
+        }
         this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTING);
         this._connection.close();
         this._onDisconnectPromise = getPromise();
@@ -291,7 +297,7 @@ export default class HivekitClient extends EventEmitter {
             }
         }
         // Generic Error without Correlation ID
-        else if (msg[C.FIELD.RESULT] === C.RESULT.ERROR) {
+        else if (msg[C.FIELD.RESULT] === C.RESULT.ERROR && msg[C.FIELD.TYPE] !== C.TYPE.SYSTEM) {
             this._onError(msg[C.FIELD.ERROR] || msg[C.FIELD.DATA]);
         }
         else if (!this._typeHandler[msg[C.FIELD.TYPE]]) {

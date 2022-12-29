@@ -1,7 +1,7 @@
 import C from './constants.js'
 import { createMessage } from './message.js'
 import fieldnames from './fieldnames.js';
-import { extendMap, getShapeTypeFromSignature } from './tools.js';
+import { extendMap, toShape } from './tools.js';
 
 /**
  * This handler manages CRUD and subscriptions for areas.
@@ -69,17 +69,17 @@ export default class AreaHandler {
     /********************************************
      * INTERNAL METHODS
      *******************************************/
-
     _setAreaState(id, label, shapeData, data, action) {
         const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
+        const shape = toShape(shapeData);
+        if (shape.err) {
+            return Promise.reject(shape.err);
+        }
+        msg[C.FIELD.SUB_TYPE] = shape.type
+        msg[C.FIELD.SHAPE] = shape.data;
         if (label) msg[C.FIELD.LABEL] = label;
         if (data) msg[C.FIELD.DATA] = data;
-        msg[C.FIELD.SUB_TYPE] = getShapeTypeFromSignature(shapeData);
-        if (!msg[C.FIELD.SUB_TYPE]) {
-            return Promise.reject('unknown shape data')
-        }
 
-        msg[C.FIELD.SHAPE] = shapeData;
         return this._client._sendRequestAndHandleResponse(msg);
     }
 }
