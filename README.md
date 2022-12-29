@@ -77,7 +77,26 @@ client.realm.list()
 /**********************************
  * SUBSCRIPTION
  * *******************************/
-subscription.on('update', data=>{})
+// subscription messages trigger an update event.
+// data is the full set of objects matching the subscription
+subscription.on('update', data=>{});
+
+// you can dynamically change subscription parameters
+// to apply filters or create roaming geofence subscriptions
+subscription.update({
+    attributes: ['charge>0.5'],
+    shape: {
+        // center X (longitude) of a circle
+        cx: 52.51660212363485,
+        // center Y (latitude) of a circle
+        cy: 13.377692047310838,
+        // radius in meters
+        r: 500
+    }
+});
+
+// if you are no longer interested in data for a subscription,
+// you can cancel it
 subscription.cancel()
 
 
@@ -102,7 +121,16 @@ realm.object.subscribe({
     // if set to true, an initial list of all objects that match the subscription criteria is sent out
     executeImmediatly: true, 
     // filter criteria to limit the objects to receive updates for
-    attributes: ["charge<0.5", "type=drone"]
+    attributes: ["charge<0.5", "type=drone"],
+    // you can limit your subscription to the borders of a given shape
+    shape: {
+        // center X (longitude) of a circle
+        cx: 52.51660212363485,
+        // center Y (latitude) of a circle
+        cy: 13.377692047310838,
+        // radius in meters
+        r: 500
+    }
 }) // returns {Promise<Subscription>}
 
 realm.object.get(id) // returns {Promise<ObjectData>}

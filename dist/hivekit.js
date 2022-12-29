@@ -813,6 +813,19 @@ var Subscription = class extends EventEmitter {
     this.listener = {};
     return this._client._subscription._removeSubscription(this);
   }
+  update(options) {
+    if (options && options.shape) {
+      options.scopeType = getShapeTypeFromSignature(options.shape);
+      if (options.scopeType === null) {
+        return Promise.reject("unknown shape data");
+      }
+    }
+    const msg = createMessage(constants_default.TYPE.SUBSCRIPTION, constants_default.ACTION.UPDATE, this.id, this.realmId, extendMap({
+      [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
+      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+    return this._client._sendRequestAndHandleResponse(msg);
+  }
   _processIncomingMessage(msg) {
     let data = {};
     if (msg[constants_default.TYPE.OBJECT]) {
@@ -2800,7 +2813,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.4.3";
+    this.version = "1.5.0";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
