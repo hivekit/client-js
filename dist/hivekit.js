@@ -265,7 +265,7 @@ var SystemHandler = class {
           this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.resolve();
         }
         if (message[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
-          this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[constants_default.FIELD.DATA]);
+          this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[constants_default.FIELD.ERROR]);
         }
         break;
       default:
@@ -403,8 +403,27 @@ var SHAPE_SIGNATURES = {
   "cxcyr": constants_default.SHAPE_TYPE.CIRCLE,
   "points": constants_default.SHAPE_TYPE.POLYGON
 };
-function getShapeTypeFromSignature(shapeData) {
-  return SHAPE_SIGNATURES[Object.keys(shapeData).sort().join("")] || null;
+function toShape(shapeData) {
+  var shapeSignature = Object.keys(shapeData).sort().join("");
+  if (shapeSignature === "eastnorthsouthwest") {
+    shapeData = {
+      x1: shapeData.west,
+      y1: shapeData.south,
+      x2: shapeData.east,
+      y2: shapeData.north
+    };
+    shapeSignature = "x1x2y1y2";
+  }
+  if (!SHAPE_SIGNATURES[shapeSignature]) {
+    return {
+      err: "unknown shape data"
+    };
+  }
+  return {
+    type: SHAPE_SIGNATURES[shapeSignature],
+    data: shapeData,
+    err: null
+  };
 }
 
 // src/object-handler.js
@@ -416,10 +435,12 @@ var ObjectHandler = class {
   }
   subscribe(options) {
     if (options && options.shape) {
-      options.scopeType = getShapeTypeFromSignature(options.shape);
-      if (options.scopeType === null) {
-        return Promise.reject("unknown shape data");
+      const shape = toShape(options.shape);
+      if (shape.err) {
+        return Promise.reject(shape.err);
       }
+      options.scopeType = shape.type;
+      options.shape = shape.data;
     }
     return this._client._subscription._getSubscription(this._client.getId("object-subscription"), this._realm.id, extendMap({
       [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
@@ -546,15 +567,16 @@ var AreaHandler = class {
   }
   _setAreaState(id, label, shapeData, data, action) {
     const msg = createMessage(constants_default.TYPE.AREA, action, id, this._realm.id);
+    const shape = toShape(shapeData);
+    if (shape.err) {
+      return Promise.reject(shape.err);
+    }
+    msg[constants_default.FIELD.SUB_TYPE] = shape.type;
+    msg[constants_default.FIELD.SHAPE] = shape.data;
     if (label)
       msg[constants_default.FIELD.LABEL] = label;
     if (data)
       msg[constants_default.FIELD.DATA] = data;
-    msg[constants_default.FIELD.SUB_TYPE] = getShapeTypeFromSignature(shapeData);
-    if (!msg[constants_default.FIELD.SUB_TYPE]) {
-      return Promise.reject("unknown shape data");
-    }
-    msg[constants_default.FIELD.SHAPE] = shapeData;
     return this._client._sendRequestAndHandleResponse(msg);
   }
 };
@@ -815,10 +837,12 @@ var Subscription = class extends EventEmitter {
   }
   update(options) {
     if (options && options.shape) {
-      options.scopeType = getShapeTypeFromSignature(options.shape);
-      if (options.scopeType === null) {
-        return Promise.reject("unknown shape data");
+      const shape = toShape(options.shape);
+      if (shape.err) {
+        return Promise.reject(shape.err);
       }
+      options.scopeType = shape.type;
+      options.shape = shape.data;
     }
     const msg = createMessage(constants_default.TYPE.SUBSCRIPTION, constants_default.ACTION.UPDATE, this.id, this.realmId, extendMap({
       [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
@@ -2813,7 +2837,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.5.0";
+    this.version = "1.5.1";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
@@ -2872,6 +2896,9 @@ var HivekitClient = class extends EventEmitter {
     return this._onConnectPromise;
   }
   authenticate(token) {
+    if (!this._connection) {
+      return Promise.reject("can't authenticate: client not connected. Did you call .connect() before calling .authenticate()?");
+    }
     if (this.mode === constants_default.MODE.HTTP) {
       this._connection.token = token;
       this.connectionStatus = constants_default.CONNECTION_STATUS.AUTHENTICATED;
@@ -2882,6 +2909,9 @@ var HivekitClient = class extends EventEmitter {
     return this._onAuthenticatePromise;
   }
   disconnect() {
+    if (!this._connection) {
+      return Promise.reject("client not connected");
+    }
     this._changeConnectionStatus(constants_default.CONNECTION_STATUS.DISCONNECTING);
     this._connection.close();
     this._onDisconnectPromise = getPromise();
@@ -2994,7 +3024,7 @@ var HivekitClient = class extends EventEmitter {
       } else {
         this._onError("Received response for unknown request", msg);
       }
-    } else if (msg[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
+    } else if (msg[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR && msg[constants_default.FIELD.TYPE] !== constants_default.TYPE.SYSTEM) {
       this._onError(msg[constants_default.FIELD.ERROR] || msg[constants_default.FIELD.DATA]);
     } else if (!this._typeHandler[msg[constants_default.FIELD.TYPE]]) {
       this._onError("Received message for unknown type " + this._typeHandler[msg[constants_default.FIELD.TYPE]]);
