@@ -1,7 +1,7 @@
 {
   "name": "@hivekit/client-js",
   "type": "module",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "The browser/node client for the Hivekit platform and server",
   "main": "src/index-node.js",
   "browser": "dist/hivekit.min.js",
