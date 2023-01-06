@@ -19,7 +19,18 @@ export default {
         INSTRUCTION: 'ins',
         LOGEVENT: "log"
     },
-
+    ERROR: {
+        CONNECTION_ERROR: 'connection_error',
+        MAX_RECONNECT_ATTEMPTS_EXCEEDED: 'max_reconnect_attempts_exceeded',
+        MESSAGE_PARSE_ERROR: 'message_parse_error',
+        UNKNOWN_REQUEST: 'unknown_request',
+        UNKNOWN_TYPE: 'unknown_type',
+        SERVER_ERROR: 'server_error',
+        UNKNOWN_FIELD: 'unknown_field',
+        UNKNOWN_ACTION: 'unknown_action',
+        UNKNOWN_SUBSCRIPTION: 'unknown_subscription',
+        DISCONNECTED_RETRYING: 'disconnected_retrying'
+    },
     UPDATE_TYPE: {
         FULL: 'ful',
         DELTA: 'dta'

@@ -48,7 +48,8 @@ export default class HivekitClient extends EventEmitter {
             logErrors: true,
             adminDashboardBasePath: '/admin/',
             heartbeatInterval: 5000,
-            reconnectInterval: 1000
+            reconnectInterval: 1000,
+            maxReconnectAttempts: Infinity
         });
 
         // public handlers
@@ -62,7 +63,8 @@ export default class HivekitClient extends EventEmitter {
         // private properties
         this._url = null;
         this._connection = null;
-        this._reconnectInterval = null;
+        this._reconnectTimeout = null;
+        this._reconnectAttempts = 0;
         this._onConnectPromise = null;
         this._onAuthenticatePromise = null;
         this._onDisconnectPromise = null;
@@ -104,7 +106,7 @@ export default class HivekitClient extends EventEmitter {
         if (this.mode === C.MODE.HTTP) {
             throw new Error('Can\'t connect via Websocket. This client is already using HTTP');
         }
-        if (this.mode !== null) {
+        if (this.mode === C.MODE.WS && this._connection.readyState === this.WsConstructor.OPEN) {
             throw new Error('This client is already connected');
         }
         this.mode = C.MODE.WS;
@@ -113,9 +115,13 @@ export default class HivekitClient extends EventEmitter {
         this._connection = new this.WsConstructor(url);
         this._connection.onopen = this._onOpen.bind(this);
         this._connection.onclose = this._onClose.bind(this);
-        this._connection.onerror = this._onError.bind(this);
+        this._connection.onerror = err => {
+            this._onError(err.message, C.ERROR.CONNECTION_ERROR);
+        }
         this._connection.onmessage = this._onMessage.bind(this);
-        this._onConnectPromise = getPromise();
+        if (!this._onConnectPromise) {
+            this._onConnectPromise = getPromise();
+        }
         return this._onConnectPromise;
     }
 
@@ -180,35 +186,53 @@ export default class HivekitClient extends EventEmitter {
      *******************************************/
     _onOpen() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);
-        clearInterval(this._reconnectInterval);
+        clearTimeout(this._reconnectTimeout);
+        this._reconnectTimeout = null;
+        this._reconnectAttempts = 0;
         this._onConnectPromise.resolve();
+    }
+
+    _onDisconnect() {
+        clearInterval(this._heartbeatInterval)
+        this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
+        this._onDisconnectPromise && this._onDisconnectPromise.resolve();
     }
 
     _onClose() {
         // Intended Close
         if (this.connectionStatus === C.CONNECTION_STATUS.DISCONNECTING) {
-            clearInterval(this._heartbeatInterval)
-            this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
-            this._onDisconnectPromise && this._onDisconnectPromise.resolve();
+            this._onDisconnect();
         }
 
         // Unintended Close - reconnect
         else {
-            this._onError('Disconnected, attempting to reconnect');
-            this.connect(this._url).catch(() => {
-                clearInterval(this._reconnectInterval);
-                this._reconnectInterval = setInterval(() => {
-                    this._onError('Disconnected, attempting to reconnect');
-                    this.connect(this._url);
-                }, this.options.reconnectInterval)
-            })
+            this._reconnectAttempts++;
+
+            if (this._reconnectAttempts > this.options.maxReconnectAttempts) {
+                const errorMsg = 'exceeded max reconnect attempts. giving up :-(';
+                this._onError(errorMsg, C.ERROR.MAX_RECONNECT_ATTEMPTS_EXCEEDED);
+                clearTimeout(this._reconnectTimeout);
+                this._onConnectPromise.reject(errorMsg);
+                this._connection.close();
+                this._onDisconnect();
+
+                return;
+            }
+
+            const errorMsg = `Disconnected, attempting to reconnect. (Attempt ${this._reconnectAttempts} of ${this.options.maxReconnectAttempts})`
+            this._onError(errorMsg, C.ERROR.DISCONNECTED_RETRYING);
+            clearTimeout(this._reconnectTimeout);
+
+            this._reconnectTimeout = setTimeout(() => {
+                this.connect(this._url);
+            }, this.options.reconnectInterval)
         }
     }
 
-    _onError(error) {
-        this.emit('error', error);
+    _onError(errorMsg, errorType, details) {
+        this.emit('error', errorMsg, errorType, details);
         if (this.options.logErrors) {
-            console.warn(error.message || error);
+            console.warn(errorMsg, details || "");
         }
     }
 
@@ -218,13 +242,13 @@ export default class HivekitClient extends EventEmitter {
         try {
             messages = typeof msg.data === 'string' ? JSON.parse(msg.data) : msg.data;
         } catch (e) {
-            this._onError(`Failed to parse message: ${e} - ${msg.data}`);
+            this._onError(`Failed to parse message: ${e} - ${msg.data}`, C.ERROR.MESSAGE_PARSE_ERROR);
         }
 
         if (Array.isArray(messages)) {
             messages.forEach(this._handleIncomingMessage.bind(this));
         } else {
-            this._onError(`message was not in expected form: ${JSON.stringify(messages)}`);
+            this._onError(`message was not in expected form: ${JSON.stringify(messages)}`, C.ERROR.MESSAGE_PARSE_ERROR);
         }
     }
 
@@ -293,15 +317,15 @@ export default class HivekitClient extends EventEmitter {
                 });
                 delete this._pendingRequests[msg[C.FIELD.CORRELATION_ID]];
             } else {
-                this._onError('Received response for unknown request', msg);
+                this._onError('Received response for unknown request', C.ERROR.UNKNOWN_REQUEST, msg);
             }
         }
         // Generic Error without Correlation ID
         else if (msg[C.FIELD.RESULT] === C.RESULT.ERROR && msg[C.FIELD.TYPE] !== C.TYPE.SYSTEM) {
-            this._onError(msg[C.FIELD.ERROR] || msg[C.FIELD.DATA]);
+            this._onError(msg[C.FIELD.ERROR] || msg[C.FIELD.DATA], C.ERROR.SERVER_ERROR);
         }
         else if (!this._typeHandler[msg[C.FIELD.TYPE]]) {
-            this._onError('Received message for unknown type ' + this._typeHandler[msg[C.FIELD.TYPE]])
+            this._onError('Received message for unknown type ' + this._typeHandler[msg[C.FIELD.TYPE]], C.ERROR.UNKNOWN_TYPE)
         } else {
             this._typeHandler[msg[C.FIELD.TYPE]]._handleIncomingMessage(msg);
         }
@@ -338,7 +362,7 @@ export default class HivekitClient extends EventEmitter {
 
         this._sendRequest(msg, response => {
             if (response[C.FIELD.RESULT] === C.RESULT.ERROR) {
-                this._onError(response[C.FIELD.ERROR]);
+                this._onError(response[C.FIELD.ERROR], C.FIELD.SERVER_ERROR, C.FIELD.ERROR_CODE);
                 result.reject({
                     message: response[C.FIELD.ERROR],
                     code: response[C.FIELD.ERROR_CODE]
@@ -451,7 +475,7 @@ export default class HivekitClient extends EventEmitter {
             } else if (ignoreUnknown) {
                 compressedFields[key] = extendedFields[key]
             } else {
-                this._onError(`Unknown field ${key}`);
+                this._onError(`Unknown field ${key}`, C.ERROR.UNKNOWN_FIELD);
             }
         }
         return compressedFields;

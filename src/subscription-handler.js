@@ -167,7 +167,7 @@ export default class SubscriptionHandler {
     _handleIncomingMessage(msg) {
         const id = msg[C.FIELD.ID];
         if (!this._subscriptionCollections[id]) {
-            this._client._onError('Received message for unknown subscription ' + msg);
+            this._client._onError('Received message for unknown subscription ' + msg, C.ERROR.UNKNOWN_SUBSCRIPTION);
         } else {
             for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
                 this._subscriptionCollections[id][i]._processIncomingMessage(msg)

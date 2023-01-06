@@ -118,7 +118,7 @@ export default class SystemHandler {
                 }
                 break;
             default:
-                this._client._onError(`Unknown action for type ${C.TYPE.SYSTEM}: ${message[C.FIELD.ACTION]}`);
+                this._client._onError(`Unknown action for type ${C.TYPE.SYSTEM}: ${message[C.FIELD.ACTION]}`, C.ERROR.UNKNOWN_ACTION);
         }
     }
 }

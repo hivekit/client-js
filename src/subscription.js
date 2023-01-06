@@ -110,7 +110,7 @@ export default class Subscription extends EventEmitter {
                 }
                 break;
             default:
-                this._client._onError('Received subscription message with unknown update type ' + msg[C.FIELD.UPDATE_TYPE])
+                this._client._onError('Received subscription message with unknown update type ' + msg[C.FIELD.UPDATE_TYPE], C.ERROR.UNKNOWN_TYPE)
                 return;
         }
 

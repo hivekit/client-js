@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import HivekitClient from '../src/index-node.js'
 import config from './config.js'
 import jwt from 'jsonwebtoken'
+import { sleep } from './tools.js';
 
 describe('Realm Test', function () {
     var client,
@@ -89,6 +90,7 @@ describe('Realm Test', function () {
         await client.realm.delete(realmIdB);
         expect(subscriptionUpdateCount).to.equal(5);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdB, action: 'delete' });
+        await sleep(2000);
         const realmList = await client.realm.list()
         expect(realmList[realmIdA].label).to.equal('label for realm a')
         expect(typeof realmList[realmIdB]).to.equal('undefined')
