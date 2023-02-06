@@ -25,6 +25,7 @@ describe('Realm Test', function () {
     it('subscribes to realm events', async function () {
         subscription = await client.realm.subscribe();
         subscription.on('update', data => {
+            console.log('SUB', data)
             subscriptionUpdateCount++;
             lastSubscriptionMessage = data;
         })
@@ -45,6 +46,7 @@ describe('Realm Test', function () {
         realmIdA = client.getId('realm-a');
         expect(subscriptionUpdateCount).to.equal(0);
         await client.realm.create(realmIdA, 'label for realm a', { some: 'value' });
+        await sleep(200);
         expect(subscriptionUpdateCount).to.equal(1);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdA, action: 'create' });
         const realmData = await client.realm.get(realmIdA);
@@ -57,6 +59,7 @@ describe('Realm Test', function () {
         realmIdB = client.getId('realm-b');
         expect(subscriptionUpdateCount).to.equal(1);
         await client.realm.create(realmIdB, 'label for realm b', { amount: 42 });
+        await sleep(200);
         expect(subscriptionUpdateCount).to.equal(2);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdB, action: 'create' });
         const realmData = await client.realm.get(realmIdB);
@@ -82,15 +85,18 @@ describe('Realm Test', function () {
             firstname: 'Joe',
             address: { street: 'spooner street', number: 12 }
         })
+        await sleep(200)
+        expect(subscriptionUpdateCount).to.equal(4)
     });
 
     it('deletes realm b', async function () {
         this.timeout(10000);
         expect(subscriptionUpdateCount).to.equal(4);
         await client.realm.delete(realmIdB);
+        await sleep(200);
         expect(subscriptionUpdateCount).to.equal(5);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdB, action: 'delete' });
-        await sleep(2000);
+        await sleep(200);
         const realmList = await client.realm.list()
         expect(realmList[realmIdA].label).to.equal('label for realm a')
         expect(typeof realmList[realmIdB]).to.equal('undefined')
