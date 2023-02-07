@@ -189,7 +189,8 @@ var constants_default = {
     HEARTBEAT: "hbt",
     SUBSCRIBE: "sub",
     UNSUBSCRIBE: "uns",
-    PUBLISH: "pub"
+    PUBLISH: "pub",
+    GET_STATS: "sta"
   },
   RESULT: {
     SUCCESS: "suc",
@@ -221,18 +222,54 @@ var constants_default = {
   }
 };
 
+// src/message.js
+function createMessage(type, action, id, realm, data, location) {
+  const message = {
+    [constants_default.FIELD.TYPE]: type,
+    [constants_default.FIELD.ACTION]: action
+  };
+  if (id)
+    message[constants_default.FIELD.ID] = id;
+  if (realm)
+    message[constants_default.FIELD.REALM] = realm;
+  if (data)
+    message[constants_default.FIELD.DATA] = data;
+  if (location)
+    message[constants_default.FIELD.LOCATION] = location;
+  return message;
+}
+
 // src/system-handler.js
 var SystemHandler = class {
   constructor(client) {
     this._client = client;
     this._systemUpdateSubscription = null;
   }
-  getHttpUrl() {
-    return document.location.protocol + "//" + new URL(this._client._connection.url).host;
+  getHttpRoot() {
+    if (this._client.options.httpRoot) {
+      return this._client.options.httpRoot;
+    }
+    const baseUrl = this._client._url || (typeof document == "undefined" ? null : document.location.href);
+    if (!baseUrl) {
+      return null;
+    }
+    var url;
+    try {
+      url = new URL(baseUrl);
+    } catch (e) {
+      return null;
+    }
+    const protocol = url.protocol === "wss:" || url.protocol === "https:" ? "https" : "http";
+    return protocol + "://" + url.host;
   }
   authenticateAdmin(password) {
     return new Promise(async (resolve, reject) => {
-      const url = this.getHttpUrl() + this._client.options.adminDashboardBasePath + "api/authenticate-admin";
+      const httpRoot = this.getHttpRoot();
+      if (!httpRoot) {
+        reject(new Error("no http url found"));
+        return;
+      }
+      const url = httpRoot + this._client.options.adminDashboardBasePath + "api/authenticate-admin";
       var rawResponse;
       try {
         rawResponse = await fetch(url, {
@@ -252,8 +289,14 @@ var SystemHandler = class {
         resolve();
       } else {
         const result = await rawResponse.json();
-        reject(result[0][constants_default.FIELD.ERROR]);
+        reject(new Error(result[0][constants_default.FIELD.ERROR]));
       }
+    });
+  }
+  getServerStats() {
+    const msg = createMessage(constants_default.TYPE.SYSTEM, constants_default.ACTION.GET_STATS);
+    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+      return response[constants_default.FIELD.DATA];
     });
   }
   _sendAuthMessage(token) {
@@ -296,23 +339,6 @@ function getPromise() {
   promise.resolve = resolve;
   promise.reject = reject;
   return promise;
-}
-
-// src/message.js
-function createMessage(type, action, id, realm, data, location) {
-  const message = {
-    [constants_default.FIELD.TYPE]: type,
-    [constants_default.FIELD.ACTION]: action
-  };
-  if (id)
-    message[constants_default.FIELD.ID] = id;
-  if (realm)
-    message[constants_default.FIELD.REALM] = realm;
-  if (data)
-    message[constants_default.FIELD.DATA] = data;
-  if (location)
-    message[constants_default.FIELD.LOCATION] = location;
-  return message;
 }
 
 // src/fieldnames.js
@@ -2849,7 +2875,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.5.2";
+    this.version = "1.6.0";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
@@ -2858,14 +2884,14 @@ var HivekitClient = class extends EventEmitter {
       logMessages: false,
       logErrors: true,
       adminDashboardBasePath: "/admin/",
-      heartbeatInterval: 5e3,
+      heartbeatInterval: 6e4,
       reconnectInterval: 1e3,
-      maxReconnectAttempts: Infinity
+      maxReconnectAttempts: Infinity,
+      httpRoot: null
     });
     this.system = new SystemHandler(this);
     this.realm = new RealmHandler(this);
     this._subscription = new SubscriptionHandler(this);
-    this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
     this._url = null;
     this._connection = null;
     this._reconnectTimeout = null;
@@ -2943,6 +2969,7 @@ var HivekitClient = class extends EventEmitter {
   }
   _onOpen() {
     this._changeConnectionStatus(constants_default.CONNECTION_STATUS.CONNECTED);
+    this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
     clearTimeout(this._reconnectTimeout);
     this._reconnectTimeout = null;
     this._reconnectAttempts = 0;
