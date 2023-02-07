@@ -47,9 +47,10 @@ export default class HivekitClient extends EventEmitter {
             logMessages: false,
             logErrors: true,
             adminDashboardBasePath: '/admin/',
-            heartbeatInterval: 5000,
+            heartbeatInterval: 60000,
             reconnectInterval: 1000,
-            maxReconnectAttempts: Infinity
+            maxReconnectAttempts: Infinity,
+            httpRoot: null
         });
 
         // public handlers
@@ -58,7 +59,6 @@ export default class HivekitClient extends EventEmitter {
 
         // internal handlers
         this._subscription = new SubscriptionHandler(this);
-        this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
 
         // private properties
         this._url = null;
@@ -186,6 +186,7 @@ export default class HivekitClient extends EventEmitter {
      *******************************************/
     _onOpen() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);
+        this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
         clearTimeout(this._reconnectTimeout);
         this._reconnectTimeout = null;
         this._reconnectAttempts = 0;

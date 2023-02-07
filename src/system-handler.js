@@ -1,4 +1,5 @@
 import C from './constants.js'
+import { createMessage } from './message.js';
 
 /**
  * The system handler is responsible for all aspects that are not
@@ -35,8 +36,27 @@ export default class SystemHandler {
      * 
      * @returns {string} httpUrl
      */
-    getHttpUrl() {
-        return document.location.protocol + '//' + new URL(this._client._connection.url).host;
+    getHttpRoot() {
+        if (this._client.options.httpRoot) {
+            return this._client.options.httpRoot;
+        }
+
+        const baseUrl = this._client._url || (typeof document == 'undefined' ? null : document.location.href);
+
+        if (!baseUrl) {
+            return null
+        }
+
+        // attempt to infer http root
+        var url;
+        try {
+            url = new URL(baseUrl)
+        } catch (e) {
+            return null;
+        }
+
+        const protocol = (url.protocol === 'wss:' || url.protocol === 'https:') ? 'https' : 'http';
+        return protocol + '://' + url.host;
     }
 
     /**
@@ -49,8 +69,12 @@ export default class SystemHandler {
      */
     authenticateAdmin(password) {
         return new Promise(async (resolve, reject) => {
-            const url = this.getHttpUrl() +
-                this._client.options.adminDashboardBasePath + 'api/authenticate-admin';
+            const httpRoot = this.getHttpRoot();
+            if (!httpRoot) {
+                reject(new Error('no http url found'));
+                return
+            }
+            const url = httpRoot + this._client.options.adminDashboardBasePath + 'api/authenticate-admin';
             var rawResponse;
 
             try {
@@ -72,8 +96,15 @@ export default class SystemHandler {
                 resolve();
             } else {
                 const result = await rawResponse.json();
-                reject(result[0][C.FIELD.ERROR]);
+                reject(new Error(result[0][C.FIELD.ERROR]));
             }
+        });
+    }
+
+    getServerStats() {
+        const msg = createMessage(C.TYPE.SYSTEM, C.ACTION.GET_STATS);
+        return this._client._sendRequestAndHandleResponse(msg, response => {
+            return response[C.FIELD.DATA];
         });
     }
 

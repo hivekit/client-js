@@ -25,7 +25,6 @@ describe('Realm Test', function () {
     it('subscribes to realm events', async function () {
         subscription = await client.realm.subscribe();
         subscription.on('update', data => {
-            console.log('SUB', data)
             subscriptionUpdateCount++;
             lastSubscriptionMessage = data;
         })

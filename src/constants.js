@@ -89,7 +89,8 @@ export default {
         HEARTBEAT: 'hbt',
         SUBSCRIBE: 'sub',
         UNSUBSCRIBE: 'uns',
-        PUBLISH: 'pub'
+        PUBLISH: 'pub',
+        GET_STATS: 'sta'
     },
 
     RESULT: {

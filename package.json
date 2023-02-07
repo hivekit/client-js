@@ -9,7 +9,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node test/",
+    "test": "node ./node_modules/c8/bin/c8.js ./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node --parallel test/",
     "test-only": "mocha --experimental-specifier-resolution=node test/",
     "build-minified": "esbuild src/index-browser.js --bundle --format=esm --minify --outfile=dist/hivekit.min.js",
     "build-unminified": "esbuild src/index-browser.js --bundle --format=esm  --outfile=dist/hivekit.js",
