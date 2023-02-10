@@ -222,7 +222,6 @@ describe('Object Test', function () {
 
     it('waits and receives subscription update C', function (done) {
         setTimeout(() => {
-
             const ids = Object.keys(lastSubscriptionMessage);
             ids.sort((a, b) => {
                 return a > b ? 1 : -1;

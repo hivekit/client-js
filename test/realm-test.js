@@ -13,7 +13,7 @@ describe('Realm Test', function () {
         lastSubscriptionMessage = [];
 
     it('creates and authenticates the client', async function () {
-        client = new HivekitClient({ logErrors: true, logMessages: false });
+        client = new HivekitClient({ logErrors: false, logMessages: false });
         await client.connect(config.wsUrl);
         await client.authenticate(jwt.sign({ sub: 'userName' }, config.authTokenSecret));
         expect(client.connectionStatus === client.constants.CONNECTION_STATUS.AUTHENTICATED);

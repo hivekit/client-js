@@ -2,6 +2,7 @@ import { getPromise } from './promise.js'
 import { createMessage } from './message.js'
 import C from './constants.js'
 import Subscription from './subscription.js'
+import { deepClone } from './tools.js'
 
 /**
  * The SubscriptionHandler is not directly exposed to the user, but used
@@ -196,13 +197,15 @@ export default class SubscriptionHandler {
         for (i = 0; i < this._subscriptionCollections[subscription.id].length; i++) {
             if (this._subscriptionCollections[subscription.id][i]._data) {
                 data = this._subscriptionCollections[subscription.id][i]._data;
+                break;
             }
         }
 
         if (data) {
             setTimeout(() => {
-                subscription.emit('update', data);
-            }, 10);
+                subscription._data = deepClone(data);
+                subscription.emit('update', subscription._data);
+            }, 1);
         }
     }
 }

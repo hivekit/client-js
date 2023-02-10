@@ -3,6 +3,7 @@ import C from "./constants.js";
 import fieldnames from "./fieldnames.js";
 import { createMessage } from "./message.js";
 import { extendMap, toShape } from './tools.js';
+
 /**
  * Subscription represents a single subscription to a given subject with
  * a given set of options. It emits an `update` event whenever a subscription
@@ -81,15 +82,41 @@ export default class Subscription extends EventEmitter {
      * @returns {void}
      */
     _processIncomingMessage(msg) {
-        let data = {};
-
+        if (this._data === null) {
+            this._data = {};
+        }
         if (msg[C.TYPE.OBJECT]) {
-            data = this._client._extendFieldsMap(msg[C.TYPE.OBJECT]);
+            const delta = {
+                added: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.CREATE]),
+                updated: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.UPDATE]),
+                removed: msg[C.TYPE.OBJECT][C.ACTION.DELETE],
+            };
+
+            if (msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {
+                this._data = {};
+            }
+
+            for (let id in delta.added) {
+                this._data[id] = delta.added[id];
+            }
+
+            for (let id in delta.updated) {
+                this._data[id] = delta.updated[id];
+            }
+
+            for (let id in delta.removed) {
+                delete this._data[id];
+            }
+
+            this.emit('update', this._data, delta, msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL ? 'full' : 'delta')
+            return;
         }
-        else if (msg[C.TYPE.AREA]) {
+
+        var data = {};
+
+        if (msg[C.TYPE.AREA]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.AREA]);
-        }
-        else if (msg[C.TYPE.INSTRUCTION]) {
+        } else if (msg[C.TYPE.INSTRUCTION]) {
             data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
         } else if (msg[C.TYPE.LOGEVENT]) {
             data = this._client._extendFieldsArray(msg[C.TYPE.LOGEVENT]);
