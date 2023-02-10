@@ -889,10 +889,32 @@ var Subscription = class extends EventEmitter {
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _processIncomingMessage(msg) {
-    let data = {};
+    if (this._data === null) {
+      this._data = {};
+    }
     if (msg[constants_default.TYPE.OBJECT]) {
-      data = this._client._extendFieldsMap(msg[constants_default.TYPE.OBJECT]);
-    } else if (msg[constants_default.TYPE.AREA]) {
+      const delta = {
+        added: this._client._extendFieldsMap(msg[constants_default.TYPE.OBJECT][constants_default.ACTION.CREATE]),
+        updated: this._client._extendFieldsMap(msg[constants_default.TYPE.OBJECT][constants_default.ACTION.UPDATE]),
+        removed: msg[constants_default.TYPE.OBJECT][constants_default.ACTION.DELETE]
+      };
+      if (msg[constants_default.FIELD.UPDATE_TYPE] === constants_default.UPDATE_TYPE.FULL) {
+        this._data = {};
+      }
+      for (let id2 in delta.added) {
+        this._data[id2] = delta.added[id2];
+      }
+      for (let id2 in delta.updated) {
+        this._data[id2] = delta.updated[id2];
+      }
+      for (let id2 in delta.removed) {
+        delete this._data[id2];
+      }
+      this.emit("update", this._data, delta, msg[constants_default.FIELD.UPDATE_TYPE] === constants_default.UPDATE_TYPE.FULL ? "full" : "delta");
+      return;
+    }
+    var data = {};
+    if (msg[constants_default.TYPE.AREA]) {
       data = this._client._extendFieldsMap(msg[constants_default.TYPE.AREA]);
     } else if (msg[constants_default.TYPE.INSTRUCTION]) {
       data = this._client._extendFieldsMap(msg[constants_default.TYPE.INSTRUCTION]);
@@ -1016,12 +1038,14 @@ var SubscriptionHandler = class {
     for (i = 0; i < this._subscriptionCollections[subscription.id].length; i++) {
       if (this._subscriptionCollections[subscription.id][i]._data) {
         data = this._subscriptionCollections[subscription.id][i]._data;
+        break;
       }
     }
     if (data) {
       setTimeout(() => {
-        subscription.emit("update", data);
-      }, 10);
+        subscription._data = deepClone(data);
+        subscription.emit("update", subscription._data);
+      }, 1);
     }
   }
 };
@@ -2875,7 +2899,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.6.0";
+    this.version = "1.7.0";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
