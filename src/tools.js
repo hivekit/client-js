@@ -100,3 +100,13 @@ export function toShape(shapeData) {
         err: null
     }
 }
+
+/**
+ * Checks if a given value is a valid JavaScript Date object
+ * 
+ * @param {Mixed} value 
+ * @returns Boolean
+ */
+export function isValidDate(value) {
+    return value instanceof Date && value.toString() != 'Invalid Date';
+}

@@ -14,7 +14,8 @@ export default {
         [C.TYPE.SUBSCRIPTION]: 'subscription',
         [C.TYPE.SYSTEM]: 'system',
         [C.TYPE.INSTRUCTION]: 'instruction',
-        [C.TYPE.LOGEVENT]: 'logEvent'
+        [C.TYPE.LOGEVENT]: 'logEvent',
+        [C.TYPE.HISTORY]: 'history'
     },
     FIELD: {
         [C.FIELD.TYPE]: 'type',
@@ -39,7 +40,11 @@ export default {
         [C.FIELD.START]: 'start',
         [C.FIELD.END]: 'end',
         [C.FIELD.LEVEL]: 'level',
-        [C.FIELD.PRESENCE_CONNECTION_STATUS]: 'connectionStatus'
+        [C.FIELD.PRESENCE_CONNECTION_STATUS]: 'connectionStatus',
+        [C.FIELD.TIME]: 'time',
+        [C.FIELD.START_TIME]: 'startTime',
+        [C.FIELD.END_TIME]: 'endTime',
+        [C.FIELD.INTERVAL]: 'interval'
     },
     PRESENCE_CONNECTION_STATUS: {
         [C.PRESENCE_CONNECTION_STATUS.CONNECTED]: 'connected',

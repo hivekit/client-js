@@ -17,7 +17,8 @@ export default {
         SUBSCRIPTION: 'sub',
         SYSTEM: 'sys',
         INSTRUCTION: 'ins',
-        LOGEVENT: "log"
+        LOGEVENT: "log",
+        HISTORY: "his"
     },
     ERROR: {
         CONNECTION_ERROR: 'connection_error',
@@ -74,7 +75,11 @@ export default {
         LEVEL: 'lvl',
         EVENT_NAME: 'eve',
         ID_PATTERN: 'idp',
-        ERROR_CODE: 'erc'
+        ERROR_CODE: 'erc',
+        START_TIME: 'sta',
+        END_TIME: 'end',
+        INTERVAL: 'int',
+        TIME: 'tim'
     },
 
     ACTION: {
