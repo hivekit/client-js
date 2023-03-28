@@ -125,7 +125,8 @@ var constants_default = {
     SUBSCRIPTION: "sub",
     SYSTEM: "sys",
     INSTRUCTION: "ins",
-    LOGEVENT: "log"
+    LOGEVENT: "log",
+    HISTORY: "his"
   },
   ERROR: {
     CONNECTION_ERROR: "connection_error",
@@ -175,7 +176,9 @@ var constants_default = {
     LEVEL: "lvl",
     EVENT_NAME: "eve",
     ID_PATTERN: "idp",
-    ERROR_CODE: "erc"
+    ERROR_CODE: "erc",
+    INTERVAL: "int",
+    TIME: "tim"
   },
   ACTION: {
     CREATE: "cre",
@@ -350,7 +353,8 @@ var fieldnames_default = {
     [constants_default.TYPE.SUBSCRIPTION]: "subscription",
     [constants_default.TYPE.SYSTEM]: "system",
     [constants_default.TYPE.INSTRUCTION]: "instruction",
-    [constants_default.TYPE.LOGEVENT]: "logEvent"
+    [constants_default.TYPE.LOGEVENT]: "logEvent",
+    [constants_default.TYPE.HISTORY]: "history"
   },
   FIELD: {
     [constants_default.FIELD.TYPE]: "type",
@@ -375,7 +379,9 @@ var fieldnames_default = {
     [constants_default.FIELD.START]: "start",
     [constants_default.FIELD.END]: "end",
     [constants_default.FIELD.LEVEL]: "level",
-    [constants_default.FIELD.PRESENCE_CONNECTION_STATUS]: "connectionStatus"
+    [constants_default.FIELD.PRESENCE_CONNECTION_STATUS]: "connectionStatus",
+    [constants_default.FIELD.TIME]: "time",
+    [constants_default.FIELD.INTERVAL]: "interval"
   },
   PRESENCE_CONNECTION_STATUS: {
     [constants_default.PRESENCE_CONNECTION_STATUS.CONNECTED]: "connected",
@@ -462,6 +468,9 @@ function toShape(shapeData) {
     data: shapeData,
     err: null
   };
+}
+function isValidDate(value) {
+  return value instanceof Date && value.toString() != "Invalid Date";
 }
 
 // src/object-handler.js
@@ -721,6 +730,32 @@ var PubSubHandler = class {
   }
 };
 
+// src/history-handler.js
+var HistoryHandler = class {
+  constructor(client, realm) {
+    this._client = client;
+    this._realm = realm;
+  }
+  get(id, options) {
+    const msg = createMessage(constants_default.TYPE.HISTORY, constants_default.ACTION.READ, id, this._realm.id);
+    if (!isValidDate(options.startTime)) {
+      throw new Error("startTime is not a valid Date object");
+    }
+    if (!isValidDate(options.endTime)) {
+      throw new Error("endTime is not a valid Date object");
+    }
+    msg[constants_default.FIELD.DATA] = {
+      [constants_default.FIELD.START]: options.startTime.toISOString(),
+      [constants_default.FIELD.END]: options.endTime.toISOString()
+    };
+    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+      return response[constants_default.FIELD.DATA].map((entry) => {
+        return this._client._extendFields(entry);
+      });
+    });
+  }
+};
+
 // src/realm.js
 var Realm = class extends EventEmitter {
   constructor(id, label, data, client) {
@@ -734,6 +769,7 @@ var Realm = class extends EventEmitter {
     this.area = new AreaHandler(client, this);
     this.instruction = new InstructionHandler(client, this);
     this.pubsub = new PubSubHandler(client, this);
+    this.history = new HistoryHandler(client, this);
   }
   getData(key) {
     if (!key) {
@@ -2899,7 +2935,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.7.0";
+    this.version = "1.8.0";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
