@@ -29,19 +29,18 @@ export default class HistoryHandler {
      */
     get(id, options) {
         const msg = createMessage(C.TYPE.HISTORY, C.ACTION.READ, id, this._realm.id);
-        const startTimeField = fieldnames.FIELD[[C.FIELD.START_TIME]];
-        const endTimeField = fieldnames.FIELD[[C.FIELD.END_TIME]];
 
-        if (!isValidDate(options[startTimeField])) {
-            throw new Error(options[startTimeField] + ' is not a valid Date object');
+        if (!isValidDate(options.startTime)) {
+            throw new Error('startTime is not a valid Date object');
         }
-        if (!isValidDate(options[endTimeField])) {
-            throw new Error(options[endTimeField] + ' is not a valid Date object');
+
+        if (!isValidDate(options.endTime)) {
+            throw new Error('endTime is not a valid Date object');
         }
 
         msg[C.FIELD.DATA] = {
-            [C.FIELD.START_TIME]: options[startTimeField].toISOString(),
-            [C.FIELD.END_TIME]: options[endTimeField].toISOString()
+            [C.FIELD.START]: options.startTime.toISOString(),
+            [C.FIELD.END]: options.endTime.toISOString()
         }
 
         return this._client._sendRequestAndHandleResponse(msg, response => {

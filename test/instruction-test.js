@@ -111,18 +111,29 @@ describe('Instruction Test', function () {
     it('creates instructions b and c', async function () {
         instructionIdC = client.getId('instruction-c')
 
-        const instructionString = `
-            every 10 min
-            when
-                object(type=scooter, charge<0.2)
-            then
-                set(needsCharging, true)
-            until
-                set(needsCharging, false)
-        `
 
-        await realmA.instruction.create(instructionIdB, { label: 'instruction B Label', instructionString, data: { letter: 'B' } })
-        await realmA.instruction.create(instructionIdC, { label: 'instruction C Label', instructionString, data: { letter: 'C' } })
+        await realmA.instruction.create(instructionIdB, {
+            label: 'instruction B Label', instructionString: `
+        every 10 min
+        when
+            object(type=scooter, charge<${Math.random()})
+        then
+            set(needsCharging, true)
+        until
+            set(needsCharging, false)
+    `, data: { letter: 'B' }
+        })
+        await realmA.instruction.create(instructionIdC, {
+            label: 'instruction C Label', instructionString: `
+        every 10 min
+        when
+            object(type=scooter, charge<${Math.random()})
+        then
+            set(needsCharging, true)
+        until
+            set(needsCharging, false)
+    `, data: { letter: 'C' }
+        })
     });
 
     it('lists all instructions', async function () {

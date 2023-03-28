@@ -42,8 +42,6 @@ export default {
         [C.FIELD.LEVEL]: 'level',
         [C.FIELD.PRESENCE_CONNECTION_STATUS]: 'connectionStatus',
         [C.FIELD.TIME]: 'time',
-        [C.FIELD.START_TIME]: 'startTime',
-        [C.FIELD.END_TIME]: 'endTime',
         [C.FIELD.INTERVAL]: 'interval'
     },
     PRESENCE_CONNECTION_STATUS: {
