@@ -1,6 +1,6 @@
 # Hivekit Client for Browsers/NodeJS
 
-The javascript/node client SDK for [https://hivekit.io](Hivekit)
+The javascript/node client SDK for **[Hivekit](https://hivekit.io)**
 
 Please find the full documentation for the client library at [https://hivekit.io/docs/js-client-sdk/client/]
 
