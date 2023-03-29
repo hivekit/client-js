@@ -1,10 +1,8 @@
 # Hivekit Client for Browsers/NodeJS
 
-The javascript/node client for Hivekit
+The javascript/node client SDK for [https://hivekit.io](Hivekit)
 
-:::tip
-[find the full documentation here](https://hivekit.io/docs/category/jsnode-client-sdk)
-:::
+Please find the full documentation for the client library at [https://hivekit.io/docs/js-client-sdk/client/]
 
 ## Installation
 Install via yarn or npm
@@ -14,159 +12,83 @@ npm install @hivekit/client-js --save-dev
 yarn add @hivekit/client-js
 ```
 
-## Usage
+## Basic Usage Example
 ```js
 import HivekitClient from '@hivekit/client-js'
 
-// Create an instance of the client. This will not yet connect it.
-// All settings are optional
-const client = new HivekitClient({
-    outgoingMessageBufferTime: 0,
-    logMessages: false,
-    logErrors: true,
-    heartbeatInterval: 5000,
-    reconnectInterval: 1000
-});
+// Use a token issued via the Hivekit account interface
+// or sign your own with a Hivekit provided secret.
+// import jwt from 'jsonwebtoken'
+// const token = jwt.sign({ sub: 'username' }, 'CHANGE_ME')
 
-// Client Properties
-client.connectionStatus // 'connected','disconnected','connecting','disconnecting','authenticated'
-client.ping // heartbeat roundtrip time in milliseconds
-client.constants // access to system level constants
-client.options // a map of user provided and default options
-client.version // the version of the client SDK
+const client = new HivekitClient();
 
-// the version and build date of the server the client is connected to.
-// populated once connectionStatus == 'authenticated'
-client.serverVersion
-client.serverBuildDate
+// Let's track the client's connection status below. If everything
+// goes well, we should see:
+// - connecting
+// - connected
+// - authenticated (that's when the client is ready to use)
+client.on('connectionStatusChanged', () => {
+    console.log(client.connectionStatus)
+})
+await client.connect('wss://api.hivekit.io/ws');
+await client.authenticate(token);
 
 
-// Events
-'error' // emitted when an error occurs
-'connectionStatusChanged' // emitted whenever the connectionStatus changes
-'ping' // emitted when the ping measurement changes
+// A realm is a space within which something happens, e.g.
+// a city or a factory hall. If we don't have one yet, we need
+// to create it first using: 
+await client.realm.create('test-realm'); // !!!this will throw an error if the realm already exists
 
-// Subscribing to events (this is the same for all classes that emit events)
-.on( eventName, callback, [context],[order])
-.off( eventName, [callback], [context])
-.emit( eventName, arg1, arg2, argN...)
-.removeListenerById(id)
-.hasListener(eventName)
+// Most concepts within Hivekit exist within the scope
+// of a realm
+const realm = await client.realm.get('test-realm');
 
-// Methods
-client.connect(url) // connect via Websocket. returns {Promise} OR
-client.useHTTP(url) // prepare to make HTTP requests
-
-client.authenticate(token) // returns {Promise}, only needs to be called explicitly if no token is set
-client.disconnect() // returns {Promise}
-client.getId(prefix) // returns randomly generated id
-client.getURL() // returns the current WS URL - which might be different from the provided one if redirects occured
-
-
-/**********************************
- * REALM
- * *******************************/
-client.realm.subscribe() //returns {Promise<Subscription>} subscribe to create/update/delete for realms
-client.realm.get(id) //returns {Promise<Realm>}
-client.realm.create(id, {label: '...', data: {}}) //returns {Promise}
-client.realm.update(id, {label: '...', data: {}}) //returns {Promise}
-client.realm.delete(id)//returns {Promise}
-client.realm.list()
-
-
-/**********************************
- * SUBSCRIPTION
- * *******************************/
-// subscription messages trigger an update event.
-// data is the full set of objects matching the subscription
-subscription.on('update', data=>{});
-
-// you can dynamically change subscription parameters
-// to apply filters or create roaming geofence subscriptions
-subscription.update({
-    attributes: ['charge>0.5'],
-    shape: {
-        // center X (longitude) of a circle
-        cx: 52.51660212363485,
-        // center Y (latitude) of a circle
-        cy: 13.377692047310838,
-        // radius in meters
-        r: 500
+// Objects can represent vehicles, people, machines or
+// other datasources. Let's create one:
+await realm.object.create('rider-12', {
+    label: 'Delivery Rider 12',
+    location: {
+        latitude: 52.5241175089,
+        longitude: 13.3975679517
+    },
+    data: {
+        charge: 0.6
     }
 });
 
-// if you are no longer interested in data for a subscription,
-// you can cancel it
-subscription.cancel()
+// This will return the object's data, e.g.:
+// {
+//     label: 'Delivery Rider 12',
+//     location: {
+//         coordinateSystem: '',
+//         longitude: 13.3975679517,
+//         latitude: 52.5241175089,
+//         accuracy: 0,
+//         speed: 0,
+//         heading: 0,
+//         altitude: 0,
+//         altitudeAccuracy: 0,
+//         time: '2023-03-29T10:08:55.4061132+02:00'
+//     },
+//     data: { charge: 0.6 },
+//     connectionStatus: 'disconnected'
+// }
+const rider = await realm.object.get('rider-12');
 
+// Use a subscription to get a realtime feed of object updates.
+// Subscriptions can be scoped and filtered in lots of ways, but
+// lets keep things simple for now.
+const subscription = await realm.object.subscribe()
+subscription.on('update', data => {
+    console.log(data);
+});
 
-/**********************************
- * REALM OBJECT (returned by client.realm.get(id)
- * *******************************/
-realm.search( searchString, {
-    // a list of properties to search in (default all)
-    field: ['data', 'label', 'id' ],
-    // max amount of object results to be returned
-    maxObjectResults: 999,
-
-    // max amount of area results to be returned
-    maxAreaResults: 999
-}) // returns {Promise<search results>}
-
-
-/**********************************
- * OBJECT
- * *******************************/
-realm.object.subscribe({
-    // if set to true, an initial list of all objects that match the subscription criteria is sent out
-    executeImmediatly: true, 
-    // filter criteria to limit the objects to receive updates for
-    attributes: ["charge<0.5", "type=drone"],
-    // you can limit your subscription to the borders of a given shape
-    shape: {
-        // center X (longitude) of a circle
-        cx: 52.51660212363485,
-        // center Y (latitude) of a circle
-        cy: 13.377692047310838,
-        // radius in meters
-        r: 500
+// Let's update the object to trigger the subscription above.
+realm.object.update('rider-12', {
+    location: {
+        latitude: 52.52826383714,
+        longitude: 13.38901541951
     }
-}) // returns {Promise<Subscription>}
-
-realm.object.get(id) // returns {Promise<ObjectData>}
-realm.object.create(id, {label: '...', location: {}, data: {}}) // returns {Promise}
-realm.object.update(id, {label: '...', location: {}, data: {}}) // returns {Promise}
-realm.object.set(id, {label: '...', location: {}, data: {}})
-realm.object.delete(id) // returns {Promise}
-realm.object.list(options) // returns {Promise<id:objectData>} options can be any of 
-{
-    field: ['customValue'] // fieldnames from data to be included in result
-    where: ['key>value'] // key -> operator -> value filters
-}
-
-/**********************************
- * AREA
- * *******************************/
-realm.area.subscribe({
-    // if set to true, an initial list of all areas that match the subscription criteria is sent out
-    executeImmediatly: true, 
-    // filter criteria to limit the areas to receive updates for
-    attributes: ["charge<0.5", "type=drone"] 
-}) // returns {Promise<Subscription>}
-
-realm.area.get(id) // returns {Promise<AreaData>}
-realm.area.create(id, {label: '...', shapeData: {}, data: {}}) // returns {Promise}
-realm.area.update(id, {label: '...', shapeData: {}, data: {}}) // returns {Promise}
-realm.area.delete(id) // returns {Promise}
-realm.area.list(options) // returns {Promise<areas>}
-/**********************************
- * INSTRUCTION
- * *******************************/
-realm.instruction.subscribe() // returns {Promise<Subscription>}
-
-realm.instruction.get(id) // returns {Promise<AreaData>}
-realm.instruction.create(id,{label: '...', instructionString: '...', data: {}}) // returns {Promise}
-realm.instruction.update(id, {label: '...', instructionString: '...', data: {}}) // returns {Promise}
-realm.instruction.delete(id) // returns {Promise}
-realm.instruction.list(options) // returns {Promise<instructions>}
+});
 ```
