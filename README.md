@@ -2,7 +2,7 @@
 
 The javascript/node client SDK for **[Hivekit](https://hivekit.io)**
 
-Please find the full documentation for the client library at [https://hivekit.io/docs/js-client-sdk/client/]
+Please find the full documentation for the client library at (https://hivekit.io/docs/js-client-sdk/client/)
 
 ## Installation
 Install via yarn or npm
