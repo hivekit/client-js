@@ -70,6 +70,7 @@ export default {
         SHAPE_DATA: 'shapeData',
         FIELD: 'fie',
         VALUE: 'val',
+        SUBSCRIPTION_TARGET: 'sta',
         START: 'sta',
         END: 'end',
         LEVEL: 'lvl',
@@ -77,7 +78,10 @@ export default {
         ID_PATTERN: 'idp',
         ERROR_CODE: 'erc',
         INTERVAL: 'int',
-        TIME: 'tim'
+        TIME: 'tim',
+
+        SCOPE_TYPE_TARGET: 'tar',
+        RADIUS: 'r'
     },
 
     ACTION: {

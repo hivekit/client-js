@@ -34,6 +34,7 @@ export default class SystemHandler {
      * be good to configure them in the app config and use different configurations for different
      * environments
      * 
+     * @deprecated
      * @returns {string} httpUrl
      */
     getHttpRoot() {

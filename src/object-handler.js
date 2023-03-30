@@ -40,7 +40,8 @@ export default class ObjectHandler {
      * @returns {Promise<Subscription>}
      */
     subscribe(options) {
-        if (options && options.shape) {
+        options = options || {};
+        if (options.shape) {
             const shape = toShape(options.shape);
             if (shape.err) {
                 return Promise.reject(shape.err);
@@ -49,13 +50,20 @@ export default class ObjectHandler {
             options.shape = shape.data;
         }
 
+
+        if (options.target) {
+            options[C.FIELD.SUBSCRIPTION_TARGET] = options.target;
+            options[C.FIELD.SCOPE_TYPE] = C.FIELD.SCOPE_TYPE_TARGET;
+            delete options.target;
+        }
+
         return this._client._subscription._getSubscription(
             this._client.getId('object-subscription'),
             this._realm.id,
             extendMap({
                 [C.FIELD.TYPE]: C.TYPE.OBJECT,
                 [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
-            }, this._client._compressFields(options, fieldnames.FIELD))
+            }, this._client._compressFields(options, fieldnames.FIELD, true))
         );
     }
 
