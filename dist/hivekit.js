@@ -171,6 +171,7 @@ var constants_default = {
     SHAPE_DATA: "shapeData",
     FIELD: "fie",
     VALUE: "val",
+    SUBSCRIPTION_TARGET: "sta",
     START: "sta",
     END: "end",
     LEVEL: "lvl",
@@ -178,7 +179,9 @@ var constants_default = {
     ID_PATTERN: "idp",
     ERROR_CODE: "erc",
     INTERVAL: "int",
-    TIME: "tim"
+    TIME: "tim",
+    SCOPE_TYPE_TARGET: "tar",
+    RADIUS: "r"
   },
   ACTION: {
     CREATE: "cre",
@@ -481,7 +484,8 @@ var ObjectHandler = class {
     this._locationFields = this._getLocationFields();
   }
   subscribe(options) {
-    if (options && options.shape) {
+    options = options || {};
+    if (options.shape) {
       const shape = toShape(options.shape);
       if (shape.err) {
         return Promise.reject(shape.err);
@@ -489,10 +493,15 @@ var ObjectHandler = class {
       options.scopeType = shape.type;
       options.shape = shape.data;
     }
+    if (options.target) {
+      options[constants_default.FIELD.SUBSCRIPTION_TARGET] = options.target;
+      options[constants_default.FIELD.SCOPE_TYPE] = constants_default.FIELD.SCOPE_TYPE_TARGET;
+      delete options.target;
+    }
     return this._client._subscription._getSubscription(this._client.getId("object-subscription"), this._realm.id, extendMap({
       [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
       [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+    }, this._client._compressFields(options, fieldnames_default.FIELD, true)));
   }
   get(id) {
     if (!id) {
@@ -2935,7 +2944,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = constants_default;
     this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.8.1";
+    this.version = "1.9.0";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
