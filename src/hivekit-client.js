@@ -1,11 +1,10 @@
 import EventEmitter from './event-emitter.js'
-import C from './constants.js'
+import { C, fieldnames } from './fields.js';
 import SystemHandler from './system-handler.js'
 import RealmHandler from './realm-handler.js'
 import { getPromise } from './promise.js'
 import { nanoid } from 'nanoid'
 import SubscriptionHandler from './subscription-handler.js'
-import fieldnames from './fieldnames.js'
 import { reverseMap } from './tools.js'
 import HTTPConnection from './http-connection.js'
 

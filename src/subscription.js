@@ -1,6 +1,5 @@
 import EventEmitter from "./event-emitter.js";
-import C from "./constants.js";
-import fieldnames from "./fieldnames.js";
+import { C, fieldnames } from './fields.js';
 import { createMessage } from "./message.js";
 import { extendMap, toShape } from './tools.js';
 

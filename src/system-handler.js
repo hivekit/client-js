@@ -1,4 +1,4 @@
-import C from './constants.js'
+import { C } from './fields.js';
 import { createMessage } from './message.js';
 
 /**

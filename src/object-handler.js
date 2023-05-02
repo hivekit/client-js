@@ -1,6 +1,5 @@
-import C from './constants.js'
+import { C, fieldnames } from './fields.js';
 import { createMessage } from './message.js'
-import fieldnames from './fieldnames.js';
 import { extendMap, toShape } from './tools.js';
 
 /**

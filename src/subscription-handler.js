@@ -1,6 +1,6 @@
 import { getPromise } from './promise.js'
 import { createMessage } from './message.js'
-import C from './constants.js'
+import { C } from './fields.js';
 import Subscription from './subscription.js'
 import { deepClone } from './tools.js'
 

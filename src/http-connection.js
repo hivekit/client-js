@@ -1,5 +1,5 @@
 import axios from "axios";
-import C from "./constants.js"
+import { C } from './fields.js';
 
 export default class HTTPConnection {
     constructor(url, messageCallback) {

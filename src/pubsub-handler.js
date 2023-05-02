@@ -1,4 +1,4 @@
-import C from './constants.js';
+import { C } from './fields.js';
 import { createMessage } from "./message.js";
 
 /**
@@ -105,7 +105,7 @@ export default class PubSubHandler {
      */
     _emitSubscriptionEvent(eventName, data, idPattern) {
         if (this._subscriptionCallbacks[eventName]) {
-            if (C.INTERNAL_EVENTS.includes(eventName)) {
+            if (['connectionStatusChanged'].includes(eventName)) {
                 data = this._client._extendFields(data);
             }
             this._subscriptionCallbacks[eventName](data, idPattern);

@@ -1,4 +1,4 @@
-import C from './constants.js'
+import { C } from './fields.js';
 
 /**
  * switches the keys and values in a map.

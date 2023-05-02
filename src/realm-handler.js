@@ -1,4 +1,4 @@
-import C from './constants.js'
+import { C } from './fields.js';
 import { getPromise } from './promise.js'
 import { createMessage } from './message.js'
 import Realm from './realm.js'

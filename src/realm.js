@@ -2,8 +2,7 @@ import ObjectHandler from "./object-handler.js";
 import AreaHandler from "./area-handler.js";
 import InstructionHandler from './instruction-handler.js';
 import EventEmitter from './event-emitter.js'
-import C from './constants.js';
-import fieldnames from "./fieldnames.js";
+import { C, fieldnames } from './fields.js';
 import { createMessage } from "./message.js";
 import { deepClone } from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
@@ -111,7 +110,7 @@ export default class Realm extends EventEmitter {
      */
     search(searchString, options) {
         const data = this._client._compressFields(options, fieldnames.FIELD, true);
-        data[C.STRING_VALUE] = searchString;
+        data.val = searchString;
         const msg = createMessage(C.TYPE.REALM, C.ACTION.SEARCH, null, this.id, data);
         return this._client._sendRequestAndHandleResponse(msg, results => {
             if (!results[C.FIELD.DATA]) {
