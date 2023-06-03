@@ -31,9 +31,8 @@ const client = new HivekitClient();
 client.on('connectionStatusChanged', () => {
     console.log(client.connectionStatus)
 })
-await client.connect('wss://api.hivekit.io/ws');
+await client.connect('wss://api.hivekit.io/v1/ws');
 await client.authenticate(token);
-
 
 // A realm is a space within which something happens, e.g.
 // a city or a factory hall. If we don't have one yet, we need
@@ -46,7 +45,7 @@ const realm = await client.realm.get('test-realm');
 
 // Objects can represent vehicles, people, machines or
 // other datasources. Let's create one:
-await realm.object.create('rider-12', {
+await realm.object.create('rider/12', {
     label: 'Delivery Rider 12',
     location: {
         latitude: 52.5241175089,
@@ -74,7 +73,7 @@ await realm.object.create('rider-12', {
 //     data: { charge: 0.6 },
 //     connectionStatus: 'disconnected'
 // }
-const rider = await realm.object.get('rider-12');
+const rider = await realm.object.get('rider/12');
 
 // Use a subscription to get a realtime feed of object updates.
 // Subscriptions can be scoped and filtered in lots of ways, but
@@ -85,7 +84,7 @@ subscription.on('update', data => {
 });
 
 // Let's update the object to trigger the subscription above.
-realm.object.update('rider-12', {
+realm.object.update('rider/12', {
     location: {
         latitude: 52.52826383714,
         longitude: 13.38901541951
