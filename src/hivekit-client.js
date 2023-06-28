@@ -39,6 +39,7 @@ export default class HivekitClient extends EventEmitter {
         this.serverVersion = null; // will be replaced by data in auth message
         this.serverBuildDate = null; // will be replaced by data in auth message
         this.mode = null; // either HTTP or WS
+        this.token = null; // the JWT token used for authentication
 
         // default options
         this.options = this._extendOptions(options, {
@@ -140,6 +141,7 @@ export default class HivekitClient extends EventEmitter {
             this.connectionStatus = C.CONNECTION_STATUS.AUTHENTICATED;
             return Promise.resolve();
         }
+        this.token = token;
         this.system._sendAuthMessage(token);
         this._onAuthenticatePromise = getPromise();
         return this._onAuthenticatePromise;
@@ -223,8 +225,11 @@ export default class HivekitClient extends EventEmitter {
             this._onError(errorMsg, C.ERROR.DISCONNECTED_RETRYING);
             clearTimeout(this._reconnectTimeout);
 
-            this._reconnectTimeout = setTimeout(() => {
-                this.connect(this._url);
+            this._reconnectTimeout = setTimeout(async () => {
+                await this.connect(this._url);
+                if (this.token) {
+                    await this.authenticate(this.token);
+                }
             }, this.options.reconnectInterval)
         }
     }
