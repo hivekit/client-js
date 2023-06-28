@@ -100,7 +100,7 @@ describe('Object Test', function () {
 
     it('applies filters to list', async function () {
         var list = await realmA.object.list({
-            where: ['type=scooter']
+            where: ['type="scooter"']
         })
         expect(list).to.deep.equal({
             [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected' },
@@ -108,7 +108,7 @@ describe('Object Test', function () {
         });
 
         list = await realmA.object.list({
-            where: ['type=maintenance-vehicle']
+            where: ['type="maintenance-vehicle"']
         })
         expect(list).to.deep.equal({
             [objectIdC]: { id: objectIdC, label: 'Object C Label', connectionStatus: 'disconnected' },
@@ -117,7 +117,7 @@ describe('Object Test', function () {
 
     it('includes additional data in the list result', async function () {
         var list = await realmA.object.list({
-            where: ['type=scooter'],
+            where: ['type="scooter"'],
             field: ['charge']
         });
 
@@ -129,7 +129,7 @@ describe('Object Test', function () {
 
     it('finds objects within a shape', async function () {
         var list = await realmA.object.list({
-            where: ['type=scooter'],
+            where: ['type="scooter"'],
             field: ['charge'],
             shape: {
                 x1: 13,
@@ -146,7 +146,7 @@ describe('Object Test', function () {
 
     it('does not find objects outside of a shape', async function () {
         var list = await realmA.object.list({
-            where: ['type=scooter'],
+            where: ['type="scooter"'],
             field: ['charge'],
             shape: {
                 x1: 14,

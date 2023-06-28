@@ -37,11 +37,11 @@ describe('Instruction Test', function () {
         instructionIdA = client.getId('instruction-a');
         const instructionString = `
             when
-                object(type=scooter, charge<0.2)
+                object(type="scooter", charge<0.2)
             then
-                set(needsCharging, true)
+                set("needsCharging", "true")
             until
-                set(needsCharging, false)
+                set("needsCharging", "false")
         `
 
         const data = {
@@ -58,11 +58,11 @@ describe('Instruction Test', function () {
     it('fails to create instruction A again', function (done) {
         const instructionString = `
             when
-                object(type=scooter, charge<0.2)
+                object(type="scooter", charge<0.2)
             then
-                set(needsCharging, true)
+                set("needsCharging", "true")
             until
-                set(needsCharging, false)
+                set("needsCharging", "false")
         `
 
         const data = {
@@ -87,11 +87,11 @@ describe('Instruction Test', function () {
 
         const instructionString = `
             when blablub
-                object(type=scooter, charge<0.2)
+                object(type="scooter", charge<0.2)
             then
-                set(needsCharging, true)
+                set("needsCharging", "true")
             until
-                set(needsCharging, false)
+                set("needsCharging", "false")
         `
 
         const data = {
@@ -116,22 +116,22 @@ describe('Instruction Test', function () {
             label: 'instruction B Label', instructionString: `
         every 10 min
         when
-            object(type=scooter, charge<${Math.random()})
+            object(type="scooter", charge<${Math.random()})
         then
-            set(needsCharging, true)
+            set("needsCharging", "true")
         until
-            set(needsCharging, false)
+            set("needsCharging", "false")
     `, data: { letter: 'B' }
         })
         await realmA.instruction.create(instructionIdC, {
             label: 'instruction C Label', instructionString: `
         every 10 min
         when
-            object(type=scooter, charge<${Math.random()})
-        then
-            set(needsCharging, true)
+            object(type="scooter", charge<${Math.random()})
+            then
+            set("needsCharging", "true")
         until
-            set(needsCharging, false)
+            set("needsCharging", "false")
     `, data: { letter: 'C' }
         })
     });
@@ -161,11 +161,11 @@ describe('Instruction Test', function () {
         const instructionString = `
             every 10 min
             when
-                object(type=scooter, charge<0.2)
+                object(type="scooter", charge<0.2)
             then
-                set(needsCharging, true)
+                set("needsCharging", "true")
             until
-                set(needsCharging, false)`;
+                set("needsCharging", "false")`;
         await realmA.instruction.update(instructionIdB, { label: 'New Label', instructionString, data: { charge: 0.5 } });
         const intructionData = await realmA.instruction.get(instructionIdB);
         expect(intructionData.instructionString.trim()).to.deep.equal(instructionString.trim())

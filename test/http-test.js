@@ -87,7 +87,7 @@ describe('HTTP Test', function () {
 
     it('applies filters to list', async function () {
         var list = await realmA.object.list({
-            where: ['type=scooter']
+            where: ['type="scooter"']
         })
         expect(list).to.deep.equal({
             [objectIdA]: { id: objectIdA, label: 'Object A Label', connectionStatus: 'disconnected' },
@@ -95,7 +95,7 @@ describe('HTTP Test', function () {
         });
 
         list = await realmA.object.list({
-            where: ['type=maintenance-vehicle']
+            where: ['type="maintenance-vehicle"']
         })
         expect(list).to.deep.equal({
             [objectIdC]: { id: objectIdC, label: 'Object C Label', connectionStatus: 'disconnected' },

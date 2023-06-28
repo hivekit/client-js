@@ -42,7 +42,7 @@ describe('Subscription Test', function () {
                 id: objectIdA,
                 r: 2000
             },
-            where: ['$id!=' + objectIdA]
+            where: [`$id!="${objectIdA}"`]
         }
         await realmA.object.subscribe(subscriptionOptions).then(subscription => {
             subscription.on('update', data => {
