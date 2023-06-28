@@ -105,143 +105,164 @@ var EventEmitter = class {
   }
 };
 
-// src/constants.js
-var constants_default = {
+// src/fields.js
+var FIELDS = {
   CONNECTION_STATUS: {
-    CONNECTED: "connected",
-    DISCONNECTED: "disconnected",
-    CONNECTING: "connecting",
-    DISCONNECTING: "disconnecting",
-    AUTHENTICATED: "authenticated"
+    CONNECTED: { VAL: "connected" },
+    DISCONNECTED: { VAL: "disconnected" },
+    CONNECTING: { VAL: "connecting" },
+    DISCONNECTING: { VAL: "disconnecting" },
+    AUTHENTICATED: { VAL: "authenticated" }
   },
   MODE: {
-    HTTP: "http",
-    WS: "ws"
+    HTTP: { VAL: "http" },
+    WS: { VAL: "ws" }
   },
   TYPE: {
-    REALM: "rea",
-    OBJECT: "obj",
-    AREA: "are",
-    SUBSCRIPTION: "sub",
-    SYSTEM: "sys",
-    INSTRUCTION: "ins",
-    LOGEVENT: "log",
-    HISTORY: "his"
+    REALM: { VAL: "rea", FULL: "realm" },
+    OBJECT: { VAL: "obj", FULL: "object" },
+    AREA: { VAL: "are", FULL: "area" },
+    SUBSCRIPTION: { VAL: "sub", FULL: "subscription" },
+    SYSTEM: { VAL: "sys", FULL: "system" },
+    INSTRUCTION: { VAL: "ins", FULL: "instruction" },
+    LOGEVENT: { VAL: "log", FULL: "logEvent" },
+    HISTORY: { VAL: "his", FULL: "history" }
   },
   ERROR: {
-    CONNECTION_ERROR: "connection_error",
-    MAX_RECONNECT_ATTEMPTS_EXCEEDED: "max_reconnect_attempts_exceeded",
-    MESSAGE_PARSE_ERROR: "message_parse_error",
-    UNKNOWN_REQUEST: "unknown_request",
-    UNKNOWN_TYPE: "unknown_type",
-    SERVER_ERROR: "server_error",
-    UNKNOWN_FIELD: "unknown_field",
-    UNKNOWN_ACTION: "unknown_action",
-    UNKNOWN_SUBSCRIPTION: "unknown_subscription",
-    DISCONNECTED_RETRYING: "disconnected_retrying"
+    CONNECTION_ERROR: { VAL: "connection_error" },
+    MAX_RECONNECT_ATTEMPTS_EXCEEDED: { VAL: "max_reconnect_attempts_exceeded" },
+    MESSAGE_PARSE_ERROR: { VAL: "message_parse_error" },
+    UNKNOWN_REQUEST: { VAL: "unknown_request" },
+    UNKNOWN_TYPE: { VAL: "unknown_type" },
+    SERVER_ERROR: { VAL: "server_error" },
+    UNKNOWN_FIELD: { VAL: "unknown_field" },
+    UNKNOWN_ACTION: { VAL: "unknown_action" },
+    UNKNOWN_SUBSCRIPTION: { VAL: "unknown_subscription" },
+    DISCONNECTED_RETRYING: { VAL: "disconnected_retrying" }
   },
   UPDATE_TYPE: {
-    FULL: "ful",
-    DELTA: "dta"
+    FULL: { VAL: "ful" },
+    DELTA: { VAL: "dta" }
   },
-  STRING_VALUE: "val",
-  INTERNAL_EVENTS: [
-    "connectionStatusChanged"
-  ],
   FIELD: {
-    TYPE: "typ",
-    SCOPE_TYPE: "sty",
-    SUB_TYPE: "sty",
-    SCOPE_ID: "sid",
-    EXECUTE_IMMEDIATELY: "exe",
-    ACTION: "act",
-    RESULT: "res",
-    CORRELATION_ID: "cid",
-    ID: "id",
-    REALM: "rea",
-    DATA: "dat",
-    LOCATION: "loc",
-    ERROR: "err",
-    LABEL: "lab",
-    ATTRIBUTE: "atr",
-    UPDATE_TYPE: "uty",
-    INSTRUCTION_STRING: "ins",
-    PRESENCE_CONNECTION_STATUS: "cst",
-    SHAPE: "sha",
-    SHAPE_DATA: "shapeData",
-    FIELD: "fie",
-    VALUE: "val",
-    SUBSCRIPTION_TARGET: "sta",
-    START: "sta",
-    END: "end",
-    LEVEL: "lvl",
-    EVENT_NAME: "eve",
-    ID_PATTERN: "idp",
-    ERROR_CODE: "erc",
-    INTERVAL: "int",
-    TIME: "tim",
-    SCOPE_TYPE_TARGET: "tar",
-    RADIUS: "r"
+    TYPE: { VAL: "typ", FULL: "type" },
+    SCOPE_TYPE: { VAL: "sty", FULL: "scopeType" },
+    SUB_TYPE: { VAL: "sty", FULL: "scopeType" },
+    SCOPE_ID: { VAL: "sid", FULL: "scopeId" },
+    EXECUTE_IMMEDIATELY: { VAL: "exe", FULL: "executeImmediately" },
+    ACTION: { VAL: "act", FULL: "action" },
+    RESULT: { VAL: "res", FULL: "result" },
+    CORRELATION_ID: { VAL: "cid", FULL: "correlationId" },
+    ID: { VAL: "id", FULL: "id" },
+    REALM: { VAL: "rea", FULL: "realm" },
+    DATA: { VAL: "dat", FULL: "data" },
+    LOCATION: { VAL: "loc", FULL: "location" },
+    ERROR: { VAL: "err", FULL: "error" },
+    LABEL: { VAL: "lab", FULL: "label" },
+    ATTRIBUTE: { VAL: "atr", FULL: ["attribute", "where"] },
+    UPDATE_TYPE: { VAL: "uty" },
+    INSTRUCTION_STRING: { VAL: "ins", FULL: "instructionString" },
+    PRESENCE_CONNECTION_STATUS: { VAL: "cst", FULL: "connectionStatus" },
+    SHAPE: { VAL: "sha", FULL: "shape" },
+    SHAPE_DATA: { VAL: "shapeData", FULL: "shapeData" },
+    FIELD: { VAL: "fie", FULL: "field" },
+    VALUE: { VAL: "val", FULL: "value" },
+    SUBSCRIPTION_TARGET: { VAL: "sta", FULL: "start" },
+    START: { VAL: "sta", FULL: "start" },
+    END: { VAL: "end", FULL: "end" },
+    LEVEL: { VAL: "lvl", FULL: "level" },
+    EVENT_NAME: { VAL: "eve" },
+    ID_PATTERN: { VAL: "idp" },
+    ERROR_CODE: { VAL: "erc" },
+    INTERVAL: { VAL: "int", FULL: "interval" },
+    TIME: { VAL: "tim", FULL: "time" },
+    SCOPE_TYPE_TARGET: { VAL: "tar" },
+    RADIUS: { VAL: "r" }
   },
   ACTION: {
-    CREATE: "cre",
-    READ: "rea",
-    LIST: "lis",
-    UPDATE: "upd",
-    DELETE: "del",
-    AUTHENTICATE: "aut",
-    SET: "set",
-    SEARCH: "sea",
-    HEARTBEAT: "hbt",
-    SUBSCRIBE: "sub",
-    UNSUBSCRIBE: "uns",
-    PUBLISH: "pub",
-    GET_STATS: "sta"
+    CREATE: { VAL: "cre", FULL: "create" },
+    READ: { VAL: "rea", FULL: "read" },
+    LIST: { VAL: "lis", FULL: "list" },
+    UPDATE: { VAL: "upd", FULL: "update" },
+    DELETE: { VAL: "del", FULL: "delete" },
+    AUTHENTICATE: { VAL: "aut", FULL: "authenticate" },
+    SET: { VAL: "set", FULL: "set" },
+    SEARCH: { VAL: "sea" },
+    HEARTBEAT: { VAL: "hbt" },
+    SUBSCRIBE: { VAL: "sub" },
+    UNSUBSCRIBE: { VAL: "uns" },
+    PUBLISH: { VAL: "pub" },
+    GET_STATS: { VAL: "sta" }
   },
   RESULT: {
-    SUCCESS: "suc",
-    WARNING: "war",
-    ERROR: "err"
+    SUCCESS: { VAL: "suc", FULL: "success" },
+    WARNING: { VAL: "war", FULL: "warning" },
+    ERROR: { VAL: "err", FULL: "error" }
   },
   SUBSCRIPTION: {
-    REALM: "all-realms"
+    REALM: { VAL: "all-realms" }
   },
   LOCATION: {
-    GEOGRAPHIC_COORDINATE_SYSTEM: "gcs",
-    LONGITUDE: "lon",
-    LATITUDE: "lat",
-    ACCURACY: "acc",
-    SPEED: "spe",
-    HEADING: "hea",
-    ALTITUDE: "alt",
-    ALTITUDE_ACCURACY: "alc",
-    TIME: "tim"
+    GEOGRAPHIC_COORDINATE_SYSTEM: { VAL: "gcs", FULL: "coordinateSystem" },
+    LONGITUDE: { VAL: "lon", FULL: "longitude" },
+    LATITUDE: { VAL: "lat", FULL: "latitude" },
+    ACCURACY: { VAL: "acc", FULL: "accuracy" },
+    SPEED: { VAL: "spe", FULL: "speed" },
+    HEADING: { VAL: "hea", FULL: "heading" },
+    ALTITUDE: { VAL: "alt", FULL: "altitude" },
+    ALTITUDE_ACCURACY: { VAL: "alc", FULL: "altitudeAccuracy" },
+    TIME: { VAL: "tim", FULL: "time" }
   },
   SHAPE_TYPE: {
-    RECTANGLE: "rec",
-    CIRCLE: "cir",
-    POLYGON: "pol"
+    RECTANGLE: { VAL: "rec", FULL: "rectangle" },
+    CIRCLE: { VAL: "cir", FULL: "circle" },
+    POLYGON: { VAL: "pol", FULL: "polygon" }
   },
   PRESENCE_CONNECTION_STATUS: {
-    CONNECTED: "con",
-    DISCONNECTED: "dis"
+    CONNECTED: { VAL: "con", FULL: "connected" },
+    DISCONNECTED: { VAL: "dis", FULL: "disconnected" }
   }
 };
+var C = function() {
+  const C2 = {};
+  for (let category in FIELDS) {
+    C2[category] = {};
+    for (let field in FIELDS[category]) {
+      C2[category][field] = FIELDS[category][field].VAL;
+    }
+  }
+  return C2;
+}();
+var fieldnames = function getFullNames() {
+  const F = {};
+  for (let category in FIELDS) {
+    let entries = {};
+    for (let field in FIELDS[category]) {
+      if (FIELDS[category][field].FULL) {
+        entries[FIELDS[category][field].VAL] = FIELDS[category][field].FULL;
+      }
+    }
+    if (Object.keys(entries).length > 0) {
+      F[category] = entries;
+    }
+  }
+  return F;
+}();
 
 // src/message.js
 function createMessage(type, action, id, realm, data, location) {
   const message = {
-    [constants_default.FIELD.TYPE]: type,
-    [constants_default.FIELD.ACTION]: action
+    [C.FIELD.TYPE]: type,
+    [C.FIELD.ACTION]: action
   };
   if (id)
-    message[constants_default.FIELD.ID] = id;
+    message[C.FIELD.ID] = id;
   if (realm)
-    message[constants_default.FIELD.REALM] = realm;
+    message[C.FIELD.REALM] = realm;
   if (data)
-    message[constants_default.FIELD.DATA] = data;
+    message[C.FIELD.DATA] = data;
   if (location)
-    message[constants_default.FIELD.LOCATION] = location;
+    message[C.FIELD.LOCATION] = location;
   return message;
 }
 
@@ -295,14 +316,14 @@ var SystemHandler = class {
         resolve();
       } else {
         const result = await rawResponse.json();
-        reject(new Error(result[0][constants_default.FIELD.ERROR]));
+        reject(new Error(result[0][C.FIELD.ERROR]));
       }
     });
   }
   getServerStats() {
-    const msg = createMessage(constants_default.TYPE.SYSTEM, constants_default.ACTION.GET_STATS);
+    const msg = createMessage(C.TYPE.SYSTEM, C.ACTION.GET_STATS);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return response[constants_default.FIELD.DATA];
+      return response[C.FIELD.DATA];
     });
   }
   _sendAuthMessage(token) {
@@ -315,22 +336,22 @@ var SystemHandler = class {
     }
   }
   _handleIncomingMessage(message) {
-    switch (message[constants_default.FIELD.ACTION]) {
-      case constants_default.ACTION.AUTHENTICATE:
-        if (message[constants_default.FIELD.RESULT] === constants_default.RESULT.SUCCESS) {
-          if (message[constants_default.FIELD.DATA]) {
-            this._client.serverVersion = message[constants_default.FIELD.DATA].version;
-            this._client.serverBuildDate = message[constants_default.FIELD.DATA].buildDate;
+    switch (message[C.FIELD.ACTION]) {
+      case C.ACTION.AUTHENTICATE:
+        if (message[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
+          if (message[C.FIELD.DATA]) {
+            this._client.serverVersion = message[C.FIELD.DATA].version;
+            this._client.serverBuildDate = message[C.FIELD.DATA].buildDate;
           }
-          this._client._changeConnectionStatus(constants_default.CONNECTION_STATUS.AUTHENTICATED);
+          this._client._changeConnectionStatus(C.CONNECTION_STATUS.AUTHENTICATED);
           this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.resolve();
         }
-        if (message[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
-          this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[constants_default.FIELD.ERROR]);
+        if (message[C.FIELD.RESULT] === C.RESULT.ERROR) {
+          this._client._onAuthenticatePromise && this._client._onAuthenticatePromise.reject(message[C.FIELD.ERROR]);
         }
         break;
       default:
-        this._client._onError(`Unknown action for type ${constants_default.TYPE.SYSTEM}: ${message[constants_default.FIELD.ACTION]}`, constants_default.ERROR.UNKNOWN_ACTION);
+        this._client._onError(`Unknown action for type ${C.TYPE.SYSTEM}: ${message[C.FIELD.ACTION]}`, C.ERROR.UNKNOWN_ACTION);
     }
   }
 };
@@ -346,81 +367,6 @@ function getPromise() {
   promise.reject = reject;
   return promise;
 }
-
-// src/fieldnames.js
-var fieldnames_default = {
-  TYPE: {
-    [constants_default.TYPE.REALM]: "realm",
-    [constants_default.TYPE.OBJECT]: "object",
-    [constants_default.TYPE.AREA]: "area",
-    [constants_default.TYPE.SUBSCRIPTION]: "subscription",
-    [constants_default.TYPE.SYSTEM]: "system",
-    [constants_default.TYPE.INSTRUCTION]: "instruction",
-    [constants_default.TYPE.LOGEVENT]: "logEvent",
-    [constants_default.TYPE.HISTORY]: "history"
-  },
-  FIELD: {
-    [constants_default.FIELD.TYPE]: "type",
-    [constants_default.FIELD.SCOPE_TYPE]: "scopeType",
-    [constants_default.FIELD.SCOPE_ID]: "scopeId",
-    [constants_default.FIELD.ACTION]: "action",
-    [constants_default.FIELD.RESULT]: "result",
-    [constants_default.FIELD.CORRELATION_ID]: "correlationId",
-    [constants_default.FIELD.ID]: "id",
-    [constants_default.FIELD.REALM]: "realm",
-    [constants_default.FIELD.DATA]: "data",
-    [constants_default.FIELD.LOCATION]: "location",
-    [constants_default.FIELD.ERROR]: "error",
-    [constants_default.FIELD.LABEL]: "label",
-    [constants_default.FIELD.ATTRIBUTE]: ["attribute", "where"],
-    [constants_default.FIELD.EXECUTE_IMMEDIATELY]: "executeImmediately",
-    [constants_default.FIELD.SHAPE]: "shape",
-    [constants_default.FIELD.SHAPE_DATA]: "shapeData",
-    [constants_default.FIELD.INSTRUCTION_STRING]: "instructionString",
-    [constants_default.FIELD.FIELD]: "field",
-    [constants_default.FIELD.VALUE]: "value",
-    [constants_default.FIELD.START]: "start",
-    [constants_default.FIELD.END]: "end",
-    [constants_default.FIELD.LEVEL]: "level",
-    [constants_default.FIELD.PRESENCE_CONNECTION_STATUS]: "connectionStatus",
-    [constants_default.FIELD.TIME]: "time",
-    [constants_default.FIELD.INTERVAL]: "interval"
-  },
-  PRESENCE_CONNECTION_STATUS: {
-    [constants_default.PRESENCE_CONNECTION_STATUS.CONNECTED]: "connected",
-    [constants_default.PRESENCE_CONNECTION_STATUS.DISCONNECTED]: "disconnected"
-  },
-  ACTION: {
-    [constants_default.ACTION.CREATE]: "create",
-    [constants_default.ACTION.READ]: "read",
-    [constants_default.ACTION.LIST]: "list",
-    [constants_default.ACTION.UPDATE]: "update",
-    [constants_default.ACTION.DELETE]: "delete",
-    [constants_default.ACTION.AUTHENTICATE]: "authenticate",
-    [constants_default.ACTION.SET]: "set"
-  },
-  RESULT: {
-    [constants_default.RESULT.SUCCESS]: "success",
-    [constants_default.RESULT.WARNING]: "warning",
-    [constants_default.RESULT.ERROR]: "error"
-  },
-  LOCATION: {
-    [constants_default.LOCATION.GEOGRAPHIC_COORDINATE_SYSTEM]: "coordinateSystem",
-    [constants_default.LOCATION.LONGITUDE]: "longitude",
-    [constants_default.LOCATION.LATITUDE]: "latitude",
-    [constants_default.LOCATION.ACCURACY]: "accuracy",
-    [constants_default.LOCATION.SPEED]: "speed",
-    [constants_default.LOCATION.HEADING]: "heading",
-    [constants_default.LOCATION.ALTITUDE]: "altitude",
-    [constants_default.LOCATION.ALTITUDE_ACCURACY]: "altitudeAccuracy",
-    [constants_default.LOCATION.TIME]: "time"
-  },
-  SHAPE_TYPE: {
-    [constants_default.SHAPE_TYPE.RECTANGLE]: "rectangle",
-    [constants_default.SHAPE_TYPE.CIRCLE]: "circle",
-    [constants_default.SHAPE_TYPE.POLYGON]: "polygon"
-  }
-};
 
 // src/tools.js
 function reverseMap(input) {
@@ -446,9 +392,9 @@ function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 var SHAPE_SIGNATURES = {
-  "x1x2y1y2": constants_default.SHAPE_TYPE.RECTANGLE,
-  "cxcyr": constants_default.SHAPE_TYPE.CIRCLE,
-  "points": constants_default.SHAPE_TYPE.POLYGON
+  "x1x2y1y2": C.SHAPE_TYPE.RECTANGLE,
+  "cxcyr": C.SHAPE_TYPE.CIRCLE,
+  "points": C.SHAPE_TYPE.POLYGON
 };
 function toShape(shapeData) {
   var shapeSignature = Object.keys(shapeData).sort().join("");
@@ -494,63 +440,63 @@ var ObjectHandler = class {
       options.shape = shape.data;
     }
     if (options.target) {
-      options[constants_default.FIELD.SUBSCRIPTION_TARGET] = options.target;
-      options[constants_default.FIELD.SCOPE_TYPE] = constants_default.FIELD.SCOPE_TYPE_TARGET;
+      options[C.FIELD.SUBSCRIPTION_TARGET] = options.target;
+      options[C.FIELD.SCOPE_TYPE] = C.FIELD.SCOPE_TYPE_TARGET;
       delete options.target;
     }
     return this._client._subscription._getSubscription(this._client.getId("object-subscription"), this._realm.id, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD, true)));
+      [C.FIELD.TYPE]: C.TYPE.OBJECT,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD, true)));
   }
   get(id) {
     if (!id) {
       throw new Error("no id provided for object.get");
     }
-    const msg = createMessage(constants_default.TYPE.OBJECT, constants_default.ACTION.READ, id, this._realm.id);
+    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[constants_default.FIELD.DATA]);
+      return this._client._extendFields(response[C.FIELD.DATA]);
     });
   }
   create(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.CREATE);
+    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.UPDATE);
+    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.UPDATE);
   }
   set(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, constants_default.ACTION.SET);
+    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.SET);
   }
   list(options) {
-    const msg = createMessage(constants_default.TYPE.OBJECT, constants_default.ACTION.LIST, null, this._realm.id);
+    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
     if (options && Object.keys(options).length > 0) {
-      msg[constants_default.FIELD.DATA] = this._client._compressFields(options, fieldnames_default.FIELD);
+      msg[C.FIELD.DATA] = this._client._compressFields(options, fieldnames.FIELD);
     }
     return this._client._sendRequestAndHandleResponse(msg, (result) => {
-      return this._client._extendFieldsMap(result[constants_default.FIELD.DATA]);
+      return this._client._extendFieldsMap(result[C.FIELD.DATA]);
     });
   }
   delete(id) {
-    const msg = createMessage(constants_default.TYPE.OBJECT, constants_default.ACTION.DELETE, id, this._realm.id);
+    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _getLocationFields() {
     const locationFields = {};
-    for (var fieldname in fieldnames_default.LOCATION) {
-      locationFields[fieldnames_default.LOCATION[fieldname]] = fieldname;
+    for (var fieldname in fieldnames.LOCATION) {
+      locationFields[fieldnames.LOCATION[fieldname]] = fieldname;
     }
     return locationFields;
   }
   _setObjectState(id, label, location, data, action) {
-    const msg = createMessage(constants_default.TYPE.OBJECT, action, id, this._realm.id);
+    const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
     if (label)
-      msg[constants_default.FIELD.LABEL] = label;
+      msg[C.FIELD.LABEL] = label;
     if (location && Object.keys(location).length > 0) {
-      msg[constants_default.FIELD.LOCATION] = this._parseLocation(location);
+      msg[C.FIELD.LOCATION] = this._parseLocation(location);
     }
     if (data && Object.keys(data).length > 0)
-      msg[constants_default.FIELD.DATA] = data;
-    if (action === constants_default.ACTION.SET && this._client.mode !== constants_default.MODE.HTTP) {
+      msg[C.FIELD.DATA] = data;
+    if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
       this._client._sendMessage(msg);
     } else {
       return this._client._sendRequestAndHandleResponse(msg);
@@ -567,7 +513,7 @@ var ObjectHandler = class {
         continue;
       }
       if (location[key].length > 0) {
-        if (key === fieldnames_default.LOCATION[constants_default.LOCATION.TIME]) {
+        if (key === fieldnames.LOCATION[C.LOCATION.TIME]) {
           try {
             parsedLocation[key] = new Date(location[key]).toISOString();
           } catch (e) {
@@ -590,49 +536,49 @@ var AreaHandler = class {
   }
   subscribe(options) {
     return this._client._subscription._getSubscription(this._client.getId("area-subscription"), this._realm.id, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.AREA,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+      [C.FIELD.TYPE]: C.TYPE.AREA,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   get(id) {
-    const msg = createMessage(constants_default.TYPE.AREA, constants_default.ACTION.READ, id, this._realm.id);
+    const msg = createMessage(C.TYPE.AREA, C.ACTION.READ, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[constants_default.FIELD.DATA]);
+      return this._client._extendFields(response[C.FIELD.DATA]);
     });
   }
   create(id, options) {
-    return this._setAreaState(id, options.label, options.shape, options.data, constants_default.ACTION.CREATE);
+    return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setAreaState(id, options.label, options.shape, options.data, constants_default.ACTION.UPDATE);
+    return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.UPDATE);
   }
   list() {
-    const msg = createMessage(constants_default.TYPE.AREA, constants_default.ACTION.LIST, null, this._realm.id);
+    const msg = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (result) => {
-      const areas = this._client._extendFieldsMap(result[constants_default.FIELD.DATA]);
+      const areas = this._client._extendFieldsMap(result[C.FIELD.DATA]);
       for (var id in areas) {
-        areas[id].shape = fieldnames_default.SHAPE_TYPE[areas[id].scopeType];
+        areas[id].shape = fieldnames.SHAPE_TYPE[areas[id].scopeType];
         delete areas[id].scopeType;
       }
       return areas;
     });
   }
   delete(id) {
-    const msg = createMessage(constants_default.TYPE.AREA, constants_default.ACTION.DELETE, id, this._realm.id);
+    const msg = createMessage(C.TYPE.AREA, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _setAreaState(id, label, shapeData, data, action) {
-    const msg = createMessage(constants_default.TYPE.AREA, action, id, this._realm.id);
+    const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
     const shape = toShape(shapeData);
     if (shape.err) {
       return Promise.reject(shape.err);
     }
-    msg[constants_default.FIELD.SUB_TYPE] = shape.type;
-    msg[constants_default.FIELD.SHAPE] = shape.data;
+    msg[C.FIELD.SUB_TYPE] = shape.type;
+    msg[C.FIELD.SHAPE] = shape.data;
     if (label)
-      msg[constants_default.FIELD.LABEL] = label;
+      msg[C.FIELD.LABEL] = label;
     if (data)
-      msg[constants_default.FIELD.DATA] = data;
+      msg[C.FIELD.DATA] = data;
     return this._client._sendRequestAndHandleResponse(msg);
   }
 };
@@ -645,45 +591,45 @@ var InstructionHandler = class {
   }
   subscribe(options) {
     return this._client._subscription._getSubscription(this._client.getId("instruction-subscription"), this._realm.id, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.INSTRUCTION,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+      [C.FIELD.TYPE]: C.TYPE.INSTRUCTION,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   subscribeToLogs(options) {
     return this._client._subscription._getSubscription(this._client.getId("instruction-log-subscription"), this._realm.id, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.LOGEVENT,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+      [C.FIELD.TYPE]: C.TYPE.LOGEVENT,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   get(id) {
-    const msg = createMessage(constants_default.TYPE.INSTRUCTION, constants_default.ACTION.READ, id, this._realm.id);
+    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.READ, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[constants_default.FIELD.DATA]);
+      return this._client._extendFields(response[C.FIELD.DATA]);
     });
   }
   create(id, options) {
-    return this._setInstructionState(id, options.label, options.instructionString, options.data, constants_default.ACTION.CREATE);
+    return this._setInstructionState(id, options.label, options.instructionString, options.data, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setInstructionState(id, options.label, options.instructionString, options.data, constants_default.ACTION.UPDATE);
+    return this._setInstructionState(id, options.label, options.instructionString, options.data, C.ACTION.UPDATE);
   }
   list() {
-    const msg = createMessage(constants_default.TYPE.INSTRUCTION, constants_default.ACTION.LIST, null, this._realm.id);
+    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.LIST, null, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (result) => {
-      return this._client._extendFieldsMap(result[constants_default.FIELD.DATA]);
+      return this._client._extendFieldsMap(result[C.FIELD.DATA]);
     });
   }
   delete(id) {
-    const msg = createMessage(constants_default.TYPE.INSTRUCTION, constants_default.ACTION.DELETE, id, this._realm.id);
+    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _setInstructionState(id, label, instructionString, data, action) {
-    const msg = createMessage(constants_default.TYPE.INSTRUCTION, action, id, this._realm.id);
-    msg[constants_default.FIELD.INSTRUCTION_STRING] = instructionString;
+    const msg = createMessage(C.TYPE.INSTRUCTION, action, id, this._realm.id);
+    msg[C.FIELD.INSTRUCTION_STRING] = instructionString;
     if (label)
-      msg[constants_default.FIELD.LABEL] = label;
+      msg[C.FIELD.LABEL] = label;
     if (data)
-      msg[constants_default.FIELD.DATA] = data;
+      msg[C.FIELD.DATA] = data;
     return this._client._sendRequestAndHandleResponse(msg);
   }
 };
@@ -703,11 +649,11 @@ var PubSubHandler = class {
       idPattern = idPatternOrCallback;
     }
     this._subscriptionCallbacks[eventName] = callback;
-    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(constants_default.ACTION.SUBSCRIBE, eventName, idPattern));
+    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(C.ACTION.SUBSCRIBE, eventName, idPattern));
   }
   unsubscribe(eventName, idPattern) {
     delete this._subscriptionCallbacks[eventName];
-    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(constants_default.ACTION.UNSUBSCRIBE, eventName, idPattern));
+    return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(C.ACTION.UNSUBSCRIBE, eventName, idPattern));
   }
   publish(eventName, idPatternOrData, data) {
     var idPattern;
@@ -717,23 +663,23 @@ var PubSubHandler = class {
     } else {
       idPattern = idPatternOrData;
     }
-    const msg = this._getPubSubMessage(constants_default.ACTION.PUBLISH, eventName, idPattern);
-    msg[constants_default.FIELD.DATA][constants_default.FIELD.DATA] = data;
+    const msg = this._getPubSubMessage(C.ACTION.PUBLISH, eventName, idPattern);
+    msg[C.FIELD.DATA][C.FIELD.DATA] = data;
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _emitSubscriptionEvent(eventName, data, idPattern) {
     if (this._subscriptionCallbacks[eventName]) {
-      if (constants_default.INTERNAL_EVENTS.includes(eventName)) {
+      if (["connectionStatusChanged"].includes(eventName)) {
         data = this._client._extendFields(data);
       }
       this._subscriptionCallbacks[eventName](data, idPattern);
     }
   }
   _getPubSubMessage(action, eventName, idPattern) {
-    const msg = createMessage(constants_default.TYPE.REALM, action, this._realm.id);
-    msg[constants_default.FIELD.DATA] = {
-      [constants_default.FIELD.EVENT_NAME]: eventName,
-      [constants_default.FIELD.ID_PATTERN]: idPattern || "*"
+    const msg = createMessage(C.TYPE.REALM, action, this._realm.id);
+    msg[C.FIELD.DATA] = {
+      [C.FIELD.EVENT_NAME]: eventName,
+      [C.FIELD.ID_PATTERN]: idPattern || "*"
     };
     return msg;
   }
@@ -746,19 +692,19 @@ var HistoryHandler = class {
     this._realm = realm;
   }
   get(id, options) {
-    const msg = createMessage(constants_default.TYPE.HISTORY, constants_default.ACTION.READ, id, this._realm.id);
+    const msg = createMessage(C.TYPE.HISTORY, C.ACTION.READ, id, this._realm.id);
     if (!isValidDate(options.startTime)) {
       throw new Error("startTime is not a valid Date object");
     }
     if (!isValidDate(options.endTime)) {
       throw new Error("endTime is not a valid Date object");
     }
-    msg[constants_default.FIELD.DATA] = {
-      [constants_default.FIELD.START]: options.startTime.toISOString(),
-      [constants_default.FIELD.END]: options.endTime.toISOString()
+    msg[C.FIELD.DATA] = {
+      [C.FIELD.START]: options.startTime.toISOString(),
+      [C.FIELD.END]: options.endTime.toISOString()
     };
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return response[constants_default.FIELD.DATA].map((entry) => {
+      return response[C.FIELD.DATA].map((entry) => {
         return this._client._extendFields(entry);
       });
     });
@@ -791,28 +737,28 @@ var Realm = class extends EventEmitter {
     }
   }
   setData(key, value) {
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.UPDATE, this.id);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this._data[key] = value;
-    msg[constants_default.FIELD.DATA] = this._data;
+    msg[C.FIELD.DATA] = this._data;
     this.emit("update");
     return this._client._sendRequestAndHandleResponse(msg);
   }
   setLabel(label) {
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.UPDATE, this.id);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this.label = label;
-    msg[constants_default.FIELD.LABEL] = label;
+    msg[C.FIELD.LABEL] = label;
     this.emit("update");
     return this._client._sendRequestAndHandleResponse(msg);
   }
   search(searchString, options) {
-    const data = this._client._compressFields(options, fieldnames_default.FIELD, true);
-    data[constants_default.STRING_VALUE] = searchString;
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.SEARCH, null, this.id, data);
+    const data = this._client._compressFields(options, fieldnames.FIELD, true);
+    data.val = searchString;
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.SEARCH, null, this.id, data);
     return this._client._sendRequestAndHandleResponse(msg, (results) => {
-      if (!results[constants_default.FIELD.DATA]) {
+      if (!results[C.FIELD.DATA]) {
         return [];
       }
-      return results[constants_default.FIELD.DATA].map((result) => {
+      return results[C.FIELD.DATA].map((result) => {
         const extendedResult = this._client._extendFields(result);
         extendedResult.dataProperty = extendedResult.scopeType;
         delete extendedResult.scopeType;
@@ -829,9 +775,9 @@ var RealmHandler = class {
     this._realms = {};
   }
   subscribe() {
-    return this._client._subscription._getSubscription(this._client.getId("realm-subscription-"), constants_default.TYPE.SYSTEM, {
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.SYSTEM,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
+    return this._client._subscription._getSubscription(this._client.getId("realm-subscription-"), C.TYPE.SYSTEM, {
+      [C.FIELD.TYPE]: C.TYPE.SYSTEM,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
     });
   }
   get(id) {
@@ -840,37 +786,37 @@ var RealmHandler = class {
       result.resolve(this._realms[id]);
       return result;
     }
-    if (this._client.mode === constants_default.MODE.HTTP) {
+    if (this._client.mode === C.MODE.HTTP) {
       this._realms[id] = new Realm(id, null, {}, this._client);
       return Promise.resolve(this._realms[id]);
     }
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.READ, id);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      this._realms[id] = new Realm(id, response[constants_default.FIELD.DATA][constants_default.FIELD.LABEL], response[constants_default.FIELD.DATA][constants_default.FIELD.DATA] || {}, this._client);
+      this._realms[id] = new Realm(id, response[C.FIELD.DATA][C.FIELD.LABEL], response[C.FIELD.DATA][C.FIELD.DATA] || {}, this._client);
       return this._realms[id];
     });
   }
   create(id, label, data) {
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.CREATE, id);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.CREATE, id);
     if (label)
-      msg[constants_default.FIELD.LABEL] = label;
+      msg[C.FIELD.LABEL] = label;
     if (data && Object.keys(data).length > 0)
-      msg[constants_default.FIELD.DATA] = data;
+      msg[C.FIELD.DATA] = data;
     return this._client._sendRequestAndHandleResponse(msg);
   }
   list() {
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.LIST);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.LIST);
     return this._client._sendRequestAndHandleResponse(msg, (result) => {
       return this._client._extendFieldsMap(result.dat);
     });
   }
   delete(id) {
-    const msg = createMessage(constants_default.TYPE.REALM, constants_default.ACTION.DELETE, id);
+    const msg = createMessage(C.TYPE.REALM, C.ACTION.DELETE, id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _handleIncomingMessage(msg) {
-    if (msg[constants_default.FIELD.ACTION] == constants_default.ACTION.PUBLISH && this._realms[msg[constants_default.FIELD.REALM]]) {
-      this._realms[msg[constants_default.FIELD.REALM]].pubsub._emitSubscriptionEvent(msg[constants_default.FIELD.DATA][constants_default.FIELD.EVENT_NAME], msg[constants_default.FIELD.DATA][constants_default.FIELD.DATA], msg[constants_default.FIELD.DATA][constants_default.FIELD.ID_PATTERN]);
+    if (msg[C.FIELD.ACTION] == C.ACTION.PUBLISH && this._realms[msg[C.FIELD.REALM]]) {
+      this._realms[msg[C.FIELD.REALM]].pubsub._emitSubscriptionEvent(msg[C.FIELD.DATA][C.FIELD.EVENT_NAME], msg[C.FIELD.DATA][C.FIELD.DATA], msg[C.FIELD.DATA][C.FIELD.ID_PATTERN]);
     }
   }
 };
@@ -927,23 +873,23 @@ var Subscription = class extends EventEmitter {
       options.scopeType = shape.type;
       options.shape = shape.data;
     }
-    const msg = createMessage(constants_default.TYPE.SUBSCRIPTION, constants_default.ACTION.UPDATE, this.id, this.realmId, extendMap({
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.OBJECT,
-      [constants_default.FIELD.SCOPE_TYPE]: constants_default.TYPE.REALM
-    }, this._client._compressFields(options, fieldnames_default.FIELD)));
+    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.UPDATE, this.id, this.realmId, extendMap({
+      [C.FIELD.TYPE]: C.TYPE.OBJECT,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD)));
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _processIncomingMessage(msg) {
     if (this._data === null) {
       this._data = {};
     }
-    if (msg[constants_default.TYPE.OBJECT]) {
+    if (msg[C.TYPE.OBJECT]) {
       const delta = {
-        added: this._client._extendFieldsMap(msg[constants_default.TYPE.OBJECT][constants_default.ACTION.CREATE]),
-        updated: this._client._extendFieldsMap(msg[constants_default.TYPE.OBJECT][constants_default.ACTION.UPDATE]),
-        removed: msg[constants_default.TYPE.OBJECT][constants_default.ACTION.DELETE]
+        added: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.CREATE]),
+        updated: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.UPDATE]),
+        removed: msg[C.TYPE.OBJECT][C.ACTION.DELETE]
       };
-      if (msg[constants_default.FIELD.UPDATE_TYPE] === constants_default.UPDATE_TYPE.FULL) {
+      if (msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {
         this._data = {};
       }
       for (let id2 in delta.added) {
@@ -955,33 +901,33 @@ var Subscription = class extends EventEmitter {
       for (let id2 in delta.removed) {
         delete this._data[id2];
       }
-      this.emit("update", this._data, delta, msg[constants_default.FIELD.UPDATE_TYPE] === constants_default.UPDATE_TYPE.FULL ? "full" : "delta");
+      this.emit("update", this._data, delta, msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL ? "full" : "delta");
       return;
     }
     var data = {};
-    if (msg[constants_default.TYPE.AREA]) {
-      data = this._client._extendFieldsMap(msg[constants_default.TYPE.AREA]);
-    } else if (msg[constants_default.TYPE.INSTRUCTION]) {
-      data = this._client._extendFieldsMap(msg[constants_default.TYPE.INSTRUCTION]);
-    } else if (msg[constants_default.TYPE.LOGEVENT]) {
-      data = this._client._extendFieldsArray(msg[constants_default.TYPE.LOGEVENT]);
-    } else if (msg[constants_default.FIELD.DATA] && msg[constants_default.FIELD.DATA][constants_default.FIELD.TYPE] === constants_default.TYPE.REALM) {
+    if (msg[C.TYPE.AREA]) {
+      data = this._client._extendFieldsMap(msg[C.TYPE.AREA]);
+    } else if (msg[C.TYPE.INSTRUCTION]) {
+      data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
+    } else if (msg[C.TYPE.LOGEVENT]) {
+      data = this._client._extendFieldsArray(msg[C.TYPE.LOGEVENT]);
+    } else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
       data = {
-        realmId: msg[constants_default.FIELD.DATA][constants_default.FIELD.ID],
-        action: fieldnames_default.ACTION[msg[constants_default.FIELD.DATA][constants_default.FIELD.ACTION]]
+        realmId: msg[C.FIELD.DATA][C.FIELD.ID],
+        action: fieldnames.ACTION[msg[C.FIELD.DATA][C.FIELD.ACTION]]
       };
     }
-    switch (msg[constants_default.FIELD.UPDATE_TYPE]) {
-      case constants_default.UPDATE_TYPE.FULL:
+    switch (msg[C.FIELD.UPDATE_TYPE]) {
+      case C.UPDATE_TYPE.FULL:
         this._data = data;
         break;
-      case constants_default.UPDATE_TYPE.DELTA:
+      case C.UPDATE_TYPE.DELTA:
         for (var id in data) {
           this._data[id] = data[id];
         }
         break;
       default:
-        this._client._onError("Received subscription message with unknown update type " + msg[constants_default.FIELD.UPDATE_TYPE], constants_default.ERROR.UNKNOWN_TYPE);
+        this._client._onError("Received subscription message with unknown update type " + msg[C.FIELD.UPDATE_TYPE], C.ERROR.UNKNOWN_TYPE);
         return;
     }
     this.emit("update", this._data);
@@ -1012,7 +958,7 @@ var SubscriptionHandler = class {
       subscription = new Subscription(this._client, id, realmId);
       subscriptionCollection.push(subscription);
       resultPromise.resolve(subscription);
-      if (options[constants_default.FIELD.EXECUTE_IMMEDIATELY]) {
+      if (options[C.FIELD.EXECUTE_IMMEDIATELY]) {
         this._invokeImmediatly(subscription);
       }
       return resultPromise;
@@ -1028,15 +974,15 @@ var SubscriptionHandler = class {
       return resultPromise;
     }
     this._pendingSubscriptionPromises[signature] = [{ resultPromise, subscription }];
-    const msg = createMessage(constants_default.TYPE.SUBSCRIPTION, constants_default.ACTION.CREATE, id, realmId, options);
+    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId, options);
     this._client._sendRequest(msg, (res) => {
-      if (res[constants_default.FIELD.RESULT] === constants_default.RESULT.SUCCESS) {
+      if (res[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
         this._pendingSubscriptionPromises[signature].forEach((entry) => {
           entry.resultPromise.resolve(entry.subscription);
         });
       } else {
         this._pendingSubscriptionPromises[signature].forEach((promise) => {
-          promise.resultPromise.reject(res[constants_default.FIELD.ERROR]);
+          promise.resultPromise.reject(res[C.FIELD.ERROR]);
         });
       }
       delete this._pendingSubscriptionPromises[signature];
@@ -1058,14 +1004,14 @@ var SubscriptionHandler = class {
         resolve();
       });
     }
-    const msg = createMessage(constants_default.TYPE.SUBSCRIPTION, constants_default.ACTION.DELETE, subscription.id, subscription.realmId);
+    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, subscription.id, subscription.realmId);
     delete this._subscriptionCollections[subscription.id];
     return this._client._sendRequestAndHandleResponse(msg);
   }
   _handleIncomingMessage(msg) {
-    const id = msg[constants_default.FIELD.ID];
+    const id = msg[C.FIELD.ID];
     if (!this._subscriptionCollections[id]) {
-      this._client._onError("Received message for unknown subscription " + msg, constants_default.ERROR.UNKNOWN_SUBSCRIPTION);
+      this._client._onError("Received message for unknown subscription " + msg, C.ERROR.UNKNOWN_SUBSCRIPTION);
     } else {
       for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
         this._subscriptionCollections[id][i]._processIncomingMessage(msg);
@@ -2879,8 +2825,8 @@ var HTTPConnection = class {
     } catch (e) {
       return null;
     }
-    if (parsedMsg && parsedMsg[0] && parsedMsg[0][constants_default.FIELD.CORRELATION_ID]) {
-      return parsedMsg[0][constants_default.FIELD.CORRELATION_ID];
+    if (parsedMsg && parsedMsg[0] && parsedMsg[0][C.FIELD.CORRELATION_ID]) {
+      return parsedMsg[0][C.FIELD.CORRELATION_ID];
     }
   }
   send(msg) {
@@ -2898,13 +2844,13 @@ var HTTPConnection = class {
       },
       data: msg
     }).then((response) => {
-      if (msg.includes(constants_default.ACTION.SET)) {
+      if (msg.includes(C.ACTION.SET)) {
         const messages = JSON.parse(msg);
         messages.forEach((msg2) => {
-          if (msg2[constants_default.FIELD.ACTION] === constants_default.ACTION.SET) {
+          if (msg2[C.FIELD.ACTION] === C.ACTION.SET) {
             response.data.push({
-              [constants_default.FIELD.CORRELATION_ID]: msg2[constants_default.FIELD.CORRELATION_ID],
-              [constants_default.FIELD.RESULT]: constants_default.RESULT.SUCCESS
+              [C.FIELD.CORRELATION_ID]: msg2[C.FIELD.CORRELATION_ID],
+              [C.FIELD.RESULT]: C.RESULT.SUCCESS
             });
           }
         });
@@ -2912,21 +2858,21 @@ var HTTPConnection = class {
       this.messageCallback(response);
     }).catch((response) => {
       const responseMessage = {
-        [constants_default.FIELD.RESULT]: constants_default.RESULT.ERROR
+        [C.FIELD.RESULT]: C.RESULT.ERROR
       };
       const correlationId = this.getCorrelationId(msg);
       if (correlationId) {
-        responseMessage[constants_default.FIELD.CORRELATION_ID] = correlationId;
+        responseMessage[C.FIELD.CORRELATION_ID] = correlationId;
       }
       if (response.response && response.response.data) {
         if (typeof response.response.data === "object") {
-          responseMessage[constants_default.FIELD.ERROR] = response.response.data[constants_default.FIELD.ERROR];
-          responseMessage[constants_default.FIELD.ERROR_CODE] = response.response.data[constants_default.FIELD.ERROR_CODE];
+          responseMessage[C.FIELD.ERROR] = response.response.data[C.FIELD.ERROR];
+          responseMessage[C.FIELD.ERROR_CODE] = response.response.data[C.FIELD.ERROR_CODE];
         } else {
-          responseMessage[constants_default.FIELD.ERROR] = response.response.data;
+          responseMessage[C.FIELD.ERROR] = response.response.data;
         }
       } else {
-        responseMessage[constants_default.FIELD.ERROR] = response.message || response.body || response.toString();
+        responseMessage[C.FIELD.ERROR] = response.message || response.body || response.toString();
       }
       this.messageCallback({
         data: [responseMessage]
@@ -2941,13 +2887,14 @@ var HTTPConnection = class {
 var HivekitClient = class extends EventEmitter {
   constructor(options) {
     super();
-    this.constants = constants_default;
-    this.connectionStatus = constants_default.CONNECTION_STATUS.DISCONNECTED;
+    this.constants = C;
+    this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.9.0";
+    this.version = "1.9.1";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
+    this.token = null;
     this.options = this._extendOptions(options, {
       outgoingMessageBufferTime: 0,
       logMessages: false,
@@ -2972,35 +2919,35 @@ var HivekitClient = class extends EventEmitter {
     this._pendingMessages = null;
     this._pendingHeartbeats = {};
     this._typeHandler = {
-      [constants_default.TYPE.SYSTEM]: this.system,
-      [constants_default.TYPE.SUBSCRIPTION]: this._subscription,
-      [constants_default.TYPE.REALM]: this.realm
+      [C.TYPE.SYSTEM]: this.system,
+      [C.TYPE.SUBSCRIPTION]: this._subscription,
+      [C.TYPE.REALM]: this.realm
     };
   }
   useHTTP(url) {
-    if (this.mode == constants_default.MODE.WS) {
+    if (this.mode == C.MODE.WS) {
       throw new Error("Can't use HTTP. This client is already connected via Websocket.");
     }
     clearInterval(this._heartbeatInterval);
-    this.mode = constants_default.MODE.HTTP;
+    this.mode = C.MODE.HTTP;
     this._url = url;
     this._connection = new HTTPConnection(url, this._onMessage.bind(this));
   }
   connect(url) {
-    if (this.mode === constants_default.MODE.HTTP) {
+    if (this.mode === C.MODE.HTTP) {
       throw new Error("Can't connect via Websocket. This client is already using HTTP");
     }
-    if (this.mode === constants_default.MODE.WS && this._connection.readyState === this.WsConstructor.OPEN) {
+    if (this.mode === C.MODE.WS && this._connection.readyState === this.WsConstructor.OPEN) {
       throw new Error("This client is already connected");
     }
-    this.mode = constants_default.MODE.WS;
+    this.mode = C.MODE.WS;
     this._url = url;
-    this._changeConnectionStatus(constants_default.CONNECTION_STATUS.CONNECTING);
+    this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTING);
     this._connection = new this.WsConstructor(url);
     this._connection.onopen = this._onOpen.bind(this);
     this._connection.onclose = this._onClose.bind(this);
     this._connection.onerror = (err) => {
-      this._onError(err.message, constants_default.ERROR.CONNECTION_ERROR);
+      this._onError(err.message, C.ERROR.CONNECTION_ERROR);
     };
     this._connection.onmessage = this._onMessage.bind(this);
     if (!this._onConnectPromise) {
@@ -3012,11 +2959,12 @@ var HivekitClient = class extends EventEmitter {
     if (!this._connection) {
       return Promise.reject("can't authenticate: client not connected. Did you call .connect() before calling .authenticate()?");
     }
-    if (this.mode === constants_default.MODE.HTTP) {
+    if (this.mode === C.MODE.HTTP) {
       this._connection.token = token;
-      this.connectionStatus = constants_default.CONNECTION_STATUS.AUTHENTICATED;
+      this.connectionStatus = C.CONNECTION_STATUS.AUTHENTICATED;
       return Promise.resolve();
     }
+    this.token = token;
     this.system._sendAuthMessage(token);
     this._onAuthenticatePromise = getPromise();
     return this._onAuthenticatePromise;
@@ -3025,7 +2973,7 @@ var HivekitClient = class extends EventEmitter {
     if (!this._connection) {
       return Promise.reject("client not connected");
     }
-    this._changeConnectionStatus(constants_default.CONNECTION_STATUS.DISCONNECTING);
+    this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTING);
     this._connection.close();
     this._onDisconnectPromise = getPromise();
     return this._onDisconnectPromise;
@@ -3037,7 +2985,7 @@ var HivekitClient = class extends EventEmitter {
     return this._connection.url;
   }
   _onOpen() {
-    this._changeConnectionStatus(constants_default.CONNECTION_STATUS.CONNECTED);
+    this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);
     this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
     clearTimeout(this._reconnectTimeout);
     this._reconnectTimeout = null;
@@ -3046,17 +2994,17 @@ var HivekitClient = class extends EventEmitter {
   }
   _onDisconnect() {
     clearInterval(this._heartbeatInterval);
-    this._changeConnectionStatus(constants_default.CONNECTION_STATUS.DISCONNECTED);
+    this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
     this._onDisconnectPromise && this._onDisconnectPromise.resolve();
   }
   _onClose() {
-    if (this.connectionStatus === constants_default.CONNECTION_STATUS.DISCONNECTING) {
+    if (this.connectionStatus === C.CONNECTION_STATUS.DISCONNECTING) {
       this._onDisconnect();
     } else {
       this._reconnectAttempts++;
       if (this._reconnectAttempts > this.options.maxReconnectAttempts) {
         const errorMsg2 = "exceeded max reconnect attempts. giving up :-(";
-        this._onError(errorMsg2, constants_default.ERROR.MAX_RECONNECT_ATTEMPTS_EXCEEDED);
+        this._onError(errorMsg2, C.ERROR.MAX_RECONNECT_ATTEMPTS_EXCEEDED);
         clearTimeout(this._reconnectTimeout);
         this._onConnectPromise.reject(errorMsg2);
         this._connection.close();
@@ -3064,10 +3012,13 @@ var HivekitClient = class extends EventEmitter {
         return;
       }
       const errorMsg = `Disconnected, attempting to reconnect. (Attempt ${this._reconnectAttempts} of ${this.options.maxReconnectAttempts})`;
-      this._onError(errorMsg, constants_default.ERROR.DISCONNECTED_RETRYING);
+      this._onError(errorMsg, C.ERROR.DISCONNECTED_RETRYING);
       clearTimeout(this._reconnectTimeout);
-      this._reconnectTimeout = setTimeout(() => {
-        this.connect(this._url);
+      this._reconnectTimeout = setTimeout(async () => {
+        await this.connect(this._url);
+        if (this.token) {
+          await this.authenticate(this.token);
+        }
       }, this.options.reconnectInterval);
     }
   }
@@ -3082,18 +3033,18 @@ var HivekitClient = class extends EventEmitter {
     try {
       messages = typeof msg.data === "string" ? JSON.parse(msg.data) : msg.data;
     } catch (e) {
-      this._onError(`Failed to parse message: ${e} - ${msg.data}`, constants_default.ERROR.MESSAGE_PARSE_ERROR);
+      this._onError(`Failed to parse message: ${e} - ${msg.data}`, C.ERROR.MESSAGE_PARSE_ERROR);
     }
     if (Array.isArray(messages)) {
       messages.forEach(this._handleIncomingMessage.bind(this));
     } else {
-      this._onError(`message was not in expected form: ${JSON.stringify(messages)}`, constants_default.ERROR.MESSAGE_PARSE_ERROR);
+      this._onError(`message was not in expected form: ${JSON.stringify(messages)}`, C.ERROR.MESSAGE_PARSE_ERROR);
     }
   }
   _sendMessage(msg) {
     if (this._pendingMessages === null) {
       this._pendingMessages = [msg];
-      if (this.connectionStatus === constants_default.CONNECTION_STATUS.AUTHENTICATED) {
+      if (this.connectionStatus === C.CONNECTION_STATUS.AUTHENTICATED) {
         this._sendPendingMessageTimeout = setTimeout(this._sendPendingMessages.bind(this), this.options.outgoingMessageBufferTime);
       } else {
         if (this.options.logErrors) {
@@ -3117,52 +3068,52 @@ var HivekitClient = class extends EventEmitter {
     this._pendingMessages = null;
   }
   _sendHeartbeatMessage() {
-    if (this.connectionStatus !== constants_default.CONNECTION_STATUS.AUTHENTICATED) {
+    if (this.connectionStatus !== C.CONNECTION_STATUS.AUTHENTICATED) {
       return;
     }
     const id = this.getId("heartbeat");
     this._pendingHeartbeats[id] = Date.now();
     const heartbeatMessage = [{
-      [constants_default.FIELD.TYPE]: constants_default.TYPE.SYSTEM,
-      [constants_default.FIELD.ACTION]: constants_default.ACTION.HEARTBEAT,
-      [constants_default.FIELD.CORRELATION_ID]: id
+      [C.FIELD.TYPE]: C.TYPE.SYSTEM,
+      [C.FIELD.ACTION]: C.ACTION.HEARTBEAT,
+      [C.FIELD.CORRELATION_ID]: id
     }];
     this._connection.send(JSON.stringify(heartbeatMessage));
   }
   _processHeartbeatResponse(msg) {
-    if (this._pendingHeartbeats[msg[constants_default.FIELD.CORRELATION_ID]]) {
-      this.ping = Date.now() - this._pendingHeartbeats[msg[constants_default.FIELD.CORRELATION_ID]];
+    if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
+      this.ping = Date.now() - this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
       this.emit("ping", this.ping);
     }
-    delete this._pendingHeartbeats[msg[constants_default.FIELD.CORRELATION_ID]];
+    delete this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
   }
   _handleIncomingMessage(msg) {
     if (this.options.logMessages) {
       console.log("<", msg);
     }
-    if (msg[constants_default.FIELD.CORRELATION_ID]) {
-      if (this._pendingHeartbeats[msg[constants_default.FIELD.CORRELATION_ID]]) {
+    if (msg[C.FIELD.CORRELATION_ID]) {
+      if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
         this._processHeartbeatResponse(msg);
-      } else if (this._pendingRequests[msg[constants_default.FIELD.CORRELATION_ID]]) {
-        this._pendingRequests[msg[constants_default.FIELD.CORRELATION_ID]].responseCallbacks.forEach((callback) => {
+      } else if (this._pendingRequests[msg[C.FIELD.CORRELATION_ID]]) {
+        this._pendingRequests[msg[C.FIELD.CORRELATION_ID]].responseCallbacks.forEach((callback) => {
           callback(msg);
         });
-        delete this._pendingRequests[msg[constants_default.FIELD.CORRELATION_ID]];
+        delete this._pendingRequests[msg[C.FIELD.CORRELATION_ID]];
       } else {
-        this._onError("Received response for unknown request", constants_default.ERROR.UNKNOWN_REQUEST, msg);
+        this._onError("Received response for unknown request", C.ERROR.UNKNOWN_REQUEST, msg);
       }
-    } else if (msg[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR && msg[constants_default.FIELD.TYPE] !== constants_default.TYPE.SYSTEM) {
-      this._onError(msg[constants_default.FIELD.ERROR] || msg[constants_default.FIELD.DATA], constants_default.ERROR.SERVER_ERROR);
-    } else if (!this._typeHandler[msg[constants_default.FIELD.TYPE]]) {
-      this._onError("Received message for unknown type " + this._typeHandler[msg[constants_default.FIELD.TYPE]], constants_default.ERROR.UNKNOWN_TYPE);
+    } else if (msg[C.FIELD.RESULT] === C.RESULT.ERROR && msg[C.FIELD.TYPE] !== C.TYPE.SYSTEM) {
+      this._onError(msg[C.FIELD.ERROR] || msg[C.FIELD.DATA], C.ERROR.SERVER_ERROR);
+    } else if (!this._typeHandler[msg[C.FIELD.TYPE]]) {
+      this._onError("Received message for unknown type " + this._typeHandler[msg[C.FIELD.TYPE]], C.ERROR.UNKNOWN_TYPE);
     } else {
-      this._typeHandler[msg[constants_default.FIELD.TYPE]]._handleIncomingMessage(msg);
+      this._typeHandler[msg[C.FIELD.TYPE]]._handleIncomingMessage(msg);
     }
   }
   _changeConnectionStatus(connectionStatus) {
     this.connectionStatus = connectionStatus;
     this.emit("connectionStatusChanged", connectionStatus);
-    if (connectionStatus === constants_default.CONNECTION_STATUS.AUTHENTICATED) {
+    if (connectionStatus === C.CONNECTION_STATUS.AUTHENTICATED) {
       this._sendPendingMessages();
     }
   }
@@ -3175,7 +3126,7 @@ var HivekitClient = class extends EventEmitter {
       }
     }
     const requestId = nanoid();
-    msg[constants_default.FIELD.CORRELATION_ID] = requestId;
+    msg[C.FIELD.CORRELATION_ID] = requestId;
     this._pendingRequests[requestId] = {
       signature,
       responseCallbacks: [responseCallback]
@@ -3185,11 +3136,11 @@ var HivekitClient = class extends EventEmitter {
   _sendRequestAndHandleResponse(msg, successDataTransform) {
     const result = getPromise();
     this._sendRequest(msg, (response) => {
-      if (response[constants_default.FIELD.RESULT] === constants_default.RESULT.ERROR) {
-        this._onError(response[constants_default.FIELD.ERROR], constants_default.FIELD.SERVER_ERROR, constants_default.FIELD.ERROR_CODE);
+      if (response[C.FIELD.RESULT] === C.RESULT.ERROR) {
+        this._onError(response[C.FIELD.ERROR], C.FIELD.SERVER_ERROR, C.FIELD.ERROR_CODE);
         result.reject({
-          message: response[constants_default.FIELD.ERROR],
-          code: response[constants_default.FIELD.ERROR_CODE]
+          message: response[C.FIELD.ERROR],
+          code: response[C.FIELD.ERROR_CODE]
         });
       } else {
         result.resolve(successDataTransform ? successDataTransform(response) : response);
@@ -3222,22 +3173,22 @@ var HivekitClient = class extends EventEmitter {
     }
     return combinedOptions;
   }
-  _extendFields(data, fields = fieldnames_default.FIELD) {
+  _extendFields(data, fields = fieldnames.FIELD) {
     const translated = {};
     for (let key in data) {
       if (fields[key]) {
-        if (key === constants_default.FIELD.LOCATION) {
-          translated[fields[key]] = this._extendFields(data[key], fieldnames_default.LOCATION);
-        } else if (key === constants_default.FIELD.PRESENCE_CONNECTION_STATUS) {
-          translated[fields[constants_default.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames_default.PRESENCE_CONNECTION_STATUS[data[key]];
-        } else if (key === constants_default.FIELD.SUB_TYPE && data[constants_default.FIELD.SHAPE]) {
-          translated[fields[constants_default.FIELD.SHAPE]] = fieldnames_default.SHAPE_TYPE[data[key]];
-        } else if (key === constants_default.FIELD.SHAPE) {
-          translated[fields[constants_default.FIELD.SHAPE_DATA]] = data[key];
-        } else if (key === constants_default.FIELD.TYPE) {
-          translated[fields[constants_default.FIELD.TYPE]] = fieldnames_default.TYPE[data[key]];
-        } else if (key === constants_default.FIELD.FIELD) {
-          translated[fields[constants_default.FIELD.FIELD]] = fieldnames_default.FIELD[data[key]];
+        if (key === C.FIELD.LOCATION) {
+          translated[fields[key]] = this._extendFields(data[key], fieldnames.LOCATION);
+        } else if (key === C.FIELD.PRESENCE_CONNECTION_STATUS) {
+          translated[fields[C.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames.PRESENCE_CONNECTION_STATUS[data[key]];
+        } else if (key === C.FIELD.SUB_TYPE && data[C.FIELD.SHAPE]) {
+          translated[fields[C.FIELD.SHAPE]] = fieldnames.SHAPE_TYPE[data[key]];
+        } else if (key === C.FIELD.SHAPE) {
+          translated[fields[C.FIELD.SHAPE_DATA]] = data[key];
+        } else if (key === C.FIELD.TYPE) {
+          translated[fields[C.FIELD.TYPE]] = fieldnames.TYPE[data[key]];
+        } else if (key === C.FIELD.FIELD) {
+          translated[fields[C.FIELD.FIELD]] = fieldnames.FIELD[data[key]];
         } else {
           translated[fields[key]] = data[key];
         }
@@ -3261,8 +3212,8 @@ var HivekitClient = class extends EventEmitter {
     }
     return result;
   }
-  _compressFields(extendedFields, fieldnames, ignoreUnknown) {
-    const reversedFieldNames = reverseMap(fieldnames);
+  _compressFields(extendedFields, fieldnames2, ignoreUnknown) {
+    const reversedFieldNames = reverseMap(fieldnames2);
     const compressedFields = {};
     for (let key in extendedFields) {
       if (reversedFieldNames[key]) {
@@ -3270,7 +3221,7 @@ var HivekitClient = class extends EventEmitter {
       } else if (ignoreUnknown) {
         compressedFields[key] = extendedFields[key];
       } else {
-        this._onError(`Unknown field ${key}`, constants_default.ERROR.UNKNOWN_FIELD);
+        this._onError(`Unknown field ${key}`, C.ERROR.UNKNOWN_FIELD);
       }
     }
     return compressedFields;
