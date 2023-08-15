@@ -430,6 +430,9 @@ export default class HivekitClient extends EventEmitter {
                 if (key === C.FIELD.LOCATION) {
                     translated[fields[key]] = this._extendFields(data[key], fieldnames.LOCATION);
                 }
+                else if (key === C.FIELD.STEPS) {
+                    translated[fields[key]] = this._extendFieldsArray(data[key], fieldnames.FIELD);
+                }
                 else if (key === C.FIELD.PRESENCE_CONNECTION_STATUS) {
                     translated[fields[C.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames.PRESENCE_CONNECTION_STATUS[data[key]];
                 }

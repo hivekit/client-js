@@ -84,11 +84,12 @@ export default class Subscription extends EventEmitter {
         if (this._data === null) {
             this._data = {};
         }
-        if (msg[C.TYPE.OBJECT]) {
+        if (msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK]) {
+            const update = msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK];
             const delta = {
-                added: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.CREATE]),
-                updated: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.UPDATE]),
-                removed: msg[C.TYPE.OBJECT][C.ACTION.DELETE],
+                added: this._client._extendFieldsMap(update[C.ACTION.CREATE]),
+                updated: this._client._extendFieldsMap(update[C.ACTION.UPDATE]),
+                removed: update[C.ACTION.DELETE],
             };
 
             if (msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {

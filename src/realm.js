@@ -7,6 +7,7 @@ import { createMessage } from "./message.js";
 import { deepClone } from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
 import HistoryHandler from "./history-handler.js";
+import TaskHandler from "./task-handler.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -38,6 +39,7 @@ export default class Realm extends EventEmitter {
         this.instruction = new InstructionHandler(client, this);
         this.pubsub = new PubSubHandler(client, this);
         this.history = new HistoryHandler(client, this);
+        this.task = new TaskHandler(client, this);
     }
 
     /**

@@ -1,6 +1,6 @@
 import { C, fieldnames } from './fields.js';
 import { createMessage } from './message.js'
-import { extendMap, toShape } from './tools.js';
+import { extendMap, toShape, parseLocation } from './tools.js';
 
 /**
  * This class exposes functionality to create, read, update, delete
@@ -22,7 +22,6 @@ export default class ObjectHandler {
     constructor(client, realm) {
         this._client = client;
         this._realm = realm;
-        this._locationFields = this._getLocationFields();
     }
 
     /**
@@ -173,19 +172,6 @@ export default class ObjectHandler {
      *******************************************/
 
     /**
-     * Maps location fields to fieldnames
-     * 
-     * @returns {object} locationFields
-     */
-    _getLocationFields() {
-        const locationFields = {};
-        for (var fieldname in fieldnames.LOCATION) {
-            locationFields[fieldnames.LOCATION[fieldname]] = fieldname;
-        }
-        return locationFields
-    }
-
-    /**
      * Composes a message object and passes it on to the client
      * 
      * @param {string} id 
@@ -200,7 +186,7 @@ export default class ObjectHandler {
         const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;
         if (location && Object.keys(location).length > 0) {
-            msg[C.FIELD.LOCATION] = this._parseLocation(location);
+            msg[C.FIELD.LOCATION] = parseLocation(location);
         }
         if (data && Object.keys(data).length > 0) msg[C.FIELD.DATA] = data;
         if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
@@ -208,39 +194,5 @@ export default class ObjectHandler {
         } else {
             return this._client._sendRequestAndHandleResponse(msg);
         }
-    }
-
-    /**
-     * Converts a user defined location object into something
-     * compatible with the servers idea of what a location
-     * should look like.
-     * 
-     * @param {object} location 
-     * @returns {object} parsed location
-     */
-    _parseLocation(location) {
-        const parsedLocation = {};
-        for (var key in location) {
-            if (key.length === 0) {
-                continue;
-            }
-            if (typeof location[key] !== 'string') {
-                parsedLocation[this._locationFields[key]] = location[key];
-                continue;
-            }
-            if (location[key].length > 0) {
-                if (key === fieldnames.LOCATION[C.LOCATION.TIME]) {
-                    try {
-                        parsedLocation[key] = (new Date(location[key])).toISOString();
-                    } catch (e) {
-                        throw new Error(`Can't convert ${location[key]} into a valid date:${e}`);
-                    }
-                } else {
-                    parsedLocation[this._locationFields[key]] = parseFloat(location[key]);
-                }
-            }
-        }
-
-        return parsedLocation;
     }
 }
