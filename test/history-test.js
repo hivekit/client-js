@@ -24,7 +24,6 @@ describe('History Test', function () {
         expect(realmA.id).to.equal(realmIdA);
     });
 
-
     it('creates object A and updates it twice', async function () {
         this.timeout(10000);
         objectIdA = client.getId('object-a');
@@ -37,6 +36,7 @@ describe('History Test', function () {
                 valueA: 1
             }
         });
+        await sleep(100);
         realmA.object.set(objectIdA, {
             location: {
                 longitude: 14,
@@ -47,6 +47,7 @@ describe('History Test', function () {
                 valueB: 1
             }
         });
+        await sleep(100);
         realmA.object.set(objectIdA, {
             location: {
                 longitude: 15,
