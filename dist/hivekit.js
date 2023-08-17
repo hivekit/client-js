@@ -191,7 +191,8 @@ var FIELDS = {
     STATUS: { VAL: "sts", FULL: "status" },
     STEPS: { VAL: "stp", FULL: "steps" },
     DESCRIPTION: { VAL: "dsc", FULL: "description" },
-    TARGET_ID: { VAL: "tid", FULL: "targetId" }
+    TARGET_ID: { VAL: "tid", FULL: "targetId" },
+    TASK_IDS: { VAL: "tds", FULL: "taskIds" }
   },
   ACTION: {
     CREATE: { VAL: "cre", FULL: "create" },
@@ -497,17 +498,20 @@ var ObjectHandler = class {
     }
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[C.FIELD.DATA]);
+      const obj = this._client._extendFields(response[C.FIELD.DATA]);
+      obj.data = obj.data || {};
+      obj.taskIds = obj.taskIds || [];
+      return obj;
     });
   }
   create(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.CREATE);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.UPDATE);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.UPDATE);
   }
   set(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.SET);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.SET);
   }
   list(options) {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
@@ -522,7 +526,7 @@ var ObjectHandler = class {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
-  _setObjectState(id, label, location, data, action) {
+  _setObjectState(id, label, location, data, taskIds, action) {
     const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
     if (label)
       msg[C.FIELD.LABEL] = label;
@@ -531,6 +535,8 @@ var ObjectHandler = class {
     }
     if (data && Object.keys(data).length > 0)
       msg[C.FIELD.DATA] = data;
+    if (Array.isArray(taskIds))
+      msg[C.FIELD.TASK_IDS] = taskIds;
     if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
       this._client._sendMessage(msg);
     } else {
@@ -826,7 +832,10 @@ var Realm = class extends EventEmitter {
   setData(key, value) {
     const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this._data[key] = value;
-    msg[C.FIELD.DATA] = this._data;
+    msg[C.FIELD.DATA] = deepClone(this._data);
+    if (value === null) {
+      delete this._data[key];
+    }
     this.emit("update");
     return this._client._sendRequestAndHandleResponse(msg);
   }
@@ -2978,7 +2987,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = C;
     this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.10.0";
+    this.version = "1.10.1";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
