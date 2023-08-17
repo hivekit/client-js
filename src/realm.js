@@ -72,7 +72,12 @@ export default class Realm extends EventEmitter {
     setData(key, value) {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this._data[key] = value;
-        msg[C.FIELD.DATA] = this._data;
+        msg[C.FIELD.DATA] = deepClone(this._data);
+
+        if (value === null) {
+            delete this._data[key];
+        }
+
         this.emit('update'); // @todo - react to remote data changes
         return this._client._sendRequestAndHandleResponse(msg);
     }

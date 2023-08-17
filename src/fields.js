@@ -88,6 +88,7 @@ export const FIELDS = {
         STEPS: { VAL: 'stp', FULL: 'steps' },
         DESCRIPTION: { VAL: 'dsc', FULL: 'description' },
         TARGET_ID: { VAL: 'tid', FULL: 'targetId' },
+        TASK_IDS: { VAL: 'tds', FULL: 'taskIds' },
     },
     ACTION: {
         CREATE: { VAL: 'cre', FULL: 'create' },

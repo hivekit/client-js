@@ -69,12 +69,25 @@ describe('Object Test', function () {
             charge: 0.5
         }
 
-        await realmA.object.create(objectIdA, { label: 'Object A Label', location, data });
+        const taskIds = ['task-a', 'task-b', 'task-c']
+
+        await realmA.object.create(objectIdA, { label: 'Object A Label', location, data, taskIds });
         const objectA = await realmA.object.get(objectIdA);
         expect(objectA.data).to.deep.equal(data);
         expect(objectA.location.latitude).to.equal(location.latitude);
         expect(objectA.location.altitude).to.equal(0);
+        expect(objectA.taskIds).to.deep.equal(taskIds);
         expect(objectA.label).to.equal('Object A Label');
+    });
+
+    it('updates object A\'s task ids', async function () {
+        await realmA.object.update(objectIdA, { taskIds: ['task-d', 'task-e', 'task-f'] });
+        var objectA = await realmA.object.get(objectIdA);
+        expect(objectA.taskIds).to.deep.equal(['task-d', 'task-e', 'task-f']);
+
+        await realmA.object.set(objectIdA, { taskIds: [] });
+        var objectA = await realmA.object.get(objectIdA);
+        expect(objectA.taskIds).to.deep.equal([]);
     });
 
     it('creates object B and C ', async function () {

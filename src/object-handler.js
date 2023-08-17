@@ -77,7 +77,10 @@ export default class ObjectHandler {
         }
         const msg = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
         return this._client._sendRequestAndHandleResponse(msg, response => {
-            return this._client._extendFields(response[C.FIELD.DATA]);
+            const obj = this._client._extendFields(response[C.FIELD.DATA]);
+            obj.data = obj.data || {};
+            obj.taskIds = obj.taskIds || [];
+            return obj;
         });
     }
 
@@ -95,11 +98,12 @@ export default class ObjectHandler {
      * @param {string} [options.label]
      * @param {object} [options.location]
      * @param {object} [options.data]
+     * @param {string[]} [options.taskIds]
      * 
      * @returns {Promise<result>}
      */
     create(id, options) {
-        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.CREATE);
+        return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.CREATE);
     }
 
     /**
@@ -116,11 +120,12 @@ export default class ObjectHandler {
      * @param {string} [options.label]
      * @param {object} [options.location]
      * @param {object} [options.data]
+     * @param {string[]} [options.taskIds]
      * 
      * @returns {Promise<result>}
      */
     update(id, options) {
-        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.UPDATE);
+        return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.UPDATE);
     }
     /**
      * Creates or updates objects without waiting for confirmation.
@@ -134,11 +139,12 @@ export default class ObjectHandler {
      * @param {string} [options.label]
      * @param {object} [options.location]
      * @param {object} [options.data]
+     * @param {string[]} [options.taskIds]
      * 
      * @returns {Promise<result>}
      */
     set(id, options) {
-        return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.SET);
+        return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.SET);
     }
 
     /**
@@ -182,13 +188,14 @@ export default class ObjectHandler {
      * 
      * @returns {Promise<success> }
      */
-    _setObjectState(id, label, location, data, action) {
+    _setObjectState(id, label, location, data, taskIds, action) {
         const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
         if (label) msg[C.FIELD.LABEL] = label;
         if (location && Object.keys(location).length > 0) {
             msg[C.FIELD.LOCATION] = parseLocation(location);
         }
         if (data && Object.keys(data).length > 0) msg[C.FIELD.DATA] = data;
+        if (Array.isArray(taskIds)) msg[C.FIELD.TASK_IDS] = taskIds;
         if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
             this._client._sendMessage(msg);
         } else {
