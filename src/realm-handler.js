@@ -109,11 +109,11 @@ export default class RealmHandler {
      * @param {Object} msg 
      */
     _handleIncomingMessage(msg) {
-        if (msg[C.FIELD.ACTION] == C.ACTION.PUBLISH && this._realms[msg[C.FIELD.REALM]]) {
+        if (msg[C.FIELD.ACTION] === C.ACTION.PUBLISH && this._realms[msg[C.FIELD.REALM]]) {
             this._realms[msg[C.FIELD.REALM]].pubsub._emitSubscriptionEvent(
                 msg[C.FIELD.DATA][C.FIELD.EVENT_NAME],
                 msg[C.FIELD.DATA][C.FIELD.DATA],
-                msg[C.FIELD.DATA][C.FIELD.ID_PATTERN]
+                msg[C.FIELD.SCOPE_ID]
             )
         }
     }

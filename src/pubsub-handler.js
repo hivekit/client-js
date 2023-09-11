@@ -39,37 +39,73 @@ export default class PubSubHandler {
      * @returns Promise<success>
      */
     subscribe(eventName, idPatternOrCallback, callback) {
-        var idPattern = null;
+        let idPattern = "*";
 
-        if (arguments.length == 2) {
+        if (arguments.length === 2) {
             callback = idPatternOrCallback;
         } else {
             idPattern = idPatternOrCallback
         }
 
-        this._subscriptionCallbacks[eventName] = callback;
-        return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
-            C.ACTION.SUBSCRIBE,
-            eventName,
-            idPattern
-        ));
+        const enip = `${eventName}:${idPattern}`;
+        let exists = this._subscriptionCallbacks[enip];
+        this._subscriptionCallbacks[enip] = this._subscriptionCallbacks[enip] || [];
+        this._subscriptionCallbacks[enip].push(callback);
+        if (!exists) {
+            return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
+                C.ACTION.SUBSCRIBE,
+                eventName,
+                idPattern
+            ));
+        }
+        return Promise.resolve({});
     }
 
     /**
      * Ends a subscription that was previously established via .subscribe()
      * 
      * @param {string} eventName name of the previously subscribed event
-     * @param {string} idPattern optional id pattern
+     * @param {string} idPatternOrCallback optional id pattern
+     * @param {function} callbackFn the callback that was previously registered. If omitted, all callbacks for the given event and idPattern will be removed.
      * @returns Promise<success>
      */
-    unsubscribe(eventName, idPattern) {
-        delete this._subscriptionCallbacks[eventName];
+    unsubscribe(eventName, idPatternOrCallback, callbackFn) {
+        let idPattern = "*";
+        let callback = null;
 
-        return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
-            C.ACTION.UNSUBSCRIBE,
-            eventName,
-            idPattern
-        ));
+        if (typeof idPatternOrCallback === 'function') {
+            callback = idPatternOrCallback;
+        } else if (idPatternOrCallback) {
+            idPattern = idPatternOrCallback;
+        }
+
+        const enip = `${eventName}:${idPattern}`;
+        let exists = this._subscriptionCallbacks[enip];
+        if (exists) {
+            if (callback) {
+                const subs = this._subscriptionCallbacks[enip];
+                const index = subs.indexOf(callback);
+                if (index > -1) {
+                    subs.splice(index, 1);
+                }
+            } else {
+                this._subscriptionCallbacks[enip].length = 0;
+            }
+
+            if (this._subscriptionCallbacks[enip].length === 0) {
+                delete this._subscriptionCallbacks[enip];
+                return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
+                    C.ACTION.UNSUBSCRIBE,
+                    eventName,
+                    idPattern
+                ));
+            }
+        }
+
+        return Promise.reject({
+            message: "no subscription with that id pattern",
+            code: 400
+        })
     }
 
     /**
@@ -84,7 +120,7 @@ export default class PubSubHandler {
     publish(eventName, idPatternOrData, data) {
         var idPattern;
 
-        if (arguments.length == 2) {
+        if (arguments.length === 2) {
             idPattern = '*';
             data = idPatternOrData;
         } else {
@@ -104,11 +140,15 @@ export default class PubSubHandler {
      * @param {string} idPattern
      */
     _emitSubscriptionEvent(eventName, data, idPattern) {
-        if (this._subscriptionCallbacks[eventName]) {
+        const enip = `${eventName}:${idPattern}`;
+        const subs = this._subscriptionCallbacks[enip];
+        if (subs) {
             if (['connectionStatusChanged'].includes(eventName)) {
                 data = this._client._extendFields(data);
             }
-            this._subscriptionCallbacks[eventName](data, idPattern);
+            for (let i = 0; i < subs.length; i++) {
+                subs[i](data);
+            }
         }
     }
 
