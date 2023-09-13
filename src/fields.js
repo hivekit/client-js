@@ -23,6 +23,16 @@ export const FIELDS = {
         INSTRUCTION: { VAL: 'ins', FULL: 'instruction' },
         LOGEVENT: { VAL: 'log', FULL: 'logEvent' },
         HISTORY: { VAL: 'his', FULL: 'history' },
+        TASK: { VAL: 'tsk', FULL: 'task' },
+    },
+    TASK_STATUS: {
+        NOT_STARTED: { VAL: '$hkt_not_started' },
+        IN_PROGRESS: { VAL: '$hkt_in_progress' },
+        COMPLETED: { VAL: '$hkt_completed' },
+        FAILED: { VAL: '$hkt_failed' },
+        CANCELED: { VAL: '$hkt_canceled' },
+        PAUSED: { VAL: '$hkt_paused' },
+        BLOCKED: { VAL: '$hkt_blocked' },
     },
     ERROR: {
         CONNECTION_ERROR: { VAL: 'connection_error' },
@@ -74,6 +84,11 @@ export const FIELDS = {
         TIME: { VAL: 'tim', FULL: 'time' },
         SCOPE_TYPE_TARGET: { VAL: 'tar' },
         RADIUS: { VAL: 'r' },
+        STATUS: { VAL: 'sts', FULL: 'status' },
+        STEPS: { VAL: 'stp', FULL: 'steps' },
+        DESCRIPTION: { VAL: 'dsc', FULL: 'description' },
+        TARGET_ID: { VAL: 'tid', FULL: 'targetId' },
+        TASK_IDS: { VAL: 'tds', FULL: 'taskIds' },
     },
     ACTION: {
         CREATE: { VAL: 'cre', FULL: 'create' },

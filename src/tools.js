@@ -1,4 +1,4 @@
-import { C } from './fields.js';
+import { C, fieldnames } from './fields.js';
 
 /**
  * switches the keys and values in a map.
@@ -109,4 +109,44 @@ export function toShape(shapeData) {
  */
 export function isValidDate(value) {
     return value instanceof Date && value.toString() != 'Invalid Date';
+}
+
+// remap location fields
+const locationFields = {};
+for (var fieldname in fieldnames.LOCATION) {
+    locationFields[fieldnames.LOCATION[fieldname]] = fieldname;
+}
+
+/**
+ * Converts a user defined location object into something
+ * compatible with the servers idea of what a location
+ * should look like.
+ * 
+ * @param {object} location 
+ * @returns {object} parsed location
+ */
+export function parseLocation(location) {
+    const parsedLocation = {};
+    for (var key in location) {
+        if (key.length === 0) {
+            continue;
+        }
+        if (typeof location[key] !== 'string') {
+            parsedLocation[locationFields[key]] = location[key];
+            continue;
+        }
+        if (location[key].length > 0) {
+            if (key === fieldnames.LOCATION[C.LOCATION.TIME]) {
+                try {
+                    parsedLocation[key] = (new Date(location[key])).toISOString();
+                } catch (e) {
+                    throw new Error(`Can't convert ${location[key]} into a valid date:${e}`);
+                }
+            } else {
+                parsedLocation[locationFields[key]] = parseFloat(location[key]);
+            }
+        }
+    }
+
+    return parsedLocation;
 }

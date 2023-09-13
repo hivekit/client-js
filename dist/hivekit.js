@@ -97,7 +97,17 @@ var FIELDS = {
     SYSTEM: { VAL: "sys", FULL: "system" },
     INSTRUCTION: { VAL: "ins", FULL: "instruction" },
     LOGEVENT: { VAL: "log", FULL: "logEvent" },
-    HISTORY: { VAL: "his", FULL: "history" }
+    HISTORY: { VAL: "his", FULL: "history" },
+    TASK: { VAL: "tsk", FULL: "task" }
+  },
+  TASK_STATUS: {
+    NOT_STARTED: { VAL: "$hkt_not_started" },
+    IN_PROGRESS: { VAL: "$hkt_in_progress" },
+    COMPLETED: { VAL: "$hkt_completed" },
+    FAILED: { VAL: "$hkt_failed" },
+    CANCELED: { VAL: "$hkt_canceled" },
+    PAUSED: { VAL: "$hkt_paused" },
+    BLOCKED: { VAL: "$hkt_blocked" }
   },
   ERROR: {
     CONNECTION_ERROR: { VAL: "connection_error" },
@@ -148,7 +158,12 @@ var FIELDS = {
     INTERVAL: { VAL: "int", FULL: "interval" },
     TIME: { VAL: "tim", FULL: "time" },
     SCOPE_TYPE_TARGET: { VAL: "tar" },
-    RADIUS: { VAL: "r" }
+    RADIUS: { VAL: "r" },
+    STATUS: { VAL: "sts", FULL: "status" },
+    STEPS: { VAL: "stp", FULL: "steps" },
+    DESCRIPTION: { VAL: "dsc", FULL: "description" },
+    TARGET_ID: { VAL: "tid", FULL: "targetId" },
+    TASK_IDS: { VAL: "tds", FULL: "taskIds" }
   },
   ACTION: {
     CREATE: { VAL: "cre", FULL: "create" },
@@ -392,13 +407,41 @@ function toShape(shapeData) {
 function isValidDate(value) {
   return value instanceof Date && value.toString() != "Invalid Date";
 }
+var locationFields = {};
+for (fieldname in fieldnames.LOCATION) {
+  locationFields[fieldnames.LOCATION[fieldname]] = fieldname;
+}
+var fieldname;
+function parseLocation(location) {
+  const parsedLocation = {};
+  for (var key in location) {
+    if (key.length === 0) {
+      continue;
+    }
+    if (typeof location[key] !== "string") {
+      parsedLocation[locationFields[key]] = location[key];
+      continue;
+    }
+    if (location[key].length > 0) {
+      if (key === fieldnames.LOCATION[C.LOCATION.TIME]) {
+        try {
+          parsedLocation[key] = new Date(location[key]).toISOString();
+        } catch (e) {
+          throw new Error(`Can't convert ${location[key]} into a valid date:${e}`);
+        }
+      } else {
+        parsedLocation[locationFields[key]] = parseFloat(location[key]);
+      }
+    }
+  }
+  return parsedLocation;
+}
 
 // src/object-handler.js
 var ObjectHandler = class {
   constructor(client, realm) {
     this._client = client;
     this._realm = realm;
-    this._locationFields = this._getLocationFields();
   }
   subscribe(options) {
     options = options || {};
@@ -426,17 +469,20 @@ var ObjectHandler = class {
     }
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg, (response) => {
-      return this._client._extendFields(response[C.FIELD.DATA]);
+      const obj = this._client._extendFields(response[C.FIELD.DATA]);
+      obj.data = obj.data || {};
+      obj.taskIds = obj.taskIds || [];
+      return obj;
     });
   }
   create(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.CREATE);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.UPDATE);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.UPDATE);
   }
   set(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, C.ACTION.SET);
+    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.SET);
   }
   list(options) {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
@@ -451,51 +497,22 @@ var ObjectHandler = class {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
-  _getLocationFields() {
-    const locationFields = {};
-    for (var fieldname in fieldnames.LOCATION) {
-      locationFields[fieldnames.LOCATION[fieldname]] = fieldname;
-    }
-    return locationFields;
-  }
-  _setObjectState(id, label, location, data, action) {
+  _setObjectState(id, label, location, data, taskIds, action) {
     const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
     if (label)
       msg[C.FIELD.LABEL] = label;
     if (location && Object.keys(location).length > 0) {
-      msg[C.FIELD.LOCATION] = this._parseLocation(location);
+      msg[C.FIELD.LOCATION] = parseLocation(location);
     }
     if (data && Object.keys(data).length > 0)
       msg[C.FIELD.DATA] = data;
+    if (Array.isArray(taskIds))
+      msg[C.FIELD.TASK_IDS] = taskIds;
     if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
       this._client._sendMessage(msg);
     } else {
       return this._client._sendRequestAndHandleResponse(msg);
     }
-  }
-  _parseLocation(location) {
-    const parsedLocation = {};
-    for (var key in location) {
-      if (key.length === 0) {
-        continue;
-      }
-      if (typeof location[key] !== "string") {
-        parsedLocation[this._locationFields[key]] = location[key];
-        continue;
-      }
-      if (location[key].length > 0) {
-        if (key === fieldnames.LOCATION[C.LOCATION.TIME]) {
-          try {
-            parsedLocation[key] = new Date(location[key]).toISOString();
-          } catch (e) {
-            throw new Error(`Can't convert ${location[key]} into a valid date:${e}`);
-          }
-        } else {
-          parsedLocation[this._locationFields[key]] = parseFloat(location[key]);
-        }
-      }
-    }
-    return parsedLocation;
   }
 };
 
@@ -718,6 +735,81 @@ var HistoryHandler = class {
   }
 };
 
+// src/task-handler.js
+var TaskHandler = class {
+  constructor(client, realm) {
+    this._client = client;
+    this._realm = realm;
+  }
+  subscribe(options) {
+    return this._client._subscription._getSubscription(this._client.getId("task-subscription"), this._realm.id, extendMap({
+      [C.FIELD.TYPE]: C.TYPE.TASK,
+      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+    }, this._client._compressFields(options, fieldnames.FIELD)));
+  }
+  get(id) {
+    const msg = createMessage(C.TYPE.TASK, C.ACTION.READ, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+      const extended = this._client._extendFields(response[C.FIELD.DATA]);
+      if (extended.steps) {
+        extended.steps = extended.steps.map((step) => this._client._extendFields(step));
+      }
+      return extended;
+    });
+  }
+  create(id, options) {
+    const hasLocation = options.location && Object.keys(options.location).length > 0;
+    if (hasLocation && options.targetId) {
+      throw new Error("Cannot set both location and targetId");
+    }
+    if (!hasLocation && !options.targetId) {
+      throw new Error("Task needs either a targetId or location");
+    }
+    return this._setTaskState(id, options, C.ACTION.CREATE);
+  }
+  update(id, options) {
+    return this._setTaskState(id, options, C.ACTION.UPDATE);
+  }
+  list() {
+    const msg = createMessage(C.TYPE.TASK, C.ACTION.LIST, null, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+      return this._client._extendFieldsMap(result[C.FIELD.DATA]);
+    });
+  }
+  delete(id) {
+    const msg = createMessage(C.TYPE.TASK, C.ACTION.DELETE, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg);
+  }
+  _setTaskState(id, options, action) {
+    const msg = createMessage(C.TYPE.TASK, action, id, this._realm.id);
+    if (options.label)
+      msg[C.FIELD.LABEL] = options.label;
+    if (options.data)
+      msg[C.FIELD.DATA] = options.data;
+    if (options.status) {
+      if (!Object.values(C.TASK_STATUS).includes(options.status)) {
+        throw new Error(`Invalid task status: ${options.status}`);
+      }
+      msg[C.FIELD.STATUS] = options.status;
+    }
+    if (options.location) {
+      msg[C.FIELD.LOCATION] = parseLocation(options.location);
+    }
+    if (options.steps) {
+      msg[C.FIELD.STEPS] = options.steps.map((step) => {
+        return this._client._compressFields(step, fieldnames.FIELD);
+      });
+    }
+    if (options.targetId) {
+      msg[C.FIELD.TARGET_ID] = options.targetId;
+    }
+    if (options.description) {
+      msg[C.FIELD.DESCRIPTION] = options.description;
+    }
+    return this._client._sendRequestAndHandleResponse(msg);
+  }
+};
+
 // src/realm.js
 var Realm = class extends EventEmitter {
   constructor(id, label, data, client) {
@@ -732,6 +824,7 @@ var Realm = class extends EventEmitter {
     this.instruction = new InstructionHandler(client, this);
     this.pubsub = new PubSubHandler(client, this);
     this.history = new HistoryHandler(client, this);
+    this.task = new TaskHandler(client, this);
   }
   getData(key) {
     if (!key) {
@@ -746,7 +839,10 @@ var Realm = class extends EventEmitter {
   setData(key, value) {
     const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this._data[key] = value;
-    msg[C.FIELD.DATA] = this._data;
+    msg[C.FIELD.DATA] = deepClone(this._data);
+    if (value === null) {
+      delete this._data[key];
+    }
     this.emit("update");
     return this._client._sendRequestAndHandleResponse(msg);
   }
@@ -890,11 +986,12 @@ var Subscription = class extends EventEmitter {
     if (this._data === null) {
       this._data = {};
     }
-    if (msg[C.TYPE.OBJECT]) {
+    if (msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK]) {
+      const update = msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK];
       const delta = {
-        added: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.CREATE]),
-        updated: this._client._extendFieldsMap(msg[C.TYPE.OBJECT][C.ACTION.UPDATE]),
-        removed: msg[C.TYPE.OBJECT][C.ACTION.DELETE]
+        added: this._client._extendFieldsMap(update[C.ACTION.CREATE]),
+        updated: this._client._extendFieldsMap(update[C.ACTION.UPDATE]),
+        removed: update[C.ACTION.DELETE]
       };
       if (msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {
         this._data = {};
@@ -3374,6 +3471,8 @@ var HivekitClient = class extends EventEmitter {
       if (fields[key]) {
         if (key === C.FIELD.LOCATION) {
           translated[fields[key]] = this._extendFields(data[key], fieldnames.LOCATION);
+        } else if (key === C.FIELD.STEPS) {
+          translated[fields[key]] = this._extendFieldsArray(data[key], fieldnames.FIELD);
         } else if (key === C.FIELD.PRESENCE_CONNECTION_STATUS) {
           translated[fields[C.FIELD.PRESENCE_CONNECTION_STATUS]] = fieldnames.PRESENCE_CONNECTION_STATUS[data[key]];
         } else if (key === C.FIELD.SUB_TYPE && data[C.FIELD.SHAPE]) {

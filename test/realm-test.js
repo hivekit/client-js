@@ -86,14 +86,21 @@ describe('Realm Test', function () {
         })
         await sleep(200)
         expect(subscriptionUpdateCount).to.equal(4)
+        await realm.setData('firstname', null)
+        expect(await realm.getData()).to.deep.equal({
+            amount: 42,
+            address: { street: 'spooner street', number: 12 }
+        })
+        await sleep(200)
+        expect(subscriptionUpdateCount).to.equal(5)
     });
 
     it('deletes realm b', async function () {
         this.timeout(10000);
-        expect(subscriptionUpdateCount).to.equal(4);
+        expect(subscriptionUpdateCount).to.equal(5);
         await client.realm.delete(realmIdB);
         await sleep(200);
-        expect(subscriptionUpdateCount).to.equal(5);
+        expect(subscriptionUpdateCount).to.equal(6);
         expect(lastSubscriptionMessage).to.deep.equal({ realmId: realmIdB, action: 'delete' });
         await sleep(200);
         const realmList = await client.realm.list()
@@ -102,12 +109,12 @@ describe('Realm Test', function () {
     });
 
     it('unsubscribes before deleting realm a and receives no updates', async function () {
-        expect(subscriptionUpdateCount).to.equal(5);
+        expect(subscriptionUpdateCount).to.equal(6);
         lastSubscriptionMessage = null;
         await subscription.cancel();
         expect(lastSubscriptionMessage).to.equal(null);
         await client.realm.delete(realmIdA);
-        expect(subscriptionUpdateCount).to.equal(5);
+        expect(subscriptionUpdateCount).to.equal(6);
     });
 
     it('closes the client', async function () {

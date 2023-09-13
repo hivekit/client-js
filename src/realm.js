@@ -7,6 +7,7 @@ import { createMessage } from "./message.js";
 import { deepClone } from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
 import HistoryHandler from "./history-handler.js";
+import TaskHandler from "./task-handler.js";
 
 /**
  * Represents a single realm. This class is returned
@@ -38,6 +39,7 @@ export default class Realm extends EventEmitter {
         this.instruction = new InstructionHandler(client, this);
         this.pubsub = new PubSubHandler(client, this);
         this.history = new HistoryHandler(client, this);
+        this.task = new TaskHandler(client, this);
     }
 
     /**
@@ -70,7 +72,12 @@ export default class Realm extends EventEmitter {
     setData(key, value) {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this._data[key] = value;
-        msg[C.FIELD.DATA] = this._data;
+        msg[C.FIELD.DATA] = deepClone(this._data);
+
+        if (value === null) {
+            delete this._data[key];
+        }
+
         this.emit('update'); // @todo - react to remote data changes
         return this._client._sendRequestAndHandleResponse(msg);
     }
