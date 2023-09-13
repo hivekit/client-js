@@ -29,7 +29,6 @@ describe('Realm PubSub Test', function () {
         expect(clientB.connectionStatus === clientB.constants.CONNECTION_STATUS.AUTHENTICATED);
     });
 
-
     it('creates a realm with client a and retrieves it', async function () {
         realmIdA = clientA.getId('realm-a');
         await clientA.realm.create(realmIdA, 'label for realm a', { some: 'value' });
