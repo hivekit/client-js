@@ -35,11 +35,11 @@ export default class AreaHandler {
     }
 
     create(id, options) {
-        return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.CREATE);
+        return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.CREATE);
     }
 
     update(id, options) {
-        return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.UPDATE);
+        return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.UPDATE);
     }
 
     list() {
