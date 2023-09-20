@@ -564,10 +564,10 @@ var AreaHandler = class {
     });
   }
   create(id, options) {
-    return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.CREATE);
+    return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setAreaState(id, options.label, options.shape, options.data, C.ACTION.UPDATE);
+    return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.UPDATE);
   }
   list() {
     const msg = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
@@ -3023,7 +3023,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = C;
     this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.10.3";
+    this.version = "1.10.4";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
