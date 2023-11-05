@@ -1,4 +1,4 @@
-import { C } from './fields.js';
+import {C, FIELDS} from './fields.js';
 import { getPromise } from './promise.js'
 import { createMessage } from './message.js'
 import Realm from './realm.js'
@@ -41,9 +41,7 @@ export default class RealmHandler {
      */
     get(id) {
         if (this._realms[id]) {
-            const result = getPromise();
-            result.resolve(this._realms[id]);
-            return result;
+            return Promise.resolve(this._realms[id])
         }
 
         if (this._client.mode === C.MODE.HTTP) {
@@ -54,12 +52,25 @@ export default class RealmHandler {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
 
         return this._client._sendRequestAndHandleResponse(msg, response => {
-            this._realms[id] = new Realm(id,
+            const realm = new Realm(id,
                 response[C.FIELD.DATA][C.FIELD.LABEL],
                 response[C.FIELD.DATA][C.FIELD.DATA] || {},
                 this._client
-            );
-            return this._realms[id];
+            )
+            this._realms[id] = realm
+
+            this.subscribe().then(subscription => {
+                subscription.on("update", (update) => {
+                    if (update.action === FIELDS.ACTION.UPDATE.FULL && update.realmId === id) {
+                        this._client._sendRequestAndHandleResponse(msg, response => {
+                            const newData =  response[C.FIELD.DATA][C.FIELD.DATA] || {}
+                            realm._setDataFromRemote(newData)
+                        })
+                    }
+                })
+            })
+
+            return realm
         });
     }
 

@@ -4,7 +4,7 @@ import InstructionHandler from './instruction-handler.js';
 import EventEmitter from './event-emitter.js'
 import { C, fieldnames } from './fields.js';
 import { createMessage } from "./message.js";
-import { deepClone } from "./tools.js";
+import {deepClone} from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
 import HistoryHandler from "./history-handler.js";
 import TaskHandler from "./task-handler.js";
@@ -78,8 +78,14 @@ export default class Realm extends EventEmitter {
             delete this._data[key];
         }
 
-        this.emit('update'); // @todo - react to remote data changes
+        this.emit('update')
         return this._client._sendRequestAndHandleResponse(msg);
+    }
+
+    _setDataFromRemote(data) {
+        console.log('setting data from remote, sending update')
+        this._data = data;
+        this.emit('update');
     }
 
     /**
@@ -93,7 +99,7 @@ export default class Realm extends EventEmitter {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this.label = label;
         msg[C.FIELD.LABEL] = label;
-        this.emit('update'); // @todo - react to remote data changes
+        this.emit('update');
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
