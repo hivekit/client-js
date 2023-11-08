@@ -4,7 +4,7 @@ import InstructionHandler from './instruction-handler.js';
 import EventEmitter from './event-emitter.js'
 import { C, fieldnames } from './fields.js';
 import { createMessage } from "./message.js";
-import { deepClone } from "./tools.js";
+import {deepClone} from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
 import HistoryHandler from "./history-handler.js";
 import TaskHandler from "./task-handler.js";
@@ -40,15 +40,29 @@ export default class Realm extends EventEmitter {
         this.pubsub = new PubSubHandler(client, this);
         this.history = new HistoryHandler(client, this);
         this.task = new TaskHandler(client, this);
+
+        this._client._subscription._getSubscription(
+            this._client.getId(`realm-data-${id}`),
+            id,
+            {
+                [C.FIELD.TYPE]: C.TYPE.REALM,
+                [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM,
+            }
+        ).then(subscription => {
+            this._dataSub = subscription
+            subscription.on('update', ({data, label}) => {
+                this._data = data
+                this.label = label
+                this.emit('update')
+            })
+        })
     }
 
     /**
-     * Updates a value in the realm's metadata
+     * Gets a value in the realm's metadata
      * 
-     * @param {string} key 
-     * @param {mixed} value
-     * 
-     * @returns {Promise<success>}
+     * @param {string} key
+     * @returns {any} value
      */
     getData(key) {
         if (!key) {
@@ -65,7 +79,7 @@ export default class Realm extends EventEmitter {
      * Updates a value in the realm's metadata
      * 
      * @param {string} key 
-     * @param {mixed} value
+     * @param {any} value
      * 
      * @returns {Promise<success>}
      */
@@ -78,7 +92,8 @@ export default class Realm extends EventEmitter {
             delete this._data[key];
         }
 
-        this.emit('update'); // @todo - react to remote data changes
+        // this will result in a second update when the message comes back from the server
+        this.emit('update');
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
@@ -93,7 +108,9 @@ export default class Realm extends EventEmitter {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this.label = label;
         msg[C.FIELD.LABEL] = label;
-        this.emit('update'); // @todo - react to remote data changes
+
+        // this will result in a second update when the message comes back from the server
+        this.emit('update');
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
@@ -107,8 +124,8 @@ export default class Realm extends EventEmitter {
      *  	field: ['data', 'label', 'id' ]
      * 
      *      // max amount of object results to be returned
-            maxObjectResults
-
+     *      maxObjectResults
+      
             // max amount of area results to be returned
             maxAreaResults
      * }
