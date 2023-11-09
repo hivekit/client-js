@@ -41,30 +41,43 @@ export default class Realm extends EventEmitter {
         this.history = new HistoryHandler(client, this);
         this.task = new TaskHandler(client, this);
 
-        this._client._subscription._getSubscription(
-            this._client.getId(`realm-data-${id}`),
-            id,
-            {
-                [C.FIELD.TYPE]: C.TYPE.REALM,
-                [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM,
-            }
-        ).then(subscription => {
-            this._dataSub = subscription
-            subscription.on('update', ({data, label}) => {
-                this._data = data
-                this.label = label
-                this.emit('update')
+        if (client.mode === C.MODE.WS) {
+            client._subscription._getSubscription(
+                client.getId(`realm-data-${id}`),
+                id,
+                {
+                    [C.FIELD.TYPE]: C.TYPE.REALM,
+                    [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM,
+                }
+            ).then(subscription => {
+                this._dataSub = subscription
+                subscription.on('update', ({data, label}) => {
+                    this._data = data
+                    this.label = label
+                    this.emit('update')
+                })
             })
-        })
+        }
     }
 
     /**
      * Gets a value in the realm's metadata
      * 
      * @param {string} key
-     * @returns {any} value
+     * @returns {Promise<any>} value
      */
-    getData(key) {
+    async getData(key) {
+        if (this._client.mode === C.MODE.HTTP) {
+            return this._client._sendRequestAndHandleResponse(msg, response => {
+                const data = response[C.FIELD.DATA][C.FIELD.DATA] || {}
+                if (!key) {
+                    return data
+                } else {
+                    return data[key]
+                }
+            });
+        }
+
         if (!key) {
             return deepClone(this._data);
         }
@@ -118,16 +131,16 @@ export default class Realm extends EventEmitter {
      * Searches Objects and Areas within the given realm.
      * 
      * @param {string} searchString 
-     * @param {object} options
+     * @param {{field: string[],maxObjectResults: number,maxAreaResults: number}} options
      * {
      *      // a list of properties to search in
      *  	field: ['data', 'label', 'id' ]
      * 
      *      // max amount of object results to be returned
      *      maxObjectResults
-      
-            // max amount of area results to be returned
-            maxAreaResults
+     *
+     *      // max amount of area results to be returned
+     *      maxAreaResults
      * }
      * 
      * @returns {Promise<search results>}

@@ -307,8 +307,8 @@ var SystemHandler = class {
     });
   }
   getServerStats() {
-    const msg = createMessage(C.TYPE.SYSTEM, C.ACTION.GET_STATS);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.SYSTEM, C.ACTION.GET_STATS);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       return response[C.FIELD.DATA];
     });
   }
@@ -467,8 +467,8 @@ var ObjectHandler = class {
     if (!id) {
       throw new Error("no id provided for object.get");
     }
-    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.OBJECT, C.ACTION.READ, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       const obj = this._client._extendFields(response[C.FIELD.DATA]);
       obj.data = obj.data || {};
       obj.taskIds = obj.taskIds || [];
@@ -485,33 +485,33 @@ var ObjectHandler = class {
     return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.SET);
   }
   list(options) {
-    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
+    const msg2 = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
     if (options && Object.keys(options).length > 0) {
-      msg[C.FIELD.DATA] = this._client._compressFields(options, fieldnames.FIELD);
+      msg2[C.FIELD.DATA] = this._client._compressFields(options, fieldnames.FIELD);
     }
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+    return this._client._sendRequestAndHandleResponse(msg2, (result) => {
       return this._client._extendFieldsMap(result[C.FIELD.DATA]);
     });
   }
   delete(id) {
-    const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   _setObjectState(id, label, location, data, taskIds, action) {
-    const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
+    const msg2 = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
     if (label)
-      msg[C.FIELD.LABEL] = label;
+      msg2[C.FIELD.LABEL] = label;
     if (location && Object.keys(location).length > 0) {
-      msg[C.FIELD.LOCATION] = parseLocation(location);
+      msg2[C.FIELD.LOCATION] = parseLocation(location);
     }
     if (data && Object.keys(data).length > 0)
-      msg[C.FIELD.DATA] = data;
+      msg2[C.FIELD.DATA] = data;
     if (Array.isArray(taskIds))
-      msg[C.FIELD.TASK_IDS] = taskIds;
+      msg2[C.FIELD.TASK_IDS] = taskIds;
     if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
-      this._client._sendMessage(msg);
+      this._client._sendMessage(msg2);
     } else {
-      return this._client._sendRequestAndHandleResponse(msg);
+      return this._client._sendRequestAndHandleResponse(msg2);
     }
   }
 };
@@ -529,8 +529,8 @@ var AreaHandler = class {
     }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   get(id) {
-    const msg = createMessage(C.TYPE.AREA, C.ACTION.READ, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.AREA, C.ACTION.READ, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       return this._client._extendFields(response[C.FIELD.DATA]);
     });
   }
@@ -541,8 +541,8 @@ var AreaHandler = class {
     return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.UPDATE);
   }
   list() {
-    const msg = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+    const msg2 = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (result) => {
       const areas = this._client._extendFieldsMap(result[C.FIELD.DATA]);
       for (var id in areas) {
         areas[id].shape = fieldnames.SHAPE_TYPE[areas[id].scopeType];
@@ -552,22 +552,22 @@ var AreaHandler = class {
     });
   }
   delete(id) {
-    const msg = createMessage(C.TYPE.AREA, C.ACTION.DELETE, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = createMessage(C.TYPE.AREA, C.ACTION.DELETE, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   _setAreaState(id, label, shapeData, data, action) {
-    const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
+    const msg2 = createMessage(C.TYPE.AREA, action, id, this._realm.id);
     const shape = toShape(shapeData);
     if (shape.err) {
       return Promise.reject(shape.err);
     }
-    msg[C.FIELD.SUB_TYPE] = shape.type;
-    msg[C.FIELD.SHAPE] = shape.data;
+    msg2[C.FIELD.SUB_TYPE] = shape.type;
+    msg2[C.FIELD.SHAPE] = shape.data;
     if (label)
-      msg[C.FIELD.LABEL] = label;
+      msg2[C.FIELD.LABEL] = label;
     if (data)
-      msg[C.FIELD.DATA] = data;
-    return this._client._sendRequestAndHandleResponse(msg);
+      msg2[C.FIELD.DATA] = data;
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
 };
 
@@ -590,8 +590,8 @@ var InstructionHandler = class {
     }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   get(id) {
-    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.READ, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.INSTRUCTION, C.ACTION.READ, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       return this._client._extendFields(response[C.FIELD.DATA]);
     });
   }
@@ -602,23 +602,23 @@ var InstructionHandler = class {
     return this._setInstructionState(id, options.label, options.instructionString, options.data, C.ACTION.UPDATE);
   }
   list() {
-    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.LIST, null, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+    const msg2 = createMessage(C.TYPE.INSTRUCTION, C.ACTION.LIST, null, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (result) => {
       return this._client._extendFieldsMap(result[C.FIELD.DATA]);
     });
   }
   delete(id) {
-    const msg = createMessage(C.TYPE.INSTRUCTION, C.ACTION.DELETE, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = createMessage(C.TYPE.INSTRUCTION, C.ACTION.DELETE, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   _setInstructionState(id, label, instructionString, data, action) {
-    const msg = createMessage(C.TYPE.INSTRUCTION, action, id, this._realm.id);
-    msg[C.FIELD.INSTRUCTION_STRING] = instructionString;
+    const msg2 = createMessage(C.TYPE.INSTRUCTION, action, id, this._realm.id);
+    msg2[C.FIELD.INSTRUCTION_STRING] = instructionString;
     if (label)
-      msg[C.FIELD.LABEL] = label;
+      msg2[C.FIELD.LABEL] = label;
     if (data)
-      msg[C.FIELD.DATA] = data;
-    return this._client._sendRequestAndHandleResponse(msg);
+      msg2[C.FIELD.DATA] = data;
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
 };
 
@@ -683,9 +683,9 @@ var PubSubHandler = class {
     } else {
       idPattern = idPatternOrData;
     }
-    const msg = this._getPubSubMessage(C.ACTION.PUBLISH, eventName, idPattern);
-    msg[C.FIELD.DATA][C.FIELD.DATA] = data;
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = this._getPubSubMessage(C.ACTION.PUBLISH, eventName, idPattern);
+    msg2[C.FIELD.DATA][C.FIELD.DATA] = data;
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   _emitSubscriptionEvent(eventName, data, idPattern) {
     const enip = `${eventName}:${idPattern}`;
@@ -700,12 +700,12 @@ var PubSubHandler = class {
     }
   }
   _getPubSubMessage(action, eventName, idPattern) {
-    const msg = createMessage(C.TYPE.REALM, action, this._realm.id);
-    msg[C.FIELD.DATA] = {
+    const msg2 = createMessage(C.TYPE.REALM, action, this._realm.id);
+    msg2[C.FIELD.DATA] = {
       [C.FIELD.EVENT_NAME]: eventName,
       [C.FIELD.ID_PATTERN]: idPattern || "*"
     };
-    return msg;
+    return msg2;
   }
 };
 
@@ -716,18 +716,18 @@ var HistoryHandler = class {
     this._realm = realm;
   }
   get(id, options) {
-    const msg = createMessage(C.TYPE.HISTORY, C.ACTION.READ, id, this._realm.id);
+    const msg2 = createMessage(C.TYPE.HISTORY, C.ACTION.READ, id, this._realm.id);
     if (!isValidDate(options.startTime)) {
       throw new Error("startTime is not a valid Date object");
     }
     if (!isValidDate(options.endTime)) {
       throw new Error("endTime is not a valid Date object");
     }
-    msg[C.FIELD.DATA] = {
+    msg2[C.FIELD.DATA] = {
       [C.FIELD.START]: options.startTime.toISOString(),
       [C.FIELD.END]: options.endTime.toISOString()
     };
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       return response[C.FIELD.DATA].map((entry) => {
         return this._client._extendFields(entry);
       });
@@ -748,8 +748,8 @@ var TaskHandler = class {
     }, this._client._compressFields(options, fieldnames.FIELD)));
   }
   get(id) {
-    const msg = createMessage(C.TYPE.TASK, C.ACTION.READ, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.TASK, C.ACTION.READ, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       const extended = this._client._extendFields(response[C.FIELD.DATA]);
       if (extended.steps) {
         extended.steps = extended.steps.map((step) => this._client._extendFields(step));
@@ -771,42 +771,42 @@ var TaskHandler = class {
     return this._setTaskState(id, options, C.ACTION.UPDATE);
   }
   list() {
-    const msg = createMessage(C.TYPE.TASK, C.ACTION.LIST, null, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+    const msg2 = createMessage(C.TYPE.TASK, C.ACTION.LIST, null, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2, (result) => {
       return this._client._extendFieldsMap(result[C.FIELD.DATA]);
     });
   }
   delete(id) {
-    const msg = createMessage(C.TYPE.TASK, C.ACTION.DELETE, id, this._realm.id);
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = createMessage(C.TYPE.TASK, C.ACTION.DELETE, id, this._realm.id);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   _setTaskState(id, options, action) {
-    const msg = createMessage(C.TYPE.TASK, action, id, this._realm.id);
+    const msg2 = createMessage(C.TYPE.TASK, action, id, this._realm.id);
     if (options.label)
-      msg[C.FIELD.LABEL] = options.label;
+      msg2[C.FIELD.LABEL] = options.label;
     if (options.data)
-      msg[C.FIELD.DATA] = options.data;
+      msg2[C.FIELD.DATA] = options.data;
     if (options.status) {
       if (!Object.values(C.TASK_STATUS).includes(options.status)) {
         throw new Error(`Invalid task status: ${options.status}`);
       }
-      msg[C.FIELD.STATUS] = options.status;
+      msg2[C.FIELD.STATUS] = options.status;
     }
     if (options.location) {
-      msg[C.FIELD.LOCATION] = parseLocation(options.location);
+      msg2[C.FIELD.LOCATION] = parseLocation(options.location);
     }
     if (options.steps) {
-      msg[C.FIELD.STEPS] = options.steps.map((step) => {
+      msg2[C.FIELD.STEPS] = options.steps.map((step) => {
         return this._client._compressFields(step, fieldnames.FIELD);
       });
     }
     if (options.targetId) {
-      msg[C.FIELD.TARGET_ID] = options.targetId;
+      msg2[C.FIELD.TARGET_ID] = options.targetId;
     }
     if (options.description) {
-      msg[C.FIELD.DESCRIPTION] = options.description;
+      msg2[C.FIELD.DESCRIPTION] = options.description;
     }
-    return this._client._sendRequestAndHandleResponse(msg);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
 };
 
@@ -825,19 +825,31 @@ var Realm = class extends EventEmitter {
     this.pubsub = new PubSubHandler(client, this);
     this.history = new HistoryHandler(client, this);
     this.task = new TaskHandler(client, this);
-    this._client._subscription._getSubscription(this._client.getId(`realm-data-${id}`), id, {
-      [C.FIELD.TYPE]: C.TYPE.REALM,
-      [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
-    }).then((subscription) => {
-      this._dataSub = subscription;
-      subscription.on("update", ({ data: data2, label: label2 }) => {
-        this._data = data2;
-        this.label = label2;
-        this.emit("update");
+    if (client.mode === C.MODE.WS) {
+      client._subscription._getSubscription(client.getId(`realm-data-${id}`), id, {
+        [C.FIELD.TYPE]: C.TYPE.REALM,
+        [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
+      }).then((subscription) => {
+        this._dataSub = subscription;
+        subscription.on("update", ({ data: data2, label: label2 }) => {
+          this._data = data2;
+          this.label = label2;
+          this.emit("update");
+        });
       });
-    });
+    }
   }
-  getData(key) {
+  async getData(key) {
+    if (this._client.mode === C.MODE.HTTP) {
+      return this._client._sendRequestAndHandleResponse(msg, (response) => {
+        const data = response[C.FIELD.DATA][C.FIELD.DATA] || {};
+        if (!key) {
+          return data;
+        } else {
+          return data[key];
+        }
+      });
+    }
     if (!key) {
       return deepClone(this._data);
     }
@@ -848,27 +860,27 @@ var Realm = class extends EventEmitter {
     }
   }
   setData(key, value) {
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this._data[key] = value;
-    msg[C.FIELD.DATA] = deepClone(this._data);
+    msg2[C.FIELD.DATA] = deepClone(this._data);
     if (value === null) {
       delete this._data[key];
     }
     this.emit("update");
-    return this._client._sendRequestAndHandleResponse(msg);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   setLabel(label) {
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
     this.label = label;
-    msg[C.FIELD.LABEL] = label;
+    msg2[C.FIELD.LABEL] = label;
     this.emit("update");
-    return this._client._sendRequestAndHandleResponse(msg);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   search(searchString, options) {
     const data = this._client._compressFields(options, fieldnames.FIELD, true);
     data.val = searchString;
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.SEARCH, null, this.id, data);
-    return this._client._sendRequestAndHandleResponse(msg, (results) => {
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.SEARCH, null, this.id, data);
+    return this._client._sendRequestAndHandleResponse(msg2, (results) => {
       if (!results[C.FIELD.DATA]) {
         return [];
       }
@@ -904,33 +916,33 @@ var RealmHandler = class {
       this._realms[id] = new Realm(id, null, {}, this._client);
       return Promise.resolve(this._realms[id]);
     }
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
-    return this._client._sendRequestAndHandleResponse(msg, (response) => {
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
+    return this._client._sendRequestAndHandleResponse(msg2, (response) => {
       this._realms[id] = new Realm(id, response[C.FIELD.DATA][C.FIELD.LABEL], response[C.FIELD.DATA][C.FIELD.DATA] || {}, this._client);
       return this._realms[id];
     });
   }
   create(id, label, data) {
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.CREATE, id);
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.CREATE, id);
     if (label)
-      msg[C.FIELD.LABEL] = label;
+      msg2[C.FIELD.LABEL] = label;
     if (data && Object.keys(data).length > 0)
-      msg[C.FIELD.DATA] = data;
-    return this._client._sendRequestAndHandleResponse(msg);
+      msg2[C.FIELD.DATA] = data;
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
   list() {
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.LIST);
-    return this._client._sendRequestAndHandleResponse(msg, (result) => {
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.LIST);
+    return this._client._sendRequestAndHandleResponse(msg2, (result) => {
       return this._client._extendFieldsMap(result.dat);
     });
   }
   delete(id) {
-    const msg = createMessage(C.TYPE.REALM, C.ACTION.DELETE, id);
-    return this._client._sendRequestAndHandleResponse(msg);
+    const msg2 = createMessage(C.TYPE.REALM, C.ACTION.DELETE, id);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
-  _handleIncomingMessage(msg) {
-    if (msg[C.FIELD.ACTION] === C.ACTION.PUBLISH && this._realms[msg[C.FIELD.REALM]]) {
-      this._realms[msg[C.FIELD.REALM]].pubsub._emitSubscriptionEvent(msg[C.FIELD.DATA][C.FIELD.EVENT_NAME], msg[C.FIELD.DATA][C.FIELD.DATA], msg[C.FIELD.SCOPE_ID]);
+  _handleIncomingMessage(msg2) {
+    if (msg2[C.FIELD.ACTION] === C.ACTION.PUBLISH && this._realms[msg2[C.FIELD.REALM]]) {
+      this._realms[msg2[C.FIELD.REALM]].pubsub._emitSubscriptionEvent(msg2[C.FIELD.DATA][C.FIELD.EVENT_NAME], msg2[C.FIELD.DATA][C.FIELD.DATA], msg2[C.FIELD.SCOPE_ID]);
     }
   }
 };
@@ -987,24 +999,24 @@ var Subscription = class extends EventEmitter {
       options.scopeType = shape.type;
       options.shape = shape.data;
     }
-    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.UPDATE, this.id, this.realmId, extendMap({
+    const msg2 = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.UPDATE, this.id, this.realmId, extendMap({
       [C.FIELD.TYPE]: C.TYPE.OBJECT,
       [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
     }, this._client._compressFields(options, fieldnames.FIELD)));
-    return this._client._sendRequestAndHandleResponse(msg);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
-  _processIncomingMessage(msg) {
+  _processIncomingMessage(msg2) {
     if (this._data === null) {
       this._data = {};
     }
-    if (msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK]) {
-      const update = msg[C.TYPE.OBJECT] || msg[C.TYPE.TASK];
+    if (msg2[C.TYPE.OBJECT] || msg2[C.TYPE.TASK]) {
+      const update = msg2[C.TYPE.OBJECT] || msg2[C.TYPE.TASK];
       const delta = {
         added: this._client._extendFieldsMap(update[C.ACTION.CREATE]),
         updated: this._client._extendFieldsMap(update[C.ACTION.UPDATE]),
         removed: update[C.ACTION.DELETE]
       };
-      if (msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {
+      if (msg2[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL) {
         this._data = {};
       }
       for (let id2 in delta.added) {
@@ -1016,25 +1028,25 @@ var Subscription = class extends EventEmitter {
       for (let id2 in delta.removed) {
         delete this._data[id2];
       }
-      this.emit("update", this._data, delta, msg[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL ? "full" : "delta");
+      this.emit("update", this._data, delta, msg2[C.FIELD.UPDATE_TYPE] === C.UPDATE_TYPE.FULL ? "full" : "delta");
       return;
     }
     var data = {};
-    if (msg[C.TYPE.AREA]) {
-      data = this._client._extendFieldsMap(msg[C.TYPE.AREA]);
-    } else if (msg[C.TYPE.INSTRUCTION]) {
-      data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
-    } else if (msg[C.TYPE.LOGEVENT]) {
-      data = this._client._extendFieldsArray(msg[C.TYPE.LOGEVENT]);
-    } else if (msg[C.TYPE.REALM]) {
-      data = this._client._extendFields(msg[C.TYPE.REALM]);
-    } else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
+    if (msg2[C.TYPE.AREA]) {
+      data = this._client._extendFieldsMap(msg2[C.TYPE.AREA]);
+    } else if (msg2[C.TYPE.INSTRUCTION]) {
+      data = this._client._extendFieldsMap(msg2[C.TYPE.INSTRUCTION]);
+    } else if (msg2[C.TYPE.LOGEVENT]) {
+      data = this._client._extendFieldsArray(msg2[C.TYPE.LOGEVENT]);
+    } else if (msg2[C.TYPE.REALM]) {
+      data = this._client._extendFields(msg2[C.TYPE.REALM]);
+    } else if (msg2[C.FIELD.DATA] && msg2[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
       data = {
-        realmId: msg[C.FIELD.DATA][C.FIELD.ID],
-        action: fieldnames.ACTION[msg[C.FIELD.DATA][C.FIELD.ACTION]]
+        realmId: msg2[C.FIELD.DATA][C.FIELD.ID],
+        action: fieldnames.ACTION[msg2[C.FIELD.DATA][C.FIELD.ACTION]]
       };
     }
-    switch (msg[C.FIELD.UPDATE_TYPE]) {
+    switch (msg2[C.FIELD.UPDATE_TYPE]) {
       case C.UPDATE_TYPE.FULL:
         this._data = data;
         break;
@@ -1044,7 +1056,7 @@ var Subscription = class extends EventEmitter {
         }
         break;
       default:
-        this._client._onError("Received subscription message with unknown update type " + msg[C.FIELD.UPDATE_TYPE], C.ERROR.UNKNOWN_TYPE);
+        this._client._onError("Received subscription message with unknown update type " + msg2[C.FIELD.UPDATE_TYPE], C.ERROR.UNKNOWN_TYPE);
         return;
     }
     this.emit("update", this._data);
@@ -1091,8 +1103,8 @@ var SubscriptionHandler = class {
       return resultPromise;
     }
     this._pendingSubscriptionPromises[signature] = [{ resultPromise, subscription }];
-    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId, options);
-    this._client._sendRequest(msg, (res) => {
+    const msg2 = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId, options);
+    this._client._sendRequest(msg2, (res) => {
       if (res[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
         this._pendingSubscriptionPromises[signature].forEach((entry) => {
           entry.resultPromise.resolve(entry.subscription);
@@ -1121,17 +1133,17 @@ var SubscriptionHandler = class {
         resolve();
       });
     }
-    const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, subscription.id, subscription.realmId);
+    const msg2 = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, subscription.id, subscription.realmId);
     delete this._subscriptionCollections[subscription.id];
-    return this._client._sendRequestAndHandleResponse(msg);
+    return this._client._sendRequestAndHandleResponse(msg2);
   }
-  _handleIncomingMessage(msg) {
-    const id = msg[C.FIELD.ID];
+  _handleIncomingMessage(msg2) {
+    const id = msg2[C.FIELD.ID];
     if (!this._subscriptionCollections[id]) {
-      this._client._onError("Received message for unknown subscription " + msg, C.ERROR.UNKNOWN_SUBSCRIPTION);
+      this._client._onError("Received message for unknown subscription " + msg2, C.ERROR.UNKNOWN_SUBSCRIPTION);
     } else {
       for (var i = 0; i < this._subscriptionCollections[id].length; i++) {
-        this._subscriptionCollections[id][i]._processIncomingMessage(msg);
+        this._subscriptionCollections[id][i]._processIncomingMessage(msg2);
         if (!this._subscriptionCollections[id]) {
           break;
         }
@@ -3120,13 +3132,13 @@ var HTTPConnection = class {
     this.token = null;
     this.messageCallback = messageCallback;
   }
-  getCorrelationId(msg) {
-    if (typeof msg !== "string") {
+  getCorrelationId(msg2) {
+    if (typeof msg2 !== "string") {
       return null;
     }
     var parsedMsg;
     try {
-      parsedMsg = msg && JSON.parse(msg);
+      parsedMsg = msg2 && JSON.parse(msg2);
     } catch (e) {
       return null;
     }
@@ -3134,7 +3146,7 @@ var HTTPConnection = class {
       return parsedMsg[0][C.FIELD.CORRELATION_ID];
     }
   }
-  send(msg) {
+  send(msg2) {
     if (this.token === null) {
       throw new Error("HTTP Connection not yet authenticated. Call authenticate() first.");
     }
@@ -3147,14 +3159,14 @@ var HTTPConnection = class {
         "Authorization": "Bearer " + this.token,
         "Content-Type": "application/json"
       },
-      data: msg
+      data: msg2
     }).then((response) => {
-      if (msg.includes(C.ACTION.SET)) {
-        const messages = JSON.parse(msg);
-        messages.forEach((msg2) => {
-          if (msg2[C.FIELD.ACTION] === C.ACTION.SET) {
+      if (msg2.includes(C.ACTION.SET)) {
+        const messages = JSON.parse(msg2);
+        messages.forEach((msg3) => {
+          if (msg3[C.FIELD.ACTION] === C.ACTION.SET) {
             response.data.push({
-              [C.FIELD.CORRELATION_ID]: msg2[C.FIELD.CORRELATION_ID],
+              [C.FIELD.CORRELATION_ID]: msg3[C.FIELD.CORRELATION_ID],
               [C.FIELD.RESULT]: C.RESULT.SUCCESS
             });
           }
@@ -3165,7 +3177,7 @@ var HTTPConnection = class {
       const responseMessage = {
         [C.FIELD.RESULT]: C.RESULT.ERROR
       };
-      const correlationId = this.getCorrelationId(msg);
+      const correlationId = this.getCorrelationId(msg2);
       if (correlationId) {
         responseMessage[C.FIELD.CORRELATION_ID] = correlationId;
       }
@@ -3333,12 +3345,12 @@ var HivekitClient = class extends EventEmitter {
       console.warn(errorMsg, details || "");
     }
   }
-  _onMessage(msg) {
+  _onMessage(msg2) {
     var messages;
     try {
-      messages = typeof msg.data === "string" ? JSON.parse(msg.data) : msg.data;
+      messages = typeof msg2.data === "string" ? JSON.parse(msg2.data) : msg2.data;
     } catch (e) {
-      this._onError(`Failed to parse message: ${e} - ${msg.data}`, C.ERROR.MESSAGE_PARSE_ERROR);
+      this._onError(`Failed to parse message: ${e} - ${msg2.data}`, C.ERROR.MESSAGE_PARSE_ERROR);
     }
     if (Array.isArray(messages)) {
       messages.forEach(this._handleIncomingMessage.bind(this));
@@ -3346,9 +3358,9 @@ var HivekitClient = class extends EventEmitter {
       this._onError(`message was not in expected form: ${JSON.stringify(messages)}`, C.ERROR.MESSAGE_PARSE_ERROR);
     }
   }
-  _sendMessage(msg) {
+  _sendMessage(msg2) {
     if (this._pendingMessages === null) {
-      this._pendingMessages = [msg];
+      this._pendingMessages = [msg2];
       if (this.connectionStatus === C.CONNECTION_STATUS.AUTHENTICATED) {
         this._sendPendingMessageTimeout = setTimeout(this._sendPendingMessages.bind(this), this.options.outgoingMessageBufferTime);
       } else {
@@ -3357,7 +3369,7 @@ var HivekitClient = class extends EventEmitter {
         }
       }
     } else {
-      this._pendingMessages.push(msg);
+      this._pendingMessages.push(msg2);
     }
   }
   _sendPendingMessages() {
@@ -3385,34 +3397,34 @@ var HivekitClient = class extends EventEmitter {
     }];
     this._connection.send(JSON.stringify(heartbeatMessage));
   }
-  _processHeartbeatResponse(msg) {
-    if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
-      this.ping = Date.now() - this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
+  _processHeartbeatResponse(msg2) {
+    if (this._pendingHeartbeats[msg2[C.FIELD.CORRELATION_ID]]) {
+      this.ping = Date.now() - this._pendingHeartbeats[msg2[C.FIELD.CORRELATION_ID]];
       this.emit("ping", this.ping);
     }
-    delete this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]];
+    delete this._pendingHeartbeats[msg2[C.FIELD.CORRELATION_ID]];
   }
-  _handleIncomingMessage(msg) {
+  _handleIncomingMessage(msg2) {
     if (this.options.logMessages) {
-      console.log("<", msg);
+      console.log("<", msg2);
     }
-    if (msg[C.FIELD.CORRELATION_ID]) {
-      if (this._pendingHeartbeats[msg[C.FIELD.CORRELATION_ID]]) {
-        this._processHeartbeatResponse(msg);
-      } else if (this._pendingRequests[msg[C.FIELD.CORRELATION_ID]]) {
-        this._pendingRequests[msg[C.FIELD.CORRELATION_ID]].responseCallbacks.forEach((callback) => {
-          callback(msg);
+    if (msg2[C.FIELD.CORRELATION_ID]) {
+      if (this._pendingHeartbeats[msg2[C.FIELD.CORRELATION_ID]]) {
+        this._processHeartbeatResponse(msg2);
+      } else if (this._pendingRequests[msg2[C.FIELD.CORRELATION_ID]]) {
+        this._pendingRequests[msg2[C.FIELD.CORRELATION_ID]].responseCallbacks.forEach((callback) => {
+          callback(msg2);
         });
-        delete this._pendingRequests[msg[C.FIELD.CORRELATION_ID]];
+        delete this._pendingRequests[msg2[C.FIELD.CORRELATION_ID]];
       } else {
-        this._onError("Received response for unknown request", C.ERROR.UNKNOWN_REQUEST, msg);
+        this._onError("Received response for unknown request", C.ERROR.UNKNOWN_REQUEST, msg2);
       }
-    } else if (msg[C.FIELD.RESULT] === C.RESULT.ERROR && msg[C.FIELD.TYPE] !== C.TYPE.SYSTEM) {
-      this._onError(msg[C.FIELD.ERROR] || msg[C.FIELD.DATA], C.ERROR.SERVER_ERROR);
-    } else if (!this._typeHandler[msg[C.FIELD.TYPE]]) {
-      this._onError("Received message for unknown type " + this._typeHandler[msg[C.FIELD.TYPE]], C.ERROR.UNKNOWN_TYPE);
+    } else if (msg2[C.FIELD.RESULT] === C.RESULT.ERROR && msg2[C.FIELD.TYPE] !== C.TYPE.SYSTEM) {
+      this._onError(msg2[C.FIELD.ERROR] || msg2[C.FIELD.DATA], C.ERROR.SERVER_ERROR);
+    } else if (!this._typeHandler[msg2[C.FIELD.TYPE]]) {
+      this._onError("Received message for unknown type " + this._typeHandler[msg2[C.FIELD.TYPE]], C.ERROR.UNKNOWN_TYPE);
     } else {
-      this._typeHandler[msg[C.FIELD.TYPE]]._handleIncomingMessage(msg);
+      this._typeHandler[msg2[C.FIELD.TYPE]]._handleIncomingMessage(msg2);
     }
   }
   _changeConnectionStatus(connectionStatus) {
@@ -3422,8 +3434,8 @@ var HivekitClient = class extends EventEmitter {
       this._sendPendingMessages();
     }
   }
-  _sendRequest(msg, responseCallback) {
-    const signature = this._getSignature(msg);
+  _sendRequest(msg2, responseCallback) {
+    const signature = this._getSignature(msg2);
     for (let id in this._pendingRequests) {
       if (this._pendingRequests[id].signature === signature) {
         this._pendingRequests[id].responseCallbacks.push(responseCallback);
@@ -3431,16 +3443,16 @@ var HivekitClient = class extends EventEmitter {
       }
     }
     const requestId = nanoid();
-    msg[C.FIELD.CORRELATION_ID] = requestId;
+    msg2[C.FIELD.CORRELATION_ID] = requestId;
     this._pendingRequests[requestId] = {
       signature,
       responseCallbacks: [responseCallback]
     };
-    this._sendMessage(msg);
+    this._sendMessage(msg2);
   }
-  _sendRequestAndHandleResponse(msg, successDataTransform) {
+  _sendRequestAndHandleResponse(msg2, successDataTransform) {
     const result = getPromise();
-    this._sendRequest(msg, (response) => {
+    this._sendRequest(msg2, (response) => {
       if (response[C.FIELD.RESULT] === C.RESULT.ERROR) {
         this._onError(response[C.FIELD.ERROR], C.FIELD.SERVER_ERROR, C.FIELD.ERROR_CODE);
         result.reject({
