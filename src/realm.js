@@ -68,6 +68,7 @@ export default class Realm extends EventEmitter {
      */
     async getData(key) {
         if (this._client.mode === C.MODE.HTTP) {
+            const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, this.id);
             return this._client._sendRequestAndHandleResponse(msg, response => {
                 const data = response[C.FIELD.DATA][C.FIELD.DATA] || {}
                 if (!key) {
