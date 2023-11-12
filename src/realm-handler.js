@@ -19,6 +19,7 @@ export default class RealmHandler {
     constructor(client) {
         this._client = client;
         this._realms = {};
+        this._useCache = client.mode !== C.MODE.HTTP;
     }
 
     /**
@@ -40,26 +41,22 @@ export default class RealmHandler {
      * @returns {Promise<Realm>}
      */
     get(id) {
-        if (this._realms[id]) {
-            const result = getPromise();
-            result.resolve(this._realms[id]);
-            return result;
-        }
-
-        if (this._client.mode === C.MODE.HTTP) {
-            this._realms[id] = new Realm(id, null, {}, this._client);
+        if (this._useCache && this._realms[id]) {
             return Promise.resolve(this._realms[id]);
         }
 
         const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, id);
 
         return this._client._sendRequestAndHandleResponse(msg, response => {
-            this._realms[id] = new Realm(id,
+            const realm = new Realm(id,
                 response[C.FIELD.DATA][C.FIELD.LABEL],
                 response[C.FIELD.DATA][C.FIELD.DATA] || {},
                 this._client
             );
-            return this._realms[id];
+            if (this._useCache) {
+                this._realms[id] = realm
+            }
+            return realm
         });
     }
 

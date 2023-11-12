@@ -120,6 +120,8 @@ export default class Subscription extends EventEmitter {
             data = this._client._extendFieldsMap(msg[C.TYPE.INSTRUCTION]);
         } else if (msg[C.TYPE.LOGEVENT]) {
             data = this._client._extendFieldsArray(msg[C.TYPE.LOGEVENT]);
+        } else if (msg[C.TYPE.REALM]) {
+            data = this._client._extendFields(msg[C.TYPE.REALM]);
         } else if (msg[C.FIELD.DATA] && msg[C.FIELD.DATA][C.FIELD.TYPE] === C.TYPE.REALM) {
             data = {
                 realmId: msg[C.FIELD.DATA][C.FIELD.ID],
