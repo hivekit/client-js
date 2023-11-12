@@ -825,7 +825,7 @@ var Realm = class extends EventEmitter {
     this.pubsub = new PubSubHandler(client, this);
     this.history = new HistoryHandler(client, this);
     this.task = new TaskHandler(client, this);
-    if (client.mode === C.MODE.WS) {
+    if (client.mode !== C.MODE.HTTP) {
       client._subscription._getSubscription(client.getId(`realm-data-${id}`), id, {
         [C.FIELD.TYPE]: C.TYPE.REALM,
         [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM
@@ -839,7 +839,7 @@ var Realm = class extends EventEmitter {
       });
     }
   }
-  async getData(key) {
+  getData(key) {
     if (this._client.mode === C.MODE.HTTP) {
       const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, this.id);
       return this._client._sendRequestAndHandleResponse(msg, (response) => {
