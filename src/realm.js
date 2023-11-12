@@ -41,7 +41,7 @@ export default class Realm extends EventEmitter {
         this.history = new HistoryHandler(client, this);
         this.task = new TaskHandler(client, this);
 
-        if (client.mode === C.MODE.WS) {
+        if (client.mode !== C.MODE.HTTP) {
             client._subscription._getSubscription(
                 client.getId(`realm-data-${id}`),
                 id,
@@ -64,10 +64,11 @@ export default class Realm extends EventEmitter {
      * Gets a value in the realm's metadata
      * 
      * @param {string} key
-     * @returns {Promise<any>} value
+     * @returns {Promise<any>|any} value or promise of value in HTTP mode.
      */
-    async getData(key) {
+    getData(key) {
         if (this._client.mode === C.MODE.HTTP) {
+            // returns a promise in HTTP mode
             const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, this.id);
             return this._client._sendRequestAndHandleResponse(msg, response => {
                 const data = response[C.FIELD.DATA][C.FIELD.DATA] || {}
