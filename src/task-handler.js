@@ -74,7 +74,6 @@ export default class TaskHandler {
      * INTERNAL METHODS
      *******************************************/
     _setTaskState(id, options, action) {
-
         const msg = createMessage(C.TYPE.TASK, action, id, this._realm.id);
         if (options.label) msg[C.FIELD.LABEL] = options.label;
         if (options.data) msg[C.FIELD.DATA] = options.data;
@@ -84,8 +83,6 @@ export default class TaskHandler {
             }
             msg[C.FIELD.STATUS] = options.status;
         }
-
-
 
         if (options.location) {
             msg[C.FIELD.LOCATION] = parseLocation(options.location);
