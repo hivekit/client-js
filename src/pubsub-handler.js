@@ -52,11 +52,14 @@ export default class PubSubHandler {
         this._subscriptionCallbacks[enip] = this._subscriptionCallbacks[enip] || [];
         this._subscriptionCallbacks[enip].push(callback);
         if (!exists) {
-            return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
+            const msg = this._getPubSubMessage(
                 C.ACTION.SUBSCRIBE,
                 eventName,
                 idPattern
-            ));
+            );
+
+            this._client._repeatOnReconnect('pubsub', this._realm.id, eventName + idPattern, msg);
+            return this._client._sendRequestAndHandleResponse(msg);
         }
         return Promise.resolve({});
     }
@@ -94,6 +97,7 @@ export default class PubSubHandler {
 
             if (this._subscriptionCallbacks[enip].length === 0) {
                 delete this._subscriptionCallbacks[enip];
+                this._client._removeFromRepeatOnReconnect('pubsub', this._realm.id, eventName + idPattern);
                 return this._client._sendRequestAndHandleResponse(this._getPubSubMessage(
                     C.ACTION.UNSUBSCRIBE,
                     eventName,

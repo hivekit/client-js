@@ -110,6 +110,7 @@ export default class SubscriptionHandler {
 
         // Let's send a message to the server to subscribe
         const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.CREATE, id, realmId, options)
+        this._client._repeatOnReconnect(C.TYPE.SUBSCRIPTION, realmId, id, msg);
         this._client._sendRequest(msg, res => {
             if (res[C.FIELD.RESULT] === C.RESULT.SUCCESS) {
                 this._pendingSubscriptionPromises[signature].forEach(entry => {
@@ -156,6 +157,7 @@ export default class SubscriptionHandler {
         }
 
         const msg = createMessage(C.TYPE.SUBSCRIPTION, C.ACTION.DELETE, subscription.id, subscription.realmId);
+        this._client._removeFromRepeatOnReconnect(C.TYPE.SUBSCRIPTION, subscription.realmId, subscription.id);
         delete this._subscriptionCollections[subscription.id];
         return this._client._sendRequestAndHandleResponse(msg);
     }

@@ -4,7 +4,7 @@ import config from './config.js'
 import jwt from 'jsonwebtoken'
 import { sleep } from './tools.js'
 
-describe('Realm PubSub Test', function () {
+describe('Realm PubSub Multi Id Pattern Test', function () {
     var clientA,
         realmIdA,
         realmInstanceA,
@@ -46,7 +46,6 @@ describe('Realm PubSub Test', function () {
             msg: 'B'
         });
         await sleep(400);
-        console.log(updatesWithoutIdPatterns, updatesWithIdPatterns)
     })
 
     it('received the events for the subscription with id patterns', async function () {

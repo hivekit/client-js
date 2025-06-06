@@ -71,6 +71,7 @@ export default class HivekitClient extends EventEmitter {
         this._pendingRequests = {};
         this._pendingMessages = null;
         this._pendingHeartbeats = {};
+        this._repeatOnReconnectMessages = {};
         this._typeHandler = {
             [C.TYPE.SYSTEM]: this.system,
             [C.TYPE.SUBSCRIPTION]: this._subscription,
@@ -187,6 +188,7 @@ export default class HivekitClient extends EventEmitter {
      *******************************************/
     _onOpen() {
         this._changeConnectionStatus(C.CONNECTION_STATUS.CONNECTED);
+        clearInterval(this._heartbeatInterval);
         this._heartbeatInterval = setInterval(this._sendHeartbeatMessage.bind(this), this.options.heartbeatInterval);
         clearTimeout(this._reconnectTimeout);
         this._reconnectTimeout = null;
@@ -224,12 +226,14 @@ export default class HivekitClient extends EventEmitter {
             const errorMsg = `Disconnected, attempting to reconnect. (Attempt ${this._reconnectAttempts} of ${this.options.maxReconnectAttempts})`
             this._onError(errorMsg, C.ERROR.DISCONNECTED_RETRYING);
             clearTimeout(this._reconnectTimeout);
+            this._changeConnectionStatus(C.CONNECTION_STATUS.DISCONNECTED);
 
             this._reconnectTimeout = setTimeout(async () => {
                 await this.connect(this._url);
                 if (this.token) {
                     await this.authenticate(this.token);
                 }
+                this._sendRepeatOnReconnectMessages();
             }, this.options.reconnectInterval)
         }
     }
@@ -487,5 +491,22 @@ export default class HivekitClient extends EventEmitter {
             }
         }
         return compressedFields;
+    }
+
+    _repeatOnReconnect(type, realmId, id, msg) {
+        const key = `${type}-${realmId}-${id}`;
+        this._repeatOnReconnectMessages[key] = msg;
+    }
+
+    _removeFromRepeatOnReconnect(type, realmId, id) {
+        const key = `${type}-${realmId}-${id}`;
+        delete this._repeatOnReconnectMessages[key];
+    }
+
+    _sendRepeatOnReconnectMessages() {
+        for (let key in this._repeatOnReconnectMessages) {
+            this._sendRequest(this._repeatOnReconnectMessages[key], () => { });
+        }
+        this._repeatOnReconnectMessages = {};
     }
 }
