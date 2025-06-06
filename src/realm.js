@@ -4,7 +4,7 @@ import InstructionHandler from './instruction-handler.js';
 import EventEmitter from './event-emitter.js'
 import { C, fieldnames } from './fields.js';
 import { createMessage } from "./message.js";
-import { deepClone } from "./tools.js";
+import {deepClone} from "./tools.js";
 import PubSubHandler from "./pubsub-handler.js";
 import HistoryHandler from "./history-handler.js";
 import TaskHandler from "./task-handler.js";
@@ -40,17 +40,46 @@ export default class Realm extends EventEmitter {
         this.pubsub = new PubSubHandler(client, this);
         this.history = new HistoryHandler(client, this);
         this.task = new TaskHandler(client, this);
+
+        if (client.mode !== C.MODE.HTTP) {
+            client._subscription._getSubscription(
+                client.getId(`realm-data-${id}`),
+                id,
+                {
+                    [C.FIELD.TYPE]: C.TYPE.REALM,
+                    [C.FIELD.SCOPE_TYPE]: C.TYPE.REALM,
+                }
+            ).then(subscription => {
+                this._dataSub = subscription
+                subscription.on('update', ({data, label}) => {
+                    this._data = data
+                    this.label = label
+                    this.emit('update')
+                })
+            })
+        }
     }
 
     /**
-     * Updates a value in the realm's metadata
+     * Gets a value in the realm's metadata
      * 
-     * @param {string} key 
-     * @param {mixed} value
-     * 
-     * @returns {Promise<success>}
+     * @param {string} key
+     * @returns {Promise<any>|any} value or promise of value in HTTP mode.
      */
     getData(key) {
+        if (this._client.mode === C.MODE.HTTP) {
+            // returns a promise in HTTP mode
+            const msg = createMessage(C.TYPE.REALM, C.ACTION.READ, this.id);
+            return this._client._sendRequestAndHandleResponse(msg, response => {
+                const data = response[C.FIELD.DATA][C.FIELD.DATA] || {}
+                if (!key) {
+                    return data
+                } else {
+                    return data[key]
+                }
+            });
+        }
+
         if (!key) {
             return deepClone(this._data);
         }
@@ -65,7 +94,7 @@ export default class Realm extends EventEmitter {
      * Updates a value in the realm's metadata
      * 
      * @param {string} key 
-     * @param {mixed} value
+     * @param {any} value
      * 
      * @returns {Promise<success>}
      */
@@ -78,7 +107,8 @@ export default class Realm extends EventEmitter {
             delete this._data[key];
         }
 
-        this.emit('update'); // @todo - react to remote data changes
+        // this will result in a second update when the message comes back from the server
+        this.emit('update');
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
@@ -93,7 +123,9 @@ export default class Realm extends EventEmitter {
         const msg = createMessage(C.TYPE.REALM, C.ACTION.UPDATE, this.id);
         this.label = label;
         msg[C.FIELD.LABEL] = label;
-        this.emit('update'); // @todo - react to remote data changes
+
+        // this will result in a second update when the message comes back from the server
+        this.emit('update');
         return this._client._sendRequestAndHandleResponse(msg);
     }
 
@@ -101,16 +133,16 @@ export default class Realm extends EventEmitter {
      * Searches Objects and Areas within the given realm.
      * 
      * @param {string} searchString 
-     * @param {object} options
+     * @param {{field: string[],maxObjectResults: number,maxAreaResults: number}} options
      * {
      *      // a list of properties to search in
      *  	field: ['data', 'label', 'id' ]
      * 
      *      // max amount of object results to be returned
-            maxObjectResults
-
-            // max amount of area results to be returned
-            maxAreaResults
+     *      maxObjectResults
+     *
+     *      // max amount of area results to be returned
+     *      maxAreaResults
      * }
      * 
      * @returns {Promise<search results>}
