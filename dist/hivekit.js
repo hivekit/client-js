@@ -3052,7 +3052,7 @@ var HivekitClient = class extends EventEmitter {
     this.constants = C;
     this.connectionStatus = C.CONNECTION_STATUS.DISCONNECTED;
     this.ping = null;
-    this.version = "1.11.0";
+    this.version = "1.11.1";
     this.serverVersion = null;
     this.serverBuildDate = null;
     this.mode = null;
@@ -3407,7 +3407,6 @@ var HivekitClient = class extends EventEmitter {
       this._sendRequest(this._repeatOnReconnectMessages[key], () => {
       });
     }
-    this._repeatOnReconnectMessages = {};
   }
 };
 
