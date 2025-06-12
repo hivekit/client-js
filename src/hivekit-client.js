@@ -507,6 +507,5 @@ export default class HivekitClient extends EventEmitter {
         for (let key in this._repeatOnReconnectMessages) {
             this._sendRequest(this._repeatOnReconnectMessages[key], () => { });
         }
-        this._repeatOnReconnectMessages = {};
     }
 }
