@@ -166,6 +166,8 @@ var FIELDS = {
     ID: { VAL: "id", FULL: "id" },
     REALM: { VAL: "rea", FULL: "realm" },
     DATA: { VAL: "dat", FULL: "data" },
+    STATIC_DATA: { VAL: "sdt", FULL: "staticData" },
+    CATEGORY_ID: { VAL: "cat", FULL: "categoryId" },
     LOCATION: { VAL: "loc", FULL: "location" },
     ERROR: { VAL: "err", FULL: "error" },
     LABEL: { VAL: "lab", FULL: "label" },
@@ -505,13 +507,13 @@ var ObjectHandler = class {
     });
   }
   create(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.CREATE);
+    return this._setObjectState(id, options, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.UPDATE);
+    return this._setObjectState(id, options, C.ACTION.UPDATE);
   }
   set(id, options) {
-    return this._setObjectState(id, options.label, options.location, options.data, options.taskIds, C.ACTION.SET);
+    return this._setObjectState(id, options, C.ACTION.SET);
   }
   list(options) {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.LIST, null, this._realm.id);
@@ -526,7 +528,8 @@ var ObjectHandler = class {
     const msg = createMessage(C.TYPE.OBJECT, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
-  _setObjectState(id, label, location, data, taskIds, action) {
+  _setObjectState(id, options, action) {
+    const { label, location, data, staticData, categoryId, taskIds } = options;
     const msg = createMessage(C.TYPE.OBJECT, action, id, this._realm.id);
     if (label)
       msg[C.FIELD.LABEL] = label;
@@ -535,6 +538,10 @@ var ObjectHandler = class {
     }
     if (data && Object.keys(data).length > 0)
       msg[C.FIELD.DATA] = data;
+    if (staticData)
+      msg[C.FIELD.STATIC_DATA] = staticData;
+    if (categoryId !== void 0)
+      msg[C.FIELD.CATEGORY_ID] = categoryId;
     if (Array.isArray(taskIds))
       msg[C.FIELD.TASK_IDS] = taskIds;
     if (action === C.ACTION.SET && this._client.mode !== C.MODE.HTTP) {
@@ -564,10 +571,10 @@ var AreaHandler = class {
     });
   }
   create(id, options) {
-    return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.CREATE);
+    return this._setAreaState(id, options, C.ACTION.CREATE);
   }
   update(id, options) {
-    return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.UPDATE);
+    return this._setAreaState(id, options, C.ACTION.UPDATE);
   }
   list() {
     const msg = createMessage(C.TYPE.AREA, C.ACTION.LIST, null, this._realm.id);
@@ -584,18 +591,24 @@ var AreaHandler = class {
     const msg = createMessage(C.TYPE.AREA, C.ACTION.DELETE, id, this._realm.id);
     return this._client._sendRequestAndHandleResponse(msg);
   }
-  _setAreaState(id, label, shapeData, data, action) {
+  _setAreaState(id, options, action) {
+    const { label, data, staticData } = options;
+    const shapeData = options.shapeData || options.shape;
     const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
-    const shape = toShape(shapeData);
-    if (shape.err) {
-      return Promise.reject(shape.err);
+    if (shapeData) {
+      const shape = toShape(shapeData);
+      if (shape.err) {
+        return Promise.reject(shape.err);
+      }
+      msg[C.FIELD.SUB_TYPE] = shape.type;
+      msg[C.FIELD.SHAPE] = shape.data;
     }
-    msg[C.FIELD.SUB_TYPE] = shape.type;
-    msg[C.FIELD.SHAPE] = shape.data;
     if (label)
       msg[C.FIELD.LABEL] = label;
     if (data)
       msg[C.FIELD.DATA] = data;
+    if (staticData)
+      msg[C.FIELD.STATIC_DATA] = staticData;
     return this._client._sendRequestAndHandleResponse(msg);
   }
 };

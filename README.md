@@ -91,3 +91,41 @@ realm.object.update('rider/12', {
     }
 });
 ```
+
+## Static data and object categories
+
+Object `create`, `update`, and `set` accept `staticData` and `categoryId`.
+Area `create` and `update` accept `staticData`. Creation requires a shape;
+metadata-only updates can omit it.
+
+`data` and `staticData` are separate attribute maps. Updates patch the supplied
+map: omitted keys stay unchanged, and a key with a `null` value is removed.
+Both maps may contain the same key; dynamic `data` takes precedence when reading
+an effective value. The SDK returns both maps separately on reads,
+subscriptions, and history entries.
+
+`categoryId` is the authoritative object category. Omit it to leave the category
+unchanged, or send `null` to clear it. The server still accepts the
+`$hkt_category` alias in either attribute map; an explicit `categoryId` wins,
+followed by the alias in `data`, then in `staticData`. On reads, the server
+provides the alias in `data` when a category is set.
+
+`object.list` field selectors keep their full names:
+
+```js
+await realm.object.update('rider/12', {
+    staticData: { model: 'Cargo bike', status: 'available' },
+    data: { status: null },
+    categoryId: 'courier'
+});
+
+const riders = await realm.object.list({
+    field: ['data', 'staticData', 'categoryId']
+});
+
+await realm.object.update('rider/12', { categoryId: null });
+```
+
+The native protocol sends these properties as `dat`, `sdt`, and `cat` in both
+WebSocket and HTTP modes. SDK callers use the full names above. History entries
+contain historical dynamic data alongside current static data, label, and category.

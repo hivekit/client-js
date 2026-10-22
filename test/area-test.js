@@ -138,9 +138,9 @@ describe('Area Test', function () {
     it('lists all areas', async function () {
         const list = await realmA.area.list();
         expect(list).to.deep.equal({
-            [areaIdA]: { id: areaIdA, label: 'area A Label', shape: 'rectangle' },
-            [areaIdB]: { id: areaIdB, label: 'Berlin', shape: 'circle' },
-            [areaIdC]: { id: areaIdC, label: 'Berlin Part', shape: 'polygon' },
+            [areaIdA]: { id: areaIdA, label: 'area A Label', shape: 'rectangle', data: { some: 'Value' } },
+            [areaIdB]: { id: areaIdB, label: 'Berlin', shape: 'circle', data: { isCapital: true, country: 'Germany' } },
+            [areaIdC]: { id: areaIdC, label: 'Berlin Part', shape: 'polygon', data: { isCapital: true, country: 'Germany' } },
         });
     });
 

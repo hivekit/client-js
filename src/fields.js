@@ -62,6 +62,8 @@ export const FIELDS = {
         ID: { VAL: 'id', FULL: 'id' },
         REALM: { VAL: 'rea', FULL: 'realm' },
         DATA: { VAL: 'dat', FULL: 'data' },
+        STATIC_DATA: { VAL: 'sdt', FULL: 'staticData' },
+        CATEGORY_ID: { VAL: 'cat', FULL: 'categoryId' },
         LOCATION: { VAL: 'loc', FULL: 'location' },
         ERROR: { VAL: 'err', FULL: 'error' },
         LABEL: { VAL: 'lab', FULL: 'label' },

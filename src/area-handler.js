@@ -35,11 +35,11 @@ export default class AreaHandler {
     }
 
     create(id, options) {
-        return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.CREATE);
+        return this._setAreaState(id, options, C.ACTION.CREATE);
     }
 
     update(id, options) {
-        return this._setAreaState(id, options.label, options.shapeData || options.shape, options.data, C.ACTION.UPDATE);
+        return this._setAreaState(id, options, C.ACTION.UPDATE);
     }
 
     list() {
@@ -68,16 +68,21 @@ export default class AreaHandler {
     /********************************************
      * INTERNAL METHODS
      *******************************************/
-    _setAreaState(id, label, shapeData, data, action) {
+    _setAreaState(id, options, action) {
+        const { label, data, staticData } = options;
+        const shapeData = options.shapeData || options.shape;
         const msg = createMessage(C.TYPE.AREA, action, id, this._realm.id);
-        const shape = toShape(shapeData);
-        if (shape.err) {
-            return Promise.reject(shape.err);
+        if (shapeData) {
+            const shape = toShape(shapeData);
+            if (shape.err) {
+                return Promise.reject(shape.err);
+            }
+            msg[C.FIELD.SUB_TYPE] = shape.type;
+            msg[C.FIELD.SHAPE] = shape.data;
         }
-        msg[C.FIELD.SUB_TYPE] = shape.type
-        msg[C.FIELD.SHAPE] = shape.data;
         if (label) msg[C.FIELD.LABEL] = label;
         if (data) msg[C.FIELD.DATA] = data;
+        if (staticData) msg[C.FIELD.STATIC_DATA] = staticData;
 
         return this._client._sendRequestAndHandleResponse(msg);
     }
