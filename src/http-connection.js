@@ -1,4 +1,3 @@
-import axios from "axios";
 import { C } from './fields.js';
 
 export default class HTTPConnection {
@@ -30,16 +29,28 @@ export default class HTTPConnection {
             throw new Error('HTTP Connection not yet authenticated. Call authenticate() first.');
         }
 
-        axios({
-            url: this.url,
-            method: 'post',
-            responseType: 'json',
-            responseEncoding: 'utf8',
+        fetch(this.url, {
+            method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
                 'Content-Type': 'application/json'
             },
-            data: msg
+            body: msg
+        }).then(async response => {
+            let data = await response.text();
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                // Preserve plain-text responses, including server error messages.
+            }
+
+            if (!response.ok) {
+                const error = new Error('Request failed with status code ' + response.status);
+                error.response = { data };
+                throw error;
+            }
+
+            return { data };
         }).then(response => {
             if (msg.includes(C.ACTION.SET)) {
                 const messages = JSON.parse(msg);

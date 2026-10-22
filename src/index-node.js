@@ -1,4 +1,3 @@
-import { WebSocket as NodeWebSocket } from 'ws'
 import HivekitClient from './hivekit-client.js'
-HivekitClient.prototype.WsConstructor = NodeWebSocket;
+HivekitClient.prototype.WsConstructor = globalThis.WebSocket;
 export default HivekitClient;

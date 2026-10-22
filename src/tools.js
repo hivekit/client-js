@@ -1,5 +1,17 @@
 import { C, fieldnames } from './fields.js';
 
+const ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+
+export function generateId() {
+    const bytes = globalThis.crypto.getRandomValues(new Uint8Array(21));
+    let id = '';
+    for (const byte of bytes) {
+        // 64 characters divide the byte range evenly, avoiding selection bias.
+        id += ID_ALPHABET[byte & 63];
+    }
+    return id;
+}
+
 /**
  * switches the keys and values in a map.
  * 

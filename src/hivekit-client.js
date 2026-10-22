@@ -3,9 +3,8 @@ import { C, fieldnames } from './fields.js';
 import SystemHandler from './system-handler.js'
 import RealmHandler from './realm-handler.js'
 import { getPromise } from './promise.js'
-import { nanoid } from 'nanoid'
 import SubscriptionHandler from './subscription-handler.js'
-import { reverseMap } from './tools.js'
+import { generateId, reverseMap } from './tools.js'
 import HTTPConnection from './http-connection.js'
 
 /**
@@ -170,7 +169,7 @@ export default class HivekitClient extends EventEmitter {
      * @returns string unique id with prefix
      */
     getId(prefix) {
-        return prefix + '-' + nanoid();
+        return prefix + '-' + generateId();
     }
 
     /**
@@ -357,7 +356,7 @@ export default class HivekitClient extends EventEmitter {
                 return;
             }
         }
-        const requestId = nanoid();
+        const requestId = generateId();
         msg[C.FIELD.CORRELATION_ID] = requestId;
         this._pendingRequests[requestId] = {
             signature: signature,

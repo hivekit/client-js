@@ -5,6 +5,8 @@ The javascript/node client SDK for **[Hivekit](https://hivekit.io)**
 Please find the full documentation for the client library at [https://hivekit.io/docs/js-client-sdk/client/](https://hivekit.io/docs/js-client-sdk/client/)
 
 ## Installation
+Requires Node.js 22.15 or later, or a browser with native `fetch`, `WebSocket`, and Web Crypto support. The client has no runtime dependencies; it uses these native APIs for connections and secure ID generation.
+
 Install via yarn or npm
 ```sh
 npm install @hivekit/client-js --save-dev
